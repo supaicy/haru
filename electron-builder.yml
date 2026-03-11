@@ -18,5 +18,9 @@ mac:
   category: public.app-category.productivity
   darkModeSupport: true
 dmg:
-  artifactName: ${productName}-${version}.${ext}
+  artifactName: ${productName}.${ext}
 npmRebuild: true
+publish:
+  provider: github
+  owner: supaicy
+  repo: haru

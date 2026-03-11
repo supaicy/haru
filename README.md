@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/supaicy/haru/releases/latest">
+  <a href="https://github.com/supaicy/haru/releases/latest/download/haru.dmg">
     <img src="https://img.shields.io/badge/Download-macOS_(Apple_Silicon)-blue?style=for-the-badge&logo=apple" alt="Download DMG">
   </a>
 </p>
