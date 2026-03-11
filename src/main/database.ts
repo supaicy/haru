@@ -25,7 +25,7 @@ function save(): void {
   if (saveTimer) return
   saveTimer = setTimeout(() => {
     saveTimer = null
-    const json = JSON.stringify(data, null, 2)
+    const json = JSON.stringify(data)
     writeFile(dbPath, json, 'utf-8', (err) => {
       if (err) console.error('DB 저장 실패:', err)
       else savePending = false
@@ -42,7 +42,7 @@ function flushSave(): void {
   }
   if (hadTimer || savePending) {
     savePending = false
-    writeFileSync(dbPath, JSON.stringify(data, null, 2), 'utf-8')
+    writeFileSync(dbPath, JSON.stringify(data), 'utf-8')
   }
 }
 
@@ -120,7 +120,12 @@ export function createList(id: string, name: string, color: string, icon: string
 }
 export function updateList(id: string, updates: Record<string, unknown>): void {
   const list = data.lists.find((l) => l.id === id)
-  if (list) { Object.assign(list, updates); save() }
+  if (!list) return
+  const allowed = ['name', 'color', 'icon', 'folder_id', 'sort_order']
+  for (const key of allowed) {
+    if (Object.hasOwn(updates, key)) (list as Record<string, unknown>)[key] = updates[key]
+  }
+  save()
 }
 export function deleteList(id: string): void {
   if (id === 'inbox') return
@@ -140,11 +145,7 @@ export function reorderLists(orderedIds: string[]): void {
 export function getTasks(): unknown[] {
   return [...data.tasks]
     .filter((t) => !t.deleted_at)
-    .sort((a, b) => {
-      const od = ((a.sort_order as number) || 0) - ((b.sort_order as number) || 0)
-      if (od !== 0) return od
-      return new Date(b.created_at as string).getTime() - new Date(a.created_at as string).getTime()
-    })
+    .sort((a, b) => ((a.sort_order as number) || 0) - ((b.sort_order as number) || 0))
 }
 export function getTrashTasks(): unknown[] {
   return data.tasks.filter((t) => t.deleted_at)
@@ -269,7 +270,11 @@ export function addScoreEvent(event: Record<string, unknown>): void {
 // === Attachments ===
 export function getAttachmentsDir(): string { return attachmentsDir }
 export function copyAttachment(sourcePath: string, destName: string): string {
-  const destPath = path.join(attachmentsDir, destName)
+  const safeName = path.basename(destName)
+  const destPath = path.resolve(attachmentsDir, safeName)
+  if (!destPath.startsWith(attachmentsDir + path.sep) && destPath !== attachmentsDir) {
+    throw new Error('Path traversal blocked in copyAttachment')
+  }
   copyFileSync(sourcePath, destPath)
   return destPath
 }

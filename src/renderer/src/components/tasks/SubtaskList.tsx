@@ -1,16 +1,22 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { Circle, CheckCircle2, Plus, X } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 
 export function SubtaskList({ taskId }: { taskId: string }) {
-  const { tasks, addTask, toggleTask, removeTask, theme } = useStore()
+  const tasks = useStore((s) => s.tasks)
+  const addTask = useStore((s) => s.addTask)
+  const toggleTask = useStore((s) => s.toggleTask)
+  const removeTask = useStore((s) => s.removeTask)
+  const theme = useStore((s) => s.theme)
   const isDark = theme === 'dark'
   const [newTitle, setNewTitle] = useState('')
   const [showInput, setShowInput] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const subtasks = tasks.filter((t) => t.parentId === taskId)
-  const completedCount = subtasks.filter((t) => t.completed).length
+  const { subtasks, completedCount } = useMemo(() => {
+    const subs = tasks.filter((t) => t.parentId === taskId)
+    return { subtasks: subs, completedCount: subs.filter((t) => t.completed).length }
+  }, [tasks, taskId])
 
   useEffect(() => {
     if (showInput) inputRef.current?.focus()

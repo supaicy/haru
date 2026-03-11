@@ -55,9 +55,25 @@ const api = {
   // Notifications
   showNotification: (title: string, body: string) => ipcRenderer.invoke('show-notification', title, body),
 
-  // 업데이트 확인
-  checkForUpdates: () => ipcRenderer.invoke('check-for-updates') as Promise<{ version: string; downloadUrl: string } | null>,
+  // 외부 링크 열기
   openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
+  downloadUpdate: () => ipcRenderer.invoke('download-update'),
+  installUpdate: () => ipcRenderer.invoke('install-update'),
+  onUpdateAvailable: (callback: (info: { version: string; downloadUrl: string }) => void) => {
+    const handler = (_: Electron.IpcRendererEvent, info: { version: string; downloadUrl: string }): void => callback(info)
+    ipcRenderer.on('update-available', handler)
+    return () => ipcRenderer.removeListener('update-available', handler)
+  },
+  onUpdateProgress: (callback: (percent: number) => void) => {
+    const handler = (_: Electron.IpcRendererEvent, percent: number): void => callback(percent)
+    ipcRenderer.on('update-download-progress', handler)
+    return () => ipcRenderer.removeListener('update-download-progress', handler)
+  },
+  onUpdateDownloaded: (callback: () => void) => {
+    const handler = (_: Electron.IpcRendererEvent): void => callback()
+    ipcRenderer.on('update-downloaded', handler)
+    return () => ipcRenderer.removeListener('update-downloaded', handler)
+  },
 
   // Global shortcut
   registerGlobalShortcut: () => ipcRenderer.invoke('register-global-shortcut'),

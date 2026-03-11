@@ -1,6 +1,7 @@
-import { app, shell, BrowserWindow, globalShortcut } from 'electron'
+import { app, shell, BrowserWindow, globalShortcut, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { autoUpdater } from 'electron-updater'
 import { initDatabase, closeDatabase } from './database'
 import { setupIpcHandlers } from './ipc-handlers'
 
@@ -16,7 +17,8 @@ function createWindow(): void {
     backgroundColor: '#1C1C1E',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: true,
+      contextIsolation: true
     }
   })
 
@@ -25,7 +27,12 @@ function createWindow(): void {
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+    try {
+      const parsed = new URL(details.url)
+      if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+        shell.openExternal(details.url)
+      }
+    } catch { /* ignore */ }
     return { action: 'deny' }
   })
 
@@ -46,6 +53,43 @@ app.whenReady().then(() => {
   initDatabase()
   setupIpcHandlers()
   createWindow()
+
+  // 자동 업데이트 설정
+  if (!is.dev) {
+    autoUpdater.autoDownload = false
+    autoUpdater.autoInstallOnAppQuit = true
+
+    autoUpdater.on('update-available', (info) => {
+      const wins = BrowserWindow.getAllWindows()
+      if (wins.length > 0) {
+        wins[0].webContents.send('update-available', {
+          version: info.version,
+          downloadUrl: `https://github.com/supaicy/haru/releases/tag/v${info.version}`
+        })
+      }
+    })
+
+    autoUpdater.on('download-progress', (progress) => {
+      const wins = BrowserWindow.getAllWindows()
+      if (wins.length > 0) {
+        wins[0].webContents.send('update-download-progress', Math.round(progress.percent))
+      }
+    })
+
+    autoUpdater.on('update-downloaded', () => {
+      const wins = BrowserWindow.getAllWindows()
+      if (wins.length > 0) {
+        wins[0].webContents.send('update-downloaded')
+      }
+    })
+
+    autoUpdater.checkForUpdates()
+    setInterval(() => autoUpdater.checkForUpdates(), 60 * 60 * 1000)
+  }
+
+  // 업데이트 다운로드 / 설치 IPC
+  ipcMain.handle('download-update', () => autoUpdater.downloadUpdate())
+  ipcMain.handle('install-update', () => autoUpdater.quitAndInstall())
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, memo } from 'react'
 import { X, Trash2, Flag, Calendar, AlignLeft, Tag, List, Eye, Edit3, Clock, Bell, Repeat, Paperclip } from 'lucide-react'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -34,6 +34,30 @@ import { RecurringPicker } from './RecurringPicker'
 import { ReminderPicker } from './ReminderPicker'
 import { AttachmentList } from './AttachmentList'
 import type { Priority } from '../../types'
+
+// 코드 블록 syntax highlighting (모듈 스코프 컴포넌트)
+const CodeBlock = memo(function CodeBlock({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }) {
+  const codeRef = useRef<HTMLElement>(null)
+  const match = /language-(\w+)/.exec(className || '')
+  const lang = match ? match[1] : null
+  const isInline = !lang && !String(children).includes('\n')
+
+  useEffect(() => {
+    if (codeRef.current && lang) {
+      codeRef.current.removeAttribute('data-highlighted')
+      hljs.highlightElement(codeRef.current)
+    }
+  }, [children, lang])
+
+  if (isInline) {
+    return <code className={className} {...props}>{children}</code>
+  }
+  return <code ref={codeRef} className={className} {...props}>{children}</code>
+})
 
 const PRIORITY_OPTIONS: { value: Priority; label: string; color: string }[] = [
   { value: 'none', label: '없음', color: 'text-gray-400' },
@@ -91,25 +115,6 @@ export function TaskDetail() {
 
   const checkboxIndex = useRef(0)
 
-  // 코드 블록 syntax highlighting
-  const CodeBlock = useCallback(({ className, children, ...props }: React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }) => {
-    const codeRef = useRef<HTMLElement>(null)
-    const match = /language-(\w+)/.exec(className || '')
-    const isInline = !match && !String(children).includes('\n')
-
-    useEffect(() => {
-      if (codeRef.current && match) {
-        codeRef.current.removeAttribute('data-highlighted')
-        hljs.highlightElement(codeRef.current)
-      }
-    }, [children, match])
-
-    if (isInline) {
-      return <code className={className} {...props}>{children}</code>
-    }
-
-    return <code ref={codeRef} className={className} {...props}>{children}</code>
-  }, [])
 
   const inputCls = isDark ? 'bg-gray-800 text-gray-300 border-gray-700' : 'bg-gray-100 text-gray-700 border-gray-300'
   const labelCls = isDark ? 'text-gray-500' : 'text-gray-400'

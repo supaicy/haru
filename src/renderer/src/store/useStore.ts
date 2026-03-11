@@ -33,10 +33,12 @@ interface Store {
   showExport: boolean
   dragTaskId: string | null
   updateAvailable: { version: string; downloadUrl: string } | null
+  updateChecked: boolean
+  updateDownloadProgress: number | null
+  updateReady: boolean
 
   // 초기화
   loadData: () => Promise<void>
-  checkForUpdates: () => Promise<void>
 
   // 폴더
   addFolder: (name: string) => Promise<void>
@@ -160,6 +162,9 @@ export const useStore = create<Store>((set, get) => ({
   batchSelectedIds: [], batchMode: false,
   undoStack: [], showQuickAdd: false, showExport: false, dragTaskId: null,
   updateAvailable: null as { version: string; downloadUrl: string } | null,
+  updateChecked: false,
+  updateDownloadProgress: null as number | null,
+  updateReady: false,
 
   loadData: async () => {
     const [rawLists, rawTasks, rawTrash, rawHabits, rawHabitLogs, rawFolders, rawSessions, rawScore] = await Promise.all([
@@ -177,11 +182,6 @@ export const useStore = create<Store>((set, get) => ({
       pomodoroSessions: (rawSessions as Record<string, unknown>[]).map(mapPomodoroSession),
       score: rawScore as { total: number; events: { type: string; points: number; date: string }[] }
     })
-  },
-
-  checkForUpdates: async () => {
-    const result = await window.api.checkForUpdates()
-    if (result) set({ updateAvailable: result })
   },
 
   // === 폴더 ===

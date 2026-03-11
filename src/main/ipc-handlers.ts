@@ -1,15 +1,23 @@
-import { ipcMain, dialog, Notification, globalShortcut, BrowserWindow, shell, app } from 'electron'
+import { ipcMain, dialog, Notification, globalShortcut, BrowserWindow, shell } from 'electron'
 import { basename } from 'path'
 import { v4 as uuid } from 'uuid'
 import * as db from './database'
 
-function compareVersions(current: string, latest: string): boolean {
-  const parse = (v: string) => v.replace(/^v/, '').split('.').map(Number)
-  const [cMajor = 0, cMinor = 0, cPatch = 0] = parse(current)
-  const [lMajor = 0, lMinor = 0, lPatch = 0] = parse(latest)
-  if (lMajor !== cMajor) return lMajor > cMajor
-  if (lMinor !== cMinor) return lMinor > cMinor
-  return lPatch > cPatch
+function csvCell(value: unknown): string {
+  const s = String(value ?? '')
+  const escaped = s.replace(/"/g, '""')
+  const safe = /^[=+\-@\t\r\n]/.test(escaped) ? `'${escaped}` : escaped
+  return `"${safe}"`
+}
+
+async function safeOpenExternal(url: string): Promise<void> {
+  try {
+    const parsed = new URL(url)
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return
+    await shell.openExternal(parsed.href)
+  } catch {
+    // 잘못된 URL 무시
+  }
 }
 
 export function setupIpcHandlers(): void {
@@ -88,7 +96,8 @@ export function setupIpcHandlers(): void {
       const tasks = parsed.tasks || []
       const header = 'Title,Description,Priority,DueDate,List,Completed,CreatedAt\n'
       const rows = tasks.map((t: Record<string, unknown>) =>
-        `"${t.title}","${t.description}","${t.priority}","${t.due_date || ''}","${t.list_id}","${t.completed ? 'Yes' : 'No'}","${t.created_at}"`
+        [t.title, t.description, t.priority, t.due_date || '', t.list_id, t.completed ? 'Yes' : 'No', t.created_at]
+          .map(csvCell).join(',')
       ).join('\n')
       const { writeFileSync } = require('fs')
       writeFileSync(result.filePath, header + rows, 'utf-8')
@@ -104,28 +113,9 @@ export function setupIpcHandlers(): void {
     new Notification({ title, body }).show()
   })
 
-  // 업데이트 확인
-  ipcMain.handle('check-for-updates', async () => {
-    try {
-      const res = await fetch('https://api.github.com/repos/supaicy/haru/releases/latest', {
-        headers: { 'User-Agent': 'haru-app' }
-      })
-      if (!res.ok) return null
-      const data = await res.json()
-      const latestVersion = data.tag_name as string
-      const currentVersion = app.getVersion()
-      if (compareVersions(currentVersion, latestVersion)) {
-        return { version: latestVersion, downloadUrl: data.html_url as string }
-      }
-      return null
-    } catch {
-      return null
-    }
-  })
-
   // 외부 링크 열기
   ipcMain.handle('open-external', (_, url: string) => {
-    shell.openExternal(url)
+    safeOpenExternal(url)
   })
 
   // Quick add (global shortcut)

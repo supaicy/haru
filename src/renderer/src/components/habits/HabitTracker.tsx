@@ -24,23 +24,27 @@ export function HabitTracker() {
     return Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i))
   }, [weekStart])
 
-  const isLoggedOn = (habitId: string, date: string) => {
-    return habitLogs.some((l) => l.habitId === habitId && l.date === date && l.completed)
-  }
+  const logSet = useMemo(
+    () => new Set(habitLogs.filter((l) => l.completed).map((l) => `${l.habitId}:${l.date}`)),
+    [habitLogs]
+  )
 
-  const getStreakCount = (habitId: string) => {
-    let streak = 0
+  const isLoggedOn = (habitId: string, date: string) => logSet.has(`${habitId}:${date}`)
+
+  const streaks = useMemo(() => {
     const today = new Date()
-    for (let i = 0; i < 365; i++) {
-      const date = toDateString(addDays(today, -i))
-      if (isLoggedOn(habitId, date)) {
-        streak++
-      } else if (i > 0) {
-        break
-      }
-    }
-    return streak
-  }
+    return Object.fromEntries(
+      habits.map((habit) => {
+        let streak = 0
+        for (let i = 0; i < 365; i++) {
+          const d = toDateString(addDays(today, -i))
+          if (logSet.has(`${habit.id}:${d}`)) streak++
+          else if (i > 0) break
+        }
+        return [habit.id, streak]
+      })
+    )
+  }, [habits, logSet])
 
   const handleAdd = async () => {
     if (!name.trim()) return
@@ -111,7 +115,7 @@ export function HabitTracker() {
               <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: habit.color }} />
               <span className={`text-sm truncate ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>{habit.name}</span>
               <span className="text-xs text-gray-500 flex-shrink-0">
-                {getStreakCount(habit.id)}일 연속
+                {streaks[habit.id] || 0}일 연속
               </span>
               <button
                 onClick={() => removeHabit(habit.id)}

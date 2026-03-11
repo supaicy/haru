@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
   Inbox, CalendarDays, CalendarRange, ListTodo, CheckCircle2, Plus, Timer, Target,
   Calendar, MoreHorizontal, Trash2, Edit3, X, Check, Settings, FolderOpen, FolderPlus,
@@ -29,10 +29,19 @@ const VIEW_ITEMS: { type: ViewType; label: string; icon: React.ReactNode }[] = [
 ]
 
 export function Sidebar() {
+  const lists = useStore((s) => s.lists)
+  const tasks = useStore((s) => s.tasks)
+  const trashTasks = useStore((s) => s.trashTasks)
+  const folders = useStore((s) => s.folders)
+  const selectedListId = useStore((s) => s.selectedListId)
+  const viewType = useStore((s) => s.viewType)
+  const theme = useStore((s) => s.theme)
+  const score = useStore((s) => s.score)
+  const updateAvailable = useStore((s) => s.updateAvailable)
+  const editingListId = useStore((s) => s.editingListId)
   const {
-    lists, tasks, folders, selectedListId, viewType, theme, score, updateAvailable,
     setSelectedList, setViewType, addList, removeList, updateList,
-    editingListId, setEditingList, toggleSettings, addFolder, updateFolder, removeFolder
+    setEditingList, toggleSettings, addFolder, updateFolder, removeFolder
   } = useStore()
 
   const [showNewList, setShowNewList] = useState(false)
@@ -47,20 +56,23 @@ export function Sidebar() {
 
   const isDark = theme === 'dark'
 
-  const getTaskCount = (listId: string | SmartList) => {
-    const now = new Date()
-    const todayStr = now.toISOString().split('T')[0]
-    const next7 = new Date(now.getTime() + 7 * 86400000).toISOString().split('T')[0]
+  const taskCounts = useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0]
+    const next7 = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0]
     const incomplete = tasks.filter((t) => !t.completed)
-    switch (listId) {
-      case 'today': return incomplete.filter((t) => t.dueDate && t.dueDate <= todayStr).length
-      case 'next7days': return incomplete.filter((t) => t.dueDate && t.dueDate <= next7).length
-      case 'all': return incomplete.length
-      case 'completed': return tasks.filter((t) => t.completed).length
-      case 'trash': return useStore.getState().trashTasks.length
-      default: return incomplete.filter((t) => t.listId === listId).length
+    const counts: Record<string, number> = {
+      today: incomplete.filter((t) => t.dueDate && t.dueDate <= todayStr).length,
+      next7days: incomplete.filter((t) => t.dueDate && t.dueDate <= next7).length,
+      inbox: incomplete.filter((t) => t.listId === 'inbox').length,
+      all: incomplete.length,
+      completed: tasks.filter((t) => t.completed).length,
+      trash: trashTasks.length,
     }
-  }
+    for (const list of lists) {
+      if (!counts[list.id]) counts[list.id] = incomplete.filter((t) => t.listId === list.id).length
+    }
+    return counts
+  }, [tasks, trashTasks, lists])
 
   const handleAddList = async () => {
     if (!newListName.trim()) return
@@ -114,7 +126,7 @@ export function Sidebar() {
         <button onClick={() => setSelectedList(list.id)} className={btnClass(selectedListId === list.id && viewType === 'tasks')}>
           <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: list.color }} />
           <span className="flex-1 text-left truncate">{list.name}</span>
-          <span className={`text-xs ${mutedClass}`}>{getTaskCount(list.id) || ''}</span>
+          <span className={`text-xs ${mutedClass}`}>{taskCounts[list.id] || ''}</span>
           <span className="opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={(e) => { e.stopPropagation(); setContextMenu(contextMenu === list.id ? null : list.id) }}>
             <MoreHorizontal size={14} className={`${mutedClass} hover:text-white`} />
@@ -148,7 +160,7 @@ export function Sidebar() {
             <button key={item.id} onClick={() => setSelectedList(item.id)} className={btnClass(selectedListId === item.id && viewType === 'tasks')}>
               <span className={mutedClass}>{item.icon}</span>
               <span className="flex-1 text-left">{item.label}</span>
-              <span className={`text-xs ${mutedClass}`}>{getTaskCount(item.id) || ''}</span>
+              <span className={`text-xs ${mutedClass}`}>{taskCounts[item.id] || ''}</span>
             </button>
           ))}
         </div>

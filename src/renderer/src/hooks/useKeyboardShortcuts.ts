@@ -11,11 +11,6 @@ const PRIORITY_MAP: Record<string, Priority> = {
 
 export function useKeyboardShortcuts() {
   const {
-    selectedTaskId,
-    tasks,
-    showAddTask,
-    showQuickAdd,
-    showExport,
     setShowAddTask,
     setSearchQuery,
     popUndo,
@@ -31,6 +26,7 @@ export function useKeyboardShortcuts() {
     const handleKeyDown = (e: KeyboardEvent) => {
       const isMod = e.metaKey || e.ctrlKey
       const key = e.key
+      const { selectedTaskId, showAddTask, showQuickAdd, showExport } = useStore.getState()
 
       // Escape: 패널 닫기 / 선택 해제
       if (key === 'Escape') {
@@ -71,7 +67,6 @@ export function useKeyboardShortcuts() {
       if (isMod && key === 'f') {
         e.preventDefault()
         setSearchQuery('')
-        // 검색 입력에 포커스하기 위해 빈 문자열로 설정 후 다시 트리거
         setTimeout(() => {
           const searchInput = document.querySelector<HTMLInputElement>('[data-search-input]')
           searchInput?.focus()
@@ -106,12 +101,7 @@ export function useKeyboardShortcuts() {
 
       // 입력 필드에 포커스가 있으면 아래 단축키 무시
       const target = e.target as HTMLElement
-      const isInputFocused =
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.isContentEditable
-
-      if (isInputFocused) return
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return
 
       // Delete/Backspace: 선택된 태스크 삭제
       if (key === 'Delete' || key === 'Backspace') {
@@ -136,20 +126,5 @@ export function useKeyboardShortcuts() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [
-    selectedTaskId,
-    showAddTask,
-    showQuickAdd,
-    showExport,
-    setShowAddTask,
-    setSearchQuery,
-    popUndo,
-    updateTask,
-    removeTask,
-    selectTask,
-    setShowQuickAdd,
-    setShowExport,
-    exportData,
-    tasks
-  ])
+  }, [setShowAddTask, setSearchQuery, popUndo, updateTask, removeTask, selectTask, setShowQuickAdd, setShowExport, exportData])
 }

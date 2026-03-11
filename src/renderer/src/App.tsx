@@ -18,7 +18,7 @@ import { UndoToast } from './components/common/UndoToast'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 
 function MainContent() {
-  const { viewType } = useStore()
+  const viewType = useStore((s) => s.viewType)
   switch (viewType) {
     case 'calendar': return <CalendarView />
     case 'calendarWeekly': return <WeeklyCalendar />
@@ -34,20 +34,36 @@ function MainContent() {
 }
 
 export default function App() {
-  const { loadData, selectedTaskId, viewType, theme, showQuickAdd, checkForUpdates } = useStore()
+  const loadData = useStore((s) => s.loadData)
+  const selectedTaskId = useStore((s) => s.selectedTaskId)
+  const viewType = useStore((s) => s.viewType)
+  const theme = useStore((s) => s.theme)
+  const showQuickAdd = useStore((s) => s.showQuickAdd)
 
   useKeyboardShortcuts()
 
   useEffect(() => {
     loadData()
-    checkForUpdates()
+    // 자동 업데이트 이벤트 수신 (electron-updater에서 push)
+    const cleanupUpdate = window.api.onUpdateAvailable?.((info) => {
+      useStore.setState({ updateAvailable: info, updateChecked: true })
+    })
+    const cleanupProgress = window.api.onUpdateProgress?.((percent) => {
+      useStore.setState({ updateDownloadProgress: percent })
+    })
+    const cleanupDownloaded = window.api.onUpdateDownloaded?.(() => {
+      useStore.setState({ updateReady: true, updateDownloadProgress: null })
+    })
     // 글로벌 단축키 등록
     window.api.registerGlobalShortcut?.()
     // 글로벌 퀵 추가 이벤트 수신
     const cleanup = window.api.onGlobalQuickAdd?.(() => {
       useStore.getState().setShowQuickAdd(true)
     })
-    return () => cleanup?.()
+    return () => {
+      cleanup?.()
+      cleanupUpdate?.(); cleanupProgress?.(); cleanupDownloaded?.()
+    }
   }, [loadData])
 
   useEffect(() => {
