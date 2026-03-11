@@ -1,4 +1,4 @@
-import { Moon, Sun, X, Download, Keyboard, ArrowUpCircle } from 'lucide-react'
+import { Moon, Sun, X, Download, Keyboard, ArrowUpCircle, CheckCircle2, RotateCw } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 
 const SHORTCUTS = [
@@ -14,7 +14,7 @@ const SHORTCUTS = [
 ]
 
 export function Settings() {
-  const { theme, setTheme, showSettings, toggleSettings, setShowExport, exportData, updateAvailable } = useStore()
+  const { theme, setTheme, showSettings, toggleSettings, setShowExport, exportData, updateAvailable, updateChecked, updateDownloadProgress, updateReady } = useStore()
 
   if (!showSettings) return null
 
@@ -85,27 +85,69 @@ export function Settings() {
             </div>
           </div>
 
-          {/* 정보 */}
+          {/* 버전 및 업데이트 */}
           <div className={`border-t pt-4 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-            {updateAvailable && (
+            <h3 className={`text-sm font-medium mb-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>버전 정보</h3>
+            <div className={`rounded-lg px-4 py-3 mb-3 ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-100'}`}>
+              <div className="flex items-center justify-between mb-1">
+                <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>haru v1.2.0</span>
+                <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Electron + React</span>
+              </div>
+              {updateChecked && !updateAvailable && (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <CheckCircle2 size={13} className="text-green-500" />
+                  <span className={`text-xs ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>최신 버전입니다</span>
+                </div>
+              )}
+              {!updateChecked && (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>업데이트 확인 중...</span>
+                </div>
+              )}
+            </div>
+            {updateAvailable && !updateReady && updateDownloadProgress === null && (
               <button
-                onClick={() => window.api.openExternal(updateAvailable.downloadUrl)}
-                className={`flex items-center gap-3 w-full px-4 py-3 mb-3 rounded-lg transition-colors ${
+                onClick={() => window.api.downloadUpdate()}
+                className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors ${
                   theme === 'dark' ? 'bg-primary-500/20 hover:bg-primary-500/30 text-primary-300' : 'bg-primary-50 hover:bg-primary-100 text-primary-600'
                 }`}>
                 <ArrowUpCircle size={18} />
                 <div className="text-left flex-1">
                   <div className="text-sm font-medium">새 버전 사용 가능</div>
                   <div className={`text-xs ${theme === 'dark' ? 'text-primary-400' : 'text-primary-500'}`}>
-                    haru {updateAvailable.version} 다운로드
+                    haru v{updateAvailable.version} — 클릭하여 업데이트
                   </div>
                 </div>
               </button>
             )}
-            <div className="flex items-center justify-between">
-              <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>haru v1.1.0</span>
-              <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Electron + React</span>
-            </div>
+            {updateDownloadProgress !== null && (
+              <div className={`px-4 py-3 rounded-lg ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-100'}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <Download size={16} className="text-primary-400 animate-bounce" />
+                  <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+                    다운로드 중... {updateDownloadProgress}%
+                  </span>
+                </div>
+                <div className={`w-full h-1.5 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}>
+                  <div className="h-full bg-primary-500 rounded-full transition-all" style={{ width: `${updateDownloadProgress}%` }} />
+                </div>
+              </div>
+            )}
+            {updateReady && (
+              <button
+                onClick={() => window.api.installUpdate()}
+                className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors ${
+                  theme === 'dark' ? 'bg-green-500/20 hover:bg-green-500/30 text-green-300' : 'bg-green-50 hover:bg-green-100 text-green-600'
+                }`}>
+                <RotateCw size={18} />
+                <div className="text-left flex-1">
+                  <div className="text-sm font-medium">업데이트 준비 완료</div>
+                  <div className={`text-xs ${theme === 'dark' ? 'text-green-400' : 'text-green-500'}`}>
+                    클릭하여 재시작 및 설치
+                  </div>
+                </div>
+              </button>
+            )}
           </div>
         </div>
       </div>
