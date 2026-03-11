@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dark ::-webkit-scrollbar-thumb,
+html.dark ::-webkit-scrollbar-thumb {
+  background: #48484A;
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover,
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #636366;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C7C7CC;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #A1A1A6;
+}
+
+/* input[type="date"] 스타일 */
+html.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.6);
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
+/* select 스타일 */
+html.dark select option {
+  background-color: #2C2C2E;
+  color: #E5E5EA;
+}
+
+/* 마크다운 프리뷰 스타일 */
+.prose h1 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+.prose h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.4rem; }
+.prose h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; }
+.prose p { margin-bottom: 0.5rem; line-height: 1.6; }
+.prose ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 0.5rem; }
+.prose ol { list-style-type: decimal; padding-left: 1.25rem; margin-bottom: 0.5rem; }
+.prose li { margin-bottom: 0.15rem; }
+.prose code {
+  font-size: 0.85em;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}
+.prose-invert code {
+  background-color: #3A3A3C;
+  color: #FF6B6B;
+}
+.prose code {
+  background-color: #E5E5EA;
+  color: #D63384;
+}
+.prose pre {
+  padding: 0.75rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-bottom: 0.5rem;
+  font-size: 0.85em;
+}
+.prose-invert pre {
+  background-color: #1C1C1E;
+}
+.prose pre {
+  background-color: #F2F2F7;
+}
+.prose blockquote {
+  border-left: 3px solid #4A90D9;
+  padding-left: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-style: italic;
+}
+.prose-invert blockquote { color: #8E8E93; }
+.prose blockquote { color: #636366; }
+.prose a { color: #4A90D9; text-decoration: underline; }
+.prose hr { border-color: #48484A; margin: 0.75rem 0; }
+.prose table { width: 100%; border-collapse: collapse; margin-bottom: 0.5rem; }
+.prose th, .prose td { border: 1px solid #48484A; padding: 0.35rem 0.5rem; text-align: left; font-size: 0.85em; }
+.prose input[type="checkbox"] { margin-right: 0.4rem; }

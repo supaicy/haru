@@ -1,0 +1,249 @@
+import { useState } from 'react'
+import {
+  Inbox, CalendarDays, CalendarRange, ListTodo, CheckCircle2, Plus, Timer, Target,
+  Calendar, MoreHorizontal, Trash2, Edit3, X, Check, Settings, FolderOpen, FolderPlus,
+  ChevronDown, ChevronRight, BarChart3, Columns3, Clock, Grid2X2, CalendarClock, Trophy
+} from 'lucide-react'
+import { useStore } from '../../store/useStore'
+import type { SmartList, ViewType } from '../../types'
+
+const SMART_LISTS: { id: SmartList; label: string; icon: React.ReactNode }[] = [
+  { id: 'today', label: '오늘', icon: <CalendarDays size={18} /> },
+  { id: 'next7days', label: '다음 7일', icon: <CalendarRange size={18} /> },
+  { id: 'inbox', label: '수신함', icon: <Inbox size={18} /> },
+  { id: 'all', label: '전체', icon: <ListTodo size={18} /> },
+  { id: 'completed', label: '완료됨', icon: <CheckCircle2 size={18} /> },
+  { id: 'trash', label: '휴지통', icon: <Trash2 size={18} /> }
+]
+
+const VIEW_ITEMS: { type: ViewType; label: string; icon: React.ReactNode }[] = [
+  { type: 'calendar', label: '캘린더 (월)', icon: <Calendar size={18} /> },
+  { type: 'calendarWeekly', label: '캘린더 (주)', icon: <CalendarClock size={18} /> },
+  { type: 'calendarDaily', label: '캘린더 (일)', icon: <Clock size={18} /> },
+  { type: 'kanban', label: '칸반 보드', icon: <Columns3 size={18} /> },
+  { type: 'timeline', label: '타임라인', icon: <CalendarRange size={18} /> },
+  { type: 'eisenhower', label: '아이젠하워', icon: <Grid2X2 size={18} /> },
+  { type: 'pomodoro', label: '포모도로', icon: <Timer size={18} /> },
+  { type: 'habits', label: '습관', icon: <Target size={18} /> },
+  { type: 'stats', label: '통계', icon: <BarChart3 size={18} /> }
+]
+
+export function Sidebar() {
+  const {
+    lists, tasks, folders, selectedListId, viewType, theme, score,
+    setSelectedList, setViewType, addList, removeList, updateList,
+    editingListId, setEditingList, toggleSettings, addFolder, updateFolder, removeFolder
+  } = useStore()
+
+  const [showNewList, setShowNewList] = useState(false)
+  const [newListName, setNewListName] = useState('')
+  const [newListColor, setNewListColor] = useState('#4A90D9')
+  const [newListFolderId, setNewListFolderId] = useState<string | null>(null)
+  const [contextMenu, setContextMenu] = useState<string | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editColor, setEditColor] = useState('')
+  const [showNewFolder, setShowNewFolder] = useState(false)
+  const [newFolderName, setNewFolderName] = useState('')
+
+  const isDark = theme === 'dark'
+
+  const getTaskCount = (listId: string | SmartList) => {
+    const now = new Date()
+    const todayStr = now.toISOString().split('T')[0]
+    const next7 = new Date(now.getTime() + 7 * 86400000).toISOString().split('T')[0]
+    const incomplete = tasks.filter((t) => !t.completed)
+    switch (listId) {
+      case 'today': return incomplete.filter((t) => t.dueDate && t.dueDate <= todayStr).length
+      case 'next7days': return incomplete.filter((t) => t.dueDate && t.dueDate <= next7).length
+      case 'all': return incomplete.length
+      case 'completed': return tasks.filter((t) => t.completed).length
+      case 'trash': return useStore.getState().trashTasks.length
+      default: return incomplete.filter((t) => t.listId === listId).length
+    }
+  }
+
+  const handleAddList = async () => {
+    if (!newListName.trim()) return
+    await addList(newListName.trim(), newListColor, newListFolderId)
+    setNewListName(''); setNewListColor('#4A90D9'); setShowNewList(false); setNewListFolderId(null)
+  }
+
+  const handleAddFolder = async () => {
+    if (!newFolderName.trim()) return
+    await addFolder(newFolderName.trim())
+    setNewFolderName(''); setShowNewFolder(false)
+  }
+
+  const startEdit = (id: string, name: string, color: string) => {
+    setEditingList(id); setEditName(name); setEditColor(color); setContextMenu(null)
+  }
+
+  const saveEdit = async () => {
+    if (editingListId && editName.trim()) await updateList(editingListId, { name: editName.trim(), color: editColor })
+    setEditingList(null)
+  }
+
+  const COLORS = ['#4A90D9', '#E74C3C', '#F39C12', '#2ECC71', '#9B59B6', '#1ABC9C', '#E91E63', '#FF5722']
+
+  const btnClass = (active: boolean) =>
+    `w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+      active
+        ? isDark ? 'bg-sidebar-active text-white' : 'bg-primary-100 text-primary-700'
+        : isDark ? 'text-sidebar-text hover:bg-sidebar-hover' : 'text-gray-600 hover:bg-gray-200'
+    }`
+
+  const mutedClass = isDark ? 'text-sidebar-muted' : 'text-gray-400'
+  const level = Math.floor(score.total / 100)
+
+  const listsWithoutFolder = lists.filter((l) => l.id !== 'inbox' && !l.folderId)
+  const listsByFolder = (folderId: string) => lists.filter((l) => l.folderId === folderId)
+
+  const renderList = (list: typeof lists[0]) => (
+    <div key={list.id} className="relative group">
+      {editingListId === list.id ? (
+        <div className="flex items-center gap-2 px-3 py-1">
+          <div className="w-3 h-3 rounded-full flex-shrink-0 cursor-pointer" style={{ backgroundColor: editColor }}
+            onClick={() => { const idx = COLORS.indexOf(editColor); setEditColor(COLORS[(idx + 1) % COLORS.length]) }} />
+          <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
+            className="flex-1 bg-sidebar-hover text-white text-sm px-2 py-1 rounded outline-none" autoFocus />
+          <button onClick={saveEdit} className="text-green-400"><Check size={14} /></button>
+          <button onClick={() => setEditingList(null)} className={mutedClass}><X size={14} /></button>
+        </div>
+      ) : (
+        <button onClick={() => setSelectedList(list.id)} className={btnClass(selectedListId === list.id && viewType === 'tasks')}>
+          <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: list.color }} />
+          <span className="flex-1 text-left truncate">{list.name}</span>
+          <span className={`text-xs ${mutedClass}`}>{getTaskCount(list.id) || ''}</span>
+          <span className="opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => { e.stopPropagation(); setContextMenu(contextMenu === list.id ? null : list.id) }}>
+            <MoreHorizontal size={14} className={`${mutedClass} hover:text-white`} />
+          </span>
+        </button>
+      )}
+      {contextMenu === list.id && (
+        <div className={`absolute right-2 top-full z-50 rounded-lg shadow-xl py-1 min-w-[120px] ${isDark ? 'bg-[#3A3A3C]' : 'bg-white border border-gray-200'}`}>
+          <button onClick={() => startEdit(list.id, list.name, list.color)}
+            className={`w-full flex items-center gap-2 px-3 py-2 text-sm ${isDark ? 'text-sidebar-text hover:bg-sidebar-hover' : 'text-gray-700 hover:bg-gray-100'}`}>
+            <Edit3 size={14} /> 편집
+          </button>
+          <button onClick={() => { removeList(list.id); setContextMenu(null) }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10">
+            <Trash2 size={14} /> 삭제
+          </button>
+        </div>
+      )}
+    </div>
+  )
+
+  return (
+    <div className={`w-64 h-full flex flex-col select-none ${isDark ? 'bg-sidebar-bg text-sidebar-text' : 'bg-gray-100 text-gray-700'}`}
+      style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}>
+      <div className="h-12 flex-shrink-0" />
+
+      <div className="flex-1 overflow-y-auto px-2 pb-4" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+        {/* 스마트 리스트 */}
+        <div className="mb-3">
+          {SMART_LISTS.map((item) => (
+            <button key={item.id} onClick={() => setSelectedList(item.id)} className={btnClass(selectedListId === item.id && viewType === 'tasks')}>
+              <span className={mutedClass}>{item.icon}</span>
+              <span className="flex-1 text-left">{item.label}</span>
+              <span className={`text-xs ${mutedClass}`}>{getTaskCount(item.id) || ''}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* 뷰 */}
+        <div className={`mb-3 border-t pt-3 ${isDark ? 'border-sidebar-hover' : 'border-gray-300'}`}>
+          <div className={`px-3 mb-1 text-xs font-semibold uppercase tracking-wider ${mutedClass}`}>뷰</div>
+          {VIEW_ITEMS.map((item) => (
+            <button key={item.type} onClick={() => setViewType(item.type)} className={btnClass(viewType === item.type)}>
+              <span className={mutedClass}>{item.icon}</span>
+              <span className="flex-1 text-left">{item.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* 리스트 + 폴더 */}
+        <div className={`border-t pt-3 ${isDark ? 'border-sidebar-hover' : 'border-gray-300'}`}>
+          <div className="flex items-center justify-between px-3 mb-1">
+            <span className={`text-xs font-semibold uppercase tracking-wider ${mutedClass}`}>리스트</span>
+            <div className="flex items-center gap-1">
+              <button onClick={() => setShowNewFolder(true)} className={`${mutedClass} hover:text-white transition-colors`} title="폴더 추가">
+                <FolderPlus size={14} />
+              </button>
+              <button onClick={() => setShowNewList(true)} className={`${mutedClass} hover:text-white transition-colors`} title="리스트 추가">
+                <Plus size={16} />
+              </button>
+            </div>
+          </div>
+
+          {/* 폴더 추가 */}
+          {showNewFolder && (
+            <div className="flex items-center gap-2 px-3 py-1 mb-1">
+              <FolderOpen size={14} className={mutedClass} />
+              <input type="text" value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)}
+                onKeyDown={(e) => { if (e.nativeEvent.isComposing) return; if (e.key === 'Enter') handleAddFolder(); if (e.key === 'Escape') setShowNewFolder(false) }}
+                placeholder="폴더 이름" className={`flex-1 text-sm px-2 py-1 rounded outline-none ${isDark ? 'bg-sidebar-hover text-white placeholder-sidebar-muted' : 'bg-gray-200 text-gray-800 placeholder-gray-400'}`} autoFocus />
+              <button onClick={handleAddFolder} className="text-green-400"><Check size={14} /></button>
+              <button onClick={() => setShowNewFolder(false)} className={mutedClass}><X size={14} /></button>
+            </div>
+          )}
+
+          {/* 폴더별 리스트 */}
+          {folders.map((folder) => (
+            <div key={folder.id} className="mb-1">
+              <div className="flex items-center gap-2 px-3 py-1.5 group">
+                <button onClick={() => updateFolder(folder.id, folder.name, !folder.collapsed)} className={mutedClass}>
+                  {folder.collapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+                </button>
+                <FolderOpen size={14} className={mutedClass} />
+                <span className={`flex-1 text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{folder.name}</span>
+                <button onClick={() => { setNewListFolderId(folder.id); setShowNewList(true) }}
+                  className={`opacity-0 group-hover:opacity-100 ${mutedClass}`}><Plus size={12} /></button>
+                <button onClick={() => removeFolder(folder.id)}
+                  className="opacity-0 group-hover:opacity-100 text-red-400"><Trash2 size={12} /></button>
+              </div>
+              {!folder.collapsed && listsByFolder(folder.id).map(renderList)}
+            </div>
+          ))}
+
+          {/* 폴더 없는 리스트 */}
+          {listsWithoutFolder.map(renderList)}
+
+          {/* 리스트 추가 */}
+          {showNewList && (
+            <div className="flex items-center gap-2 px-3 py-1 mt-1">
+              <div className="w-3 h-3 rounded-full flex-shrink-0 cursor-pointer" style={{ backgroundColor: newListColor }}
+                onClick={() => { const idx = COLORS.indexOf(newListColor); setNewListColor(COLORS[(idx + 1) % COLORS.length]) }} />
+              <input type="text" value={newListName} onChange={(e) => setNewListName(e.target.value)}
+                onKeyDown={(e) => { if (e.nativeEvent.isComposing) return; if (e.key === 'Enter') handleAddList(); if (e.key === 'Escape') { setShowNewList(false); setNewListFolderId(null) } }}
+                placeholder="리스트 이름" className={`flex-1 text-sm px-2 py-1 rounded outline-none ${isDark ? 'bg-sidebar-hover text-white placeholder-sidebar-muted' : 'bg-gray-200 text-gray-800 placeholder-gray-400'}`} autoFocus />
+              <button onClick={handleAddList} className="text-green-400"><Check size={14} /></button>
+              <button onClick={() => { setShowNewList(false); setNewListFolderId(null) }} className={mutedClass}><X size={14} /></button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 하단: 점수 + 설정 */}
+      <div className={`flex-shrink-0 px-3 py-2 border-t ${isDark ? 'border-sidebar-hover' : 'border-gray-300'}`}
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+        <div className="flex items-center gap-2 px-3 py-1.5 mb-1">
+          <Trophy size={16} className="text-yellow-500" />
+          <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+            Lv.{level} · {score.total}점
+          </span>
+          <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-gray-700' : 'bg-gray-300'}`}>
+            <div className="h-full bg-yellow-500 rounded-full transition-all" style={{ width: `${score.total % 100}%` }} />
+          </div>
+        </div>
+        <button onClick={toggleSettings}
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors ${isDark ? 'text-sidebar-muted hover:text-white hover:bg-sidebar-hover' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'}`}>
+          <Settings size={18} />
+          <span>설정</span>
+        </button>
+      </div>
+    </div>
+  )
+}

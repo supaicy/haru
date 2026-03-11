@@ -1,0 +1,349 @@
+import React, { useState, useMemo, useCallback } from 'react'
+import { useStore } from '../../store/useStore'
+import type { Task, Priority } from '../../types'
+import { ChevronLeft, ChevronRight, Calendar, Flag } from 'lucide-react'
+
+// 요일 이름
+const dayLabels = ['일', '월', '화', '수', '목', '금', '토']
+
+// 시간 슬롯 (8시~22시)
+const timeSlots: number[] = []
+for (let h = 8; h <= 22; h++) {
+  timeSlots.push(h)
+}
+
+// 우선순위 색상 (배경용)
+const priorityBg: Record<Priority, string> = {
+  high: 'bg-red-500/20 border-red-500/40',
+  medium: 'bg-amber-500/20 border-amber-500/40',
+  low: 'bg-blue-500/20 border-blue-500/40',
+  none: 'bg-gray-500/20 border-gray-500/40'
+}
+
+const priorityBgLight: Record<Priority, string> = {
+  high: 'bg-red-100 border-red-300',
+  medium: 'bg-amber-100 border-amber-300',
+  low: 'bg-blue-100 border-blue-300',
+  none: 'bg-gray-100 border-gray-300'
+}
+
+function formatHour(h: number): string {
+  const period = h < 12 ? '오전' : '오후'
+  const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h
+  return `${period} ${hour12}시`
+}
+
+function getMonday(date: Date): Date {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = day === 0 ? -6 : 1 - day
+  d.setDate(d.getDate() + diff)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+function dateToStr(d: Date): string {
+  return d.toISOString().split('T')[0]
+}
+
+function parseTime(timeStr: string): { hour: number; minute: number } | null {
+  // HH:MM 형식
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})$/)
+  if (!match) return null
+  return { hour: parseInt(match[1], 10), minute: parseInt(match[2], 10) }
+}
+
+export function WeeklyCalendar(): React.ReactElement {
+  const { theme, tasks, selectTask, selectedTaskId } = useStore()
+  const isDark = theme === 'dark'
+
+  const [weekStart, setWeekStart] = useState(() => getMonday(new Date()))
+
+  // 주간 날짜 배열 (월~일)
+  const weekDays = useMemo(() => {
+    const days: Date[] = []
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(weekStart)
+      d.setDate(d.getDate() + i)
+      days.push(d)
+    }
+    return days
+  }, [weekStart])
+
+  const todayStr = useMemo(() => dateToStr(new Date()), [])
+
+  // 날짜별 태스크 맵
+  const tasksByDate = useMemo(() => {
+    const map: Record<string, { allDay: Task[]; timed: Task[] }> = {}
+    const activeTasks = tasks.filter((t) => !t.deletedAt && t.dueDate)
+
+    for (const day of weekDays) {
+      const dateStr = dateToStr(day)
+      map[dateStr] = { allDay: [], timed: [] }
+    }
+
+    for (const task of activeTasks) {
+      if (!task.dueDate) continue
+      const entry = map[task.dueDate]
+      if (!entry) continue
+
+      if (task.dueTime) {
+        entry.timed.push(task)
+      } else {
+        entry.allDay.push(task)
+      }
+    }
+
+    return map
+  }, [tasks, weekDays])
+
+  // 네비게이션
+  const goToday = useCallback(() => setWeekStart(getMonday(new Date())), [])
+  const goPrev = useCallback(
+    () =>
+      setWeekStart((prev) => {
+        const d = new Date(prev)
+        d.setDate(d.getDate() - 7)
+        return d
+      }),
+    []
+  )
+  const goNext = useCallback(
+    () =>
+      setWeekStart((prev) => {
+        const d = new Date(prev)
+        d.setDate(d.getDate() + 7)
+        return d
+      }),
+    []
+  )
+
+  // 특정 시간에 속하는 태스크 가져오기
+  const getTasksAtHour = (dateStr: string, hour: number): Task[] => {
+    const entry = tasksByDate[dateStr]
+    if (!entry) return []
+    return entry.timed.filter((t) => {
+      if (!t.dueTime) return false
+      const parsed = parseTime(t.dueTime)
+      if (!parsed) return false
+      return parsed.hour === hour
+    })
+  }
+
+  // 월/년 표시
+  const headerMonth = useMemo(() => {
+    const first = weekDays[0]
+    const last = weekDays[6]
+    if (first.getMonth() === last.getMonth()) {
+      return `${first.getFullYear()}년 ${first.getMonth() + 1}월`
+    }
+    if (first.getFullYear() === last.getFullYear()) {
+      return `${first.getFullYear()}년 ${first.getMonth() + 1}월 - ${last.getMonth() + 1}월`
+    }
+    return `${first.getFullYear()}년 ${first.getMonth() + 1}월 - ${last.getFullYear()}년 ${last.getMonth() + 1}월`
+  }, [weekDays])
+
+  const taskCardClass = (task: Task) => {
+    const base = isDark ? priorityBg[task.priority] : priorityBgLight[task.priority]
+    const selected =
+      selectedTaskId === task.id
+        ? isDark
+          ? 'ring-1 ring-blue-500'
+          : 'ring-1 ring-blue-400'
+        : ''
+    const completed = task.completed ? 'opacity-50 line-through' : ''
+    return `${base} ${selected} ${completed} rounded px-1.5 py-0.5 text-[10px] leading-tight cursor-pointer border truncate`
+  }
+
+  return (
+    <div className="flex-1 flex flex-col h-full overflow-hidden">
+      {/* 헤더 */}
+      <div
+        className={`px-6 py-3 border-b flex items-center justify-between ${
+          isDark ? 'border-gray-700' : 'border-gray-200'
+        }`}
+      >
+        <div>
+          <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            {headerMonth}
+          </h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={goToday}
+            className={`px-3 py-1 text-xs rounded-md border ${
+              isDark
+                ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
+                : 'border-gray-300 text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            오늘
+          </button>
+          <button
+            onClick={goPrev}
+            className={`p-1 rounded-md ${
+              isDark ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'
+            }`}
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <button
+            onClick={goNext}
+            className={`p-1 rounded-md ${
+              isDark ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'
+            }`}
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      </div>
+
+      {/* 캘린더 본문 */}
+      <div className="flex-1 overflow-auto">
+        <div className="min-w-[700px]">
+          {/* 요일 헤더 */}
+          <div
+            className={`flex border-b sticky top-0 z-10 ${
+              isDark ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-white'
+            }`}
+          >
+            {/* 시간 칼럼 빈칸 */}
+            <div className="w-16 flex-shrink-0" />
+            {weekDays.map((day) => {
+              const dateStr = dateToStr(day)
+              const isToday = dateStr === todayStr
+              return (
+                <div
+                  key={dateStr}
+                  className={`flex-1 text-center py-2 border-l ${
+                    isDark ? 'border-gray-700' : 'border-gray-200'
+                  }`}
+                >
+                  <div
+                    className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
+                  >
+                    {dayLabels[day.getDay()]}
+                  </div>
+                  <div
+                    className={`text-sm font-medium mt-0.5 ${
+                      isToday
+                        ? 'bg-blue-500 text-white w-7 h-7 rounded-full flex items-center justify-center mx-auto'
+                        : isDark
+                          ? 'text-gray-200'
+                          : 'text-gray-800'
+                    }`}
+                  >
+                    {day.getDate()}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* 종일 이벤트 행 */}
+          {weekDays.some((day) => {
+            const dateStr = dateToStr(day)
+            return (tasksByDate[dateStr]?.allDay.length ?? 0) > 0
+          }) && (
+            <div
+              className={`flex border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}
+            >
+              <div
+                className={`w-16 flex-shrink-0 text-[10px] text-right pr-2 py-1 ${
+                  isDark ? 'text-gray-500' : 'text-gray-400'
+                }`}
+              >
+                종일
+              </div>
+              {weekDays.map((day) => {
+                const dateStr = dateToStr(day)
+                const allDayTasks = tasksByDate[dateStr]?.allDay ?? []
+                return (
+                  <div
+                    key={`allday-${dateStr}`}
+                    className={`flex-1 border-l p-1 space-y-0.5 min-h-[28px] ${
+                      isDark ? 'border-gray-700' : 'border-gray-200'
+                    }`}
+                  >
+                    {allDayTasks.map((task) => (
+                      <div
+                        key={task.id}
+                        onClick={() => selectTask(task.id)}
+                        className={taskCardClass(task)}
+                      >
+                        {task.title}
+                      </div>
+                    ))}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* 시간 슬롯 */}
+          {timeSlots.map((hour) => (
+            <div
+              key={hour}
+              className={`flex border-b ${isDark ? 'border-gray-800' : 'border-gray-100'}`}
+              style={{ minHeight: '48px' }}
+            >
+              {/* 시간 라벨 */}
+              <div
+                className={`w-16 flex-shrink-0 text-[10px] text-right pr-2 pt-0.5 ${
+                  isDark ? 'text-gray-500' : 'text-gray-400'
+                }`}
+              >
+                {formatHour(hour)}
+              </div>
+
+              {/* 각 요일 셀 */}
+              {weekDays.map((day) => {
+                const dateStr = dateToStr(day)
+                const cellTasks = getTasksAtHour(dateStr, hour)
+                const isToday = dateStr === todayStr
+                return (
+                  <div
+                    key={`${dateStr}-${hour}`}
+                    className={`flex-1 border-l p-0.5 ${
+                      isToday
+                        ? isDark
+                          ? 'bg-blue-900/10 border-gray-700'
+                          : 'bg-blue-50/50 border-gray-200'
+                        : isDark
+                          ? 'border-gray-700'
+                          : 'border-gray-200'
+                    }`}
+                  >
+                    {cellTasks.map((task) => (
+                      <div
+                        key={task.id}
+                        onClick={() => selectTask(task.id)}
+                        className={taskCardClass(task)}
+                      >
+                        <div className="flex items-center gap-1">
+                          {task.priority !== 'none' && (
+                            <Flag size={8} className="flex-shrink-0" />
+                          )}
+                          <span className="truncate">{task.title}</span>
+                        </div>
+                        {task.dueTime && (
+                          <div
+                            className={`text-[9px] ${
+                              isDark ? 'text-gray-400' : 'text-gray-500'
+                            }`}
+                          >
+                            {task.dueTime}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}

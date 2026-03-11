@@ -1,0 +1,22 @@
+appId: com.haru.app
+productName: haru
+directories:
+  buildResources: resources
+  output: dist
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+mac:
+  target:
+    - dmg
+    - zip
+  artifactName: ${productName}-${version}-${arch}.${ext}
+  entitlementsInherit: resources/entitlements.mac.plist
+  category: public.app-category.productivity
+  darkModeSupport: true
+dmg:
+  artifactName: ${productName}-${version}.${ext}
+npmRebuild: true
