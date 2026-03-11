@@ -55,6 +55,10 @@ const api = {
   // Notifications
   showNotification: (title: string, body: string) => ipcRenderer.invoke('show-notification', title, body),
 
+  // 업데이트 확인
+  checkForUpdates: () => ipcRenderer.invoke('check-for-updates') as Promise<{ version: string; downloadUrl: string } | null>,
+  openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
+
   // Global shortcut
   registerGlobalShortcut: () => ipcRenderer.invoke('register-global-shortcut'),
 

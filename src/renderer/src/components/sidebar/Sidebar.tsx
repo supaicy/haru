@@ -30,7 +30,7 @@ const VIEW_ITEMS: { type: ViewType; label: string; icon: React.ReactNode }[] = [
 
 export function Sidebar() {
   const {
-    lists, tasks, folders, selectedListId, viewType, theme, score,
+    lists, tasks, folders, selectedListId, viewType, theme, score, updateAvailable,
     setSelectedList, setViewType, addList, removeList, updateList,
     editingListId, setEditingList, toggleSettings, addFolder, updateFolder, removeFolder
   } = useStore()
@@ -240,7 +240,12 @@ export function Sidebar() {
         </div>
         <button onClick={toggleSettings}
           className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors ${isDark ? 'text-sidebar-muted hover:text-white hover:bg-sidebar-hover' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'}`}>
-          <Settings size={18} />
+          <div className="relative">
+            <Settings size={18} />
+            {updateAvailable && (
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full" />
+            )}
+          </div>
           <span>설정</span>
         </button>
       </div>

@@ -32,9 +32,11 @@ interface Store {
   showQuickAdd: boolean
   showExport: boolean
   dragTaskId: string | null
+  updateAvailable: { version: string; downloadUrl: string } | null
 
   // 초기화
   loadData: () => Promise<void>
+  checkForUpdates: () => Promise<void>
 
   // 폴더
   addFolder: (name: string) => Promise<void>
@@ -157,6 +159,7 @@ export const useStore = create<Store>((set, get) => ({
   showSettings: false, sortBy: 'default', sortDir: 'asc',
   batchSelectedIds: [], batchMode: false,
   undoStack: [], showQuickAdd: false, showExport: false, dragTaskId: null,
+  updateAvailable: null as { version: string; downloadUrl: string } | null,
 
   loadData: async () => {
     const [rawLists, rawTasks, rawTrash, rawHabits, rawHabitLogs, rawFolders, rawSessions, rawScore] = await Promise.all([
@@ -176,28 +179,75 @@ export const useStore = create<Store>((set, get) => ({
     })
   },
 
-  // 폴더
-  addFolder: async (name) => { await window.api.createFolder(uuid(), name); await get().loadData() },
-  updateFolder: async (id, name, collapsed) => { await window.api.updateFolder(id, name, collapsed); await get().loadData() },
-  removeFolder: async (id) => { await window.api.deleteFolder(id); await get().loadData() },
+  checkForUpdates: async () => {
+    const result = await window.api.checkForUpdates()
+    if (result) set({ updateAvailable: result })
+  },
 
-  // 리스트
+  // === 폴더 ===
+  addFolder: async (name) => {
+    const id = uuid()
+    const now = new Date().toISOString()
+    const maxOrder = get().folders.reduce((m, f) => Math.max(m, f.sortOrder || 0), 0)
+    const newFolder: Folder = { id, name, collapsed: false, sortOrder: maxOrder + 1, createdAt: now }
+    set((s) => ({ folders: [...s.folders, newFolder] }))
+    window.api.createFolder(id, name)
+  },
+  updateFolder: async (id, name, collapsed) => {
+    set((s) => ({
+      folders: s.folders.map((f) => f.id === id ? { ...f, name, collapsed } : f)
+    }))
+    window.api.updateFolder(id, name, collapsed)
+  },
+  removeFolder: async (id) => {
+    set((s) => ({
+      folders: s.folders.filter((f) => f.id !== id),
+      lists: s.lists.map((l) => l.folderId === id ? { ...l, folderId: null } : l)
+    }))
+    window.api.deleteFolder(id)
+  },
+
+  // === 리스트 ===
   setSelectedList: (id) => set({ selectedListId: id, selectedTaskId: null, viewType: 'tasks', batchMode: false, batchSelectedIds: [] }),
-  addList: async (name, color, folderId) => { await window.api.createList(uuid(), name, color, 'list', folderId || null); await get().loadData() },
+  addList: async (name, color, folderId) => {
+    const id = uuid()
+    const now = new Date().toISOString()
+    const maxOrder = get().lists.reduce((m, l) => Math.max(m, l.sortOrder || 0), 0)
+    const newList: TaskList = { id, name, color, icon: 'list', folderId: folderId || null, sortOrder: maxOrder + 1, createdAt: now }
+    set((s) => ({ lists: [...s.lists, newList] }))
+    window.api.createList(id, name, color, 'list', folderId || null)
+  },
   updateList: async (id, updates) => {
+    set((s) => ({
+      lists: s.lists.map((l) => l.id === id ? { ...l, ...updates } : l)
+    }))
     const mapped: Record<string, unknown> = {}
     if (updates.name !== undefined) mapped.name = updates.name
     if (updates.color !== undefined) mapped.color = updates.color
     if (updates.folderId !== undefined) mapped.folder_id = updates.folderId
     if (updates.sortOrder !== undefined) mapped.sort_order = updates.sortOrder
-    await window.api.updateList(id, mapped)
-    await get().loadData()
+    window.api.updateList(id, mapped)
   },
-  removeList: async (id) => { await window.api.deleteList(id); if (get().selectedListId === id) set({ selectedListId: 'inbox' }); await get().loadData() },
+  removeList: async (id) => {
+    set((s) => ({
+      lists: s.lists.filter((l) => l.id !== id),
+      tasks: s.tasks.map((t) => t.listId === id ? { ...t, listId: 'inbox' } : t),
+      selectedListId: s.selectedListId === id ? 'inbox' : s.selectedListId
+    }))
+    window.api.deleteList(id)
+  },
   setEditingList: (id) => set({ editingListId: id }),
-  reorderLists: async (ids) => { await window.api.reorderLists(ids); await get().loadData() },
+  reorderLists: async (ids) => {
+    set((s) => ({
+      lists: s.lists.map((l) => {
+        const idx = ids.indexOf(l.id)
+        return idx >= 0 ? { ...l, sortOrder: idx } : l
+      }).sort((a, b) => a.sortOrder - b.sortOrder)
+    }))
+    window.api.reorderLists(ids)
+  },
 
-  // 태스크
+  // === 태스크 ===
   addTask: async (title, opts = {}) => {
     const currentList = get().selectedListId
     const smartLists = ['today', 'next7days', 'all', 'completed', 'inbox', 'trash']
@@ -205,43 +255,109 @@ export const useStore = create<Store>((set, get) => ({
     let finalDueDate = opts.dueDate || null
     if (!finalDueDate && currentList === 'today') finalDueDate = new Date().toISOString().split('T')[0]
 
-    await window.api.createTask({
-      id: uuid(), title, description: '', priority: opts.priority || 'none',
-      dueDate: finalDueDate, dueTime: opts.dueTime || null, reminderAt: opts.reminderAt || null,
-      listId: targetList, parentId: opts.parentId || null, tags: [], attachments: [],
-      isRecurring: opts.isRecurring || false, recurringPattern: opts.recurringPattern || null
+    const id = uuid()
+    const now = new Date().toISOString()
+    const maxOrder = get().tasks.filter((t) => t.listId === targetList).reduce((m, t) => Math.max(m, t.sortOrder || 0), 0)
+
+    const newTask: Task = {
+      id, title, description: '', completed: false,
+      priority: opts.priority || 'none',
+      dueDate: finalDueDate, dueTime: opts.dueTime || null,
+      reminderAt: opts.reminderAt || null,
+      listId: targetList, parentId: opts.parentId || null,
+      tags: [], attachments: [],
+      createdAt: now, completedAt: null, deletedAt: null,
+      sortOrder: maxOrder + 1,
+      isRecurring: opts.isRecurring || false,
+      recurringPattern: opts.recurringPattern || null
+    }
+    set((s) => ({ tasks: [...s.tasks, newTask] }))
+
+    window.api.createTask({
+      id, title, description: '', priority: opts.priority || 'none',
+      dueDate: finalDueDate, dueTime: opts.dueTime || null,
+      reminderAt: opts.reminderAt || null,
+      listId: targetList, parentId: opts.parentId || null,
+      tags: [], attachments: [],
+      isRecurring: opts.isRecurring || false,
+      recurringPattern: opts.recurringPattern || null
     })
-    await get().loadData()
   },
-  updateTask: async (task) => { await window.api.updateTask(task); await get().loadData() },
+  updateTask: async (task) => {
+    set((s) => ({
+      tasks: s.tasks.map((t) => t.id === task.id ? { ...t, ...task } : t)
+    }))
+    window.api.updateTask(task)
+  },
   toggleTask: async (id) => {
     const task = get().tasks.find((t) => t.id === id)
     if (!task) return
     const newCompleted = !task.completed
-    await window.api.updateTask({ id, completed: newCompleted })
+    const completedAt = newCompleted ? new Date().toISOString() : null
+
+    set((s) => ({
+      tasks: s.tasks.map((t) => t.id === id ? { ...t, completed: newCompleted, completedAt } : t)
+    }))
+    window.api.updateTask({ id, completed: newCompleted })
+
     if (newCompleted) {
-      await get().addScore('taskComplete', task.priority === 'high' ? 3 : task.priority === 'medium' ? 2 : 1)
+      const points = task.priority === 'high' ? 3 : task.priority === 'medium' ? 2 : 1
+      get().addScore('taskComplete', points)
     }
-    await get().loadData()
   },
   removeTask: async (id) => {
     const task = get().tasks.find((t) => t.id === id)
     if (task) {
       get().pushUndo({ type: 'deleteTask', description: `"${task.title}" 삭제됨`, data: task, timestamp: Date.now() })
     }
-    await window.api.deleteTask(id)
-    if (get().selectedTaskId === id) set({ selectedTaskId: null })
-    await get().loadData()
+    const now = new Date().toISOString()
+    set((s) => {
+      const subtasks = s.tasks.filter((t) => t.parentId === id)
+      const deletedItems = [...(task ? [{ ...task, deletedAt: now }] : []), ...subtasks.map((t) => ({ ...t, deletedAt: now }))]
+      return {
+        tasks: s.tasks.filter((t) => t.id !== id && t.parentId !== id),
+        trashTasks: [...s.trashTasks, ...deletedItems],
+        selectedTaskId: s.selectedTaskId === id ? null : s.selectedTaskId
+      }
+    })
+    window.api.deleteTask(id)
   },
-  restoreTask: async (id) => { await window.api.restoreTask(id); await get().loadData() },
-  permanentDeleteTask: async (id) => { await window.api.permanentDeleteTask(id); await get().loadData() },
-  emptyTrash: async () => { await window.api.emptyTrash(); await get().loadData() },
+  restoreTask: async (id) => {
+    const task = get().trashTasks.find((t) => t.id === id)
+    if (task) {
+      const restored = { ...task, deletedAt: null }
+      set((s) => ({
+        trashTasks: s.trashTasks.filter((t) => t.id !== id),
+        tasks: [...s.tasks, restored]
+      }))
+    }
+    window.api.restoreTask(id)
+  },
+  permanentDeleteTask: async (id) => {
+    set((s) => ({
+      trashTasks: s.trashTasks.filter((t) => t.id !== id),
+      tasks: s.tasks.filter((t) => t.id !== id && t.parentId !== id)
+    }))
+    window.api.permanentDeleteTask(id)
+  },
+  emptyTrash: async () => {
+    set({ trashTasks: [] })
+    window.api.emptyTrash()
+  },
   selectTask: (id) => set({ selectedTaskId: id }),
   setShowAddTask: (show) => set({ showAddTask: show }),
-  reorderTasks: async (ids) => { await window.api.reorderTasks(ids); await get().loadData() },
+  reorderTasks: async (ids) => {
+    set((s) => ({
+      tasks: s.tasks.map((t) => {
+        const idx = ids.indexOf(t.id)
+        return idx >= 0 ? { ...t, sortOrder: idx } : t
+      })
+    }))
+    window.api.reorderTasks(ids)
+  },
   setDragTaskId: (id) => set({ dragTaskId: id }),
 
-  // 일괄
+  // === 일괄 ===
   toggleBatchMode: () => set((s) => ({ batchMode: !s.batchMode, batchSelectedIds: [] })),
   toggleBatchSelect: (id) => set((s) => ({
     batchSelectedIds: s.batchSelectedIds.includes(id)
@@ -256,34 +372,46 @@ export const useStore = create<Store>((set, get) => ({
   clearBatchSelection: () => set({ batchSelectedIds: [] }),
   batchComplete: async () => {
     const ids = get().batchSelectedIds
-    await window.api.batchUpdateTasks(ids, { completed: true })
-    set({ batchSelectedIds: [], batchMode: false })
-    await get().loadData()
+    const now = new Date().toISOString()
+    set((s) => ({
+      tasks: s.tasks.map((t) => ids.includes(t.id) ? { ...t, completed: true, completedAt: now } : t),
+      batchSelectedIds: [], batchMode: false
+    }))
+    window.api.batchUpdateTasks(ids, { completed: true })
   },
   batchDelete: async () => {
     const ids = get().batchSelectedIds
-    await window.api.batchUpdateTasks(ids, { deleted: true })
-    set({ batchSelectedIds: [], batchMode: false })
-    await get().loadData()
+    const now = new Date().toISOString()
+    const deletedTasks = get().tasks.filter((t) => ids.includes(t.id))
+    set((s) => ({
+      tasks: s.tasks.filter((t) => !ids.includes(t.id)),
+      trashTasks: [...s.trashTasks, ...deletedTasks.map((t) => ({ ...t, deletedAt: now }))],
+      batchSelectedIds: [], batchMode: false
+    }))
+    window.api.batchUpdateTasks(ids, { deleted: true })
   },
   batchMove: async (listId) => {
     const ids = get().batchSelectedIds
-    await window.api.batchUpdateTasks(ids, { listId })
-    set({ batchSelectedIds: [], batchMode: false })
-    await get().loadData()
+    set((s) => ({
+      tasks: s.tasks.map((t) => ids.includes(t.id) ? { ...t, listId } : t),
+      batchSelectedIds: [], batchMode: false
+    }))
+    window.api.batchUpdateTasks(ids, { listId })
   },
   batchSetPriority: async (priority) => {
     const ids = get().batchSelectedIds
-    await window.api.batchUpdateTasks(ids, { priority })
-    set({ batchSelectedIds: [] })
-    await get().loadData()
+    set((s) => ({
+      tasks: s.tasks.map((t) => ids.includes(t.id) ? { ...t, priority } : t),
+      batchSelectedIds: []
+    }))
+    window.api.batchUpdateTasks(ids, { priority })
   },
 
-  // 정렬
+  // === 정렬 ===
   setSortBy: (sort) => set({ sortBy: sort }),
   setSortDir: (dir) => set({ sortDir: dir }),
 
-  // 뷰
+  // === 뷰 ===
   setViewType: (type) => set({ viewType: type, selectedTaskId: null }),
   setSearchQuery: (query) => set({ searchQuery: query }),
   setTheme: (theme) => { localStorage.setItem('ticktick-theme', theme); set({ theme }) },
@@ -291,7 +419,7 @@ export const useStore = create<Store>((set, get) => ({
   setShowQuickAdd: (show) => set({ showQuickAdd: show }),
   setShowExport: (show) => set({ showExport: show }),
 
-  // 되돌리기
+  // === 되돌리기 ===
   pushUndo: (action) => set((s) => ({ undoStack: [...s.undoStack.slice(-19), action] })),
   popUndo: async () => {
     const stack = get().undoStack
@@ -300,46 +428,83 @@ export const useStore = create<Store>((set, get) => ({
     set({ undoStack: stack.slice(0, -1) })
     if (action.type === 'deleteTask') {
       const task = action.data as Task
-      await window.api.restoreTask(task.id)
+      set((s) => ({
+        trashTasks: s.trashTasks.filter((t) => t.id !== task.id),
+        tasks: [...s.tasks, { ...task, deletedAt: null }]
+      }))
+      window.api.restoreTask(task.id)
     } else if (action.type === 'deleteTasks') {
       const ids = action.data as string[]
-      for (const id of ids) await window.api.restoreTask(id)
+      set((s) => {
+        const restored = s.trashTasks.filter((t) => ids.includes(t.id))
+        return {
+          trashTasks: s.trashTasks.filter((t) => !ids.includes(t.id)),
+          tasks: [...s.tasks, ...restored.map((t) => ({ ...t, deletedAt: null }))]
+        }
+      })
+      for (const id of ids) window.api.restoreTask(id)
     }
-    await get().loadData()
   },
   clearUndo: () => set({ undoStack: [] }),
 
-  // 습관
-  addHabit: async (name, color, frequency, targetDays) => { await window.api.createHabit(uuid(), name, color, frequency, targetDays); await get().loadData() },
-  removeHabit: async (id) => { await window.api.deleteHabit(id); await get().loadData() },
+  // === 습관 ===
+  addHabit: async (name, color, frequency, targetDays) => {
+    const id = uuid()
+    const now = new Date().toISOString()
+    const newHabit: Habit = { id, name, color, frequency, targetDays, createdAt: now }
+    set((s) => ({ habits: [...s.habits, newHabit] }))
+    window.api.createHabit(id, name, color, frequency, targetDays)
+  },
+  removeHabit: async (id) => {
+    set((s) => ({
+      habits: s.habits.filter((h) => h.id !== id),
+      habitLogs: s.habitLogs.filter((l) => l.habitId !== id)
+    }))
+    window.api.deleteHabit(id)
+  },
   toggleHabitLog: async (habitId, date) => {
-    await window.api.toggleHabitLog(uuid(), habitId, date)
-    const wasLogged = get().habitLogs.some((l) => l.habitId === habitId && l.date === date)
-    if (!wasLogged) await get().addScore('habitComplete', 1)
-    await get().loadData()
-  },
-
-  // 포모도로
-  savePomodoroSession: async (session) => {
-    await window.api.savePomodoroSession({ ...session, id: uuid() })
-    if (session.type === 'work' && session.completedAt) {
-      await get().addScore('pomodoroComplete', 2)
+    const existing = get().habitLogs.find((l) => l.habitId === habitId && l.date === date)
+    const id = uuid()
+    if (existing) {
+      set((s) => ({ habitLogs: s.habitLogs.filter((l) => !(l.habitId === habitId && l.date === date)) }))
+    } else {
+      const newLog: HabitLog = { id, habitId, date, completed: true }
+      set((s) => ({ habitLogs: [...s.habitLogs, newLog] }))
+      get().addScore('habitComplete', 1)
     }
-    await get().loadData()
+    window.api.toggleHabitLog(id, habitId, date)
   },
 
-  // 점수
+  // === 포모도로 ===
+  savePomodoroSession: async (session) => {
+    const id = uuid()
+    const fullSession: PomodoroSession = { ...session, id }
+    set((s) => ({ pomodoroSessions: [...s.pomodoroSessions, fullSession] }))
+    window.api.savePomodoroSession({ ...session, id })
+
+    if (session.type === 'work' && session.completedAt) {
+      get().addScore('pomodoroComplete', 2)
+    }
+  },
+
+  // === 점수 ===
   addScore: async (type, points) => {
-    await window.api.addScoreEvent({ type, points, date: new Date().toISOString().split('T')[0] })
-    await get().loadData()
+    const date = new Date().toISOString().split('T')[0]
+    set((s) => ({
+      score: {
+        total: s.score.total + points,
+        events: [...s.score.events, { type, points, date }]
+      }
+    }))
+    window.api.addScoreEvent({ type, points, date })
   },
 
-  // 첨부파일
+  // === 첨부파일 ===
   pickAttachment: async () => {
     return (await window.api.pickAttachment()) as { name: string; path: string }[]
   },
 
-  // 내보내기
+  // === 내보내기 ===
   exportData: async () => {
     return (await window.api.exportData()) as boolean
   }

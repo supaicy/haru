@@ -1,5 +1,5 @@
 import { app } from 'electron'
-import { readFileSync, writeFileSync, existsSync, mkdirSync, copyFileSync, readdirSync } from 'fs'
+import { readFileSync, writeFileSync, writeFile, existsSync, mkdirSync, copyFileSync, readdirSync } from 'fs'
 import path from 'path'
 
 interface DbData {
@@ -16,8 +16,34 @@ let data: DbData = { lists: [], tasks: [], habits: [], habitLogs: [], folders: [
 let dbPath: string
 let attachmentsDir: string
 
+// 디바운스된 비동기 저장 (300ms 내 연속 변경은 한 번만 기록)
+let saveTimer: ReturnType<typeof setTimeout> | null = null
+let savePending = false
+
 function save(): void {
-  writeFileSync(dbPath, JSON.stringify(data, null, 2), 'utf-8')
+  savePending = true
+  if (saveTimer) return
+  saveTimer = setTimeout(() => {
+    saveTimer = null
+    const json = JSON.stringify(data, null, 2)
+    writeFile(dbPath, json, 'utf-8', (err) => {
+      if (err) console.error('DB 저장 실패:', err)
+      else savePending = false
+    })
+  }, 300)
+}
+
+// 앱 종료 시 보류 중인 변경사항 동기 저장
+function flushSave(): void {
+  const hadTimer = saveTimer !== null
+  if (saveTimer) {
+    clearTimeout(saveTimer)
+    saveTimer = null
+  }
+  if (hadTimer || savePending) {
+    savePending = false
+    writeFileSync(dbPath, JSON.stringify(data, null, 2), 'utf-8')
+  }
 }
 
 function load(): DbData {
@@ -256,4 +282,4 @@ export function exportData(): string {
   return JSON.stringify(data, null, 2)
 }
 
-export function closeDatabase(): void { save() }
+export function closeDatabase(): void { flushSave() }

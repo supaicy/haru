@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, memo } from 'react'
 import { Circle, CheckCircle2, Flag, Calendar, Trash2, Copy, ArrowRight, Square, CheckSquare2 } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import { formatDueDate, isOverdue } from '../../utils/date'
@@ -8,9 +8,35 @@ const PRIORITY_COLORS = {
   none: 'text-gray-500', low: 'text-blue-400', medium: 'text-yellow-400', high: 'text-red-400'
 }
 
-export function TaskItem({ task, onDrop }: { task: Task; onDrop?: (targetId: string) => void }) {
-  const { toggleTask, selectTask, selectedTaskId, removeTask, lists, updateTask, theme,
-    batchMode, batchSelectedIds, toggleBatchSelect, dragTaskId, setDragTaskId } = useStore()
+// 서브태스크 카운트를 위한 셀렉터 (각 값을 개별 구독하여 불필요한 리렌더 방지)
+function useSubtaskCount(taskId: string) {
+  const total = useStore((s) => {
+    let count = 0
+    for (const t of s.tasks) { if (t.parentId === taskId) count++ }
+    return count
+  })
+  const completed = useStore((s) => {
+    let count = 0
+    for (const t of s.tasks) { if (t.parentId === taskId && t.completed) count++ }
+    return count
+  })
+  return { total, completed }
+}
+
+export const TaskItem = memo(function TaskItem({ task, onDrop }: { task: Task; onDrop?: (targetId: string) => void }) {
+  const toggleTask = useStore((s) => s.toggleTask)
+  const selectTask = useStore((s) => s.selectTask)
+  const selectedTaskId = useStore((s) => s.selectedTaskId)
+  const removeTask = useStore((s) => s.removeTask)
+  const lists = useStore((s) => s.lists)
+  const updateTask = useStore((s) => s.updateTask)
+  const theme = useStore((s) => s.theme)
+  const batchMode = useStore((s) => s.batchMode)
+  const batchSelectedIds = useStore((s) => s.batchSelectedIds)
+  const toggleBatchSelect = useStore((s) => s.toggleBatchSelect)
+  const dragTaskId = useStore((s) => s.dragTaskId)
+  const setDragTaskId = useStore((s) => s.setDragTaskId)
+
   const overdue = isOverdue(task.dueDate) && !task.completed
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
   const [showMoveMenu, setShowMoveMenu] = useState(false)
@@ -28,8 +54,7 @@ export function TaskItem({ task, onDrop }: { task: Task; onDrop?: (targetId: str
     setContextMenu({ x: e.clientX, y: e.clientY })
   }
 
-  const subtaskCount = useStore.getState().tasks.filter((t) => t.parentId === task.id).length
-  const completedSubtasks = useStore.getState().tasks.filter((t) => t.parentId === task.id && t.completed).length
+  const { total: subtaskCount, completed: completedSubtasks } = useSubtaskCount(task.id)
 
   return (
     <>
@@ -130,4 +155,4 @@ export function TaskItem({ task, onDrop }: { task: Task; onDrop?: (targetId: str
       )}
     </>
   )
-}
+})

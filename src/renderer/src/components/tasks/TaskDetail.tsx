@@ -1,8 +1,34 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { X, Trash2, Flag, Calendar, AlignLeft, Tag, List, Eye, Edit3, Clock, Bell, Repeat, Paperclip } from 'lucide-react'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import hljs from 'highlight.js/lib/core'
+import javascript from 'highlight.js/lib/languages/javascript'
+import typescript from 'highlight.js/lib/languages/typescript'
+import python from 'highlight.js/lib/languages/python'
+import json from 'highlight.js/lib/languages/json'
+import bash from 'highlight.js/lib/languages/bash'
+import css from 'highlight.js/lib/languages/css'
+import xml from 'highlight.js/lib/languages/xml'
+import markdown from 'highlight.js/lib/languages/markdown'
+import sql from 'highlight.js/lib/languages/sql'
+import java from 'highlight.js/lib/languages/java'
 import { useStore } from '../../store/useStore'
+
+hljs.registerLanguage('javascript', javascript)
+hljs.registerLanguage('js', javascript)
+hljs.registerLanguage('typescript', typescript)
+hljs.registerLanguage('ts', typescript)
+hljs.registerLanguage('python', python)
+hljs.registerLanguage('json', json)
+hljs.registerLanguage('bash', bash)
+hljs.registerLanguage('sh', bash)
+hljs.registerLanguage('css', css)
+hljs.registerLanguage('html', xml)
+hljs.registerLanguage('xml', xml)
+hljs.registerLanguage('markdown', markdown)
+hljs.registerLanguage('sql', sql)
+hljs.registerLanguage('java', java)
 import { SubtaskList } from './SubtaskList'
 import { RecurringPicker } from './RecurringPicker'
 import { ReminderPicker } from './ReminderPicker'
@@ -28,7 +54,7 @@ export function TaskDetail() {
   const [priority, setPriority] = useState<Priority>('none')
   const [listId, setListId] = useState('inbox')
   const [tagInput, setTagInput] = useState('')
-  const [mdPreview, setMdPreview] = useState(false)
+  const [mdPreview, setMdPreview] = useState(true)
   const [showRecurring, setShowRecurring] = useState(false)
   const [showReminder, setShowReminder] = useState(false)
 
@@ -48,6 +74,42 @@ export function TaskDetail() {
     save({ tags: [...new Set([...task.tags, tagInput.trim()])] }); setTagInput('')
   }
   const removeTag = (tag: string) => save({ tags: task.tags.filter((t) => t !== tag) })
+
+  // 체크박스 토글: description 내 n번째 체크박스의 상태를 변경
+  const toggleCheckbox = useCallback((index: number) => {
+    let count = 0
+    const newDesc = description.replace(/^(\s*[-*]\s*)\[([ xX])\]/gm, (match, prefix, check) => {
+      if (count++ === index) {
+        const newCheck = check === ' ' ? 'x' : ' '
+        return `${prefix}[${newCheck}]`
+      }
+      return match
+    })
+    setDescription(newDesc)
+    updateTask({ id: task.id, description: newDesc })
+  }, [description, task.id, updateTask])
+
+  const checkboxIndex = useRef(0)
+
+  // 코드 블록 syntax highlighting
+  const CodeBlock = useCallback(({ className, children, ...props }: React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }) => {
+    const codeRef = useRef<HTMLElement>(null)
+    const match = /language-(\w+)/.exec(className || '')
+    const isInline = !match && !String(children).includes('\n')
+
+    useEffect(() => {
+      if (codeRef.current && match) {
+        codeRef.current.removeAttribute('data-highlighted')
+        hljs.highlightElement(codeRef.current)
+      }
+    }, [children, match])
+
+    if (isInline) {
+      return <code className={className} {...props}>{children}</code>
+    }
+
+    return <code ref={codeRef} className={className} {...props}>{children}</code>
+  }, [])
 
   const inputCls = isDark ? 'bg-gray-800 text-gray-300 border-gray-700' : 'bg-gray-100 text-gray-700 border-gray-300'
   const labelCls = isDark ? 'text-gray-500' : 'text-gray-400'
@@ -177,14 +239,46 @@ export function TaskDetail() {
               </button>
             </div>
             {mdPreview ? (
-              <div className={`prose prose-sm max-w-none min-h-[120px] rounded px-3 py-2 border ${isDark ? 'prose-invert bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-300'}`}>
-                {description ? <Markdown remarkPlugins={[remarkGfm]}>{description}</Markdown> : <p className={isDark ? 'text-gray-600' : 'text-gray-400'}>메모가 없습니다</p>}
+              <div
+                className={`prose prose-sm max-w-none min-h-[120px] rounded-lg px-3 py-2.5 border cursor-text ${isDark ? 'prose-invert bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-200'}`}
+                onClick={(e) => {
+                  // 체크박스나 링크 클릭이 아닌 경우 편집 모드 전환
+                  const target = e.target as HTMLElement
+                  if (target.tagName !== 'INPUT' && target.tagName !== 'A') {
+                    setMdPreview(false)
+                  }
+                }}>
+                {description ? (() => {
+                  checkboxIndex.current = 0
+                  return (
+                    <Markdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        code: CodeBlock,
+                        input: (props) => {
+                          if (props.type === 'checkbox') {
+                            const idx = checkboxIndex.current++
+                            return (
+                              <input
+                                type="checkbox"
+                                checked={props.checked}
+                                onChange={() => toggleCheckbox(idx)}
+                              />
+                            )
+                          }
+                          return <input {...props} />
+                        }
+                      }}
+                    >{description}</Markdown>
+                  )
+                })() : <p className={`text-sm ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>클릭하여 메모 작성...</p>}
               </div>
             ) : (
               <textarea value={description} onChange={(e) => setDescription(e.target.value)}
-                onBlur={() => save({ description })}
+                onBlur={() => { save({ description }); if (description.trim()) setMdPreview(true) }}
+                autoFocus
                 placeholder="마크다운으로 메모를 작성하세요..." rows={8}
-                className={`w-full text-sm rounded px-2 py-1.5 outline-none border resize-none font-mono ${inputCls} ${isDark ? 'placeholder-gray-600' : 'placeholder-gray-400'}`} />
+                className={`w-full text-sm rounded-lg px-3 py-2.5 outline-none border resize-none font-mono leading-relaxed ${inputCls} ${isDark ? 'placeholder-gray-600' : 'placeholder-gray-400'}`} />
             )}
           </div>
         </div>

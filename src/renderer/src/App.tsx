@@ -34,12 +34,13 @@ function MainContent() {
 }
 
 export default function App() {
-  const { loadData, selectedTaskId, viewType, theme, showQuickAdd } = useStore()
+  const { loadData, selectedTaskId, viewType, theme, showQuickAdd, checkForUpdates } = useStore()
 
   useKeyboardShortcuts()
 
   useEffect(() => {
     loadData()
+    checkForUpdates()
     // 글로벌 단축키 등록
     window.api.registerGlobalShortcut?.()
     // 글로벌 퀵 추가 이벤트 수신

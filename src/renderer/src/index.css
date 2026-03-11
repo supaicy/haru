@@ -62,49 +62,142 @@ html.dark select option {
 }
 
 /* 마크다운 프리뷰 스타일 */
-.prose h1 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
-.prose h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.4rem; }
-.prose h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; }
-.prose p { margin-bottom: 0.5rem; line-height: 1.6; }
+.prose { font-size: 0.875rem; line-height: 1.7; }
+.prose h1 { font-size: 1.5rem; font-weight: 700; margin-top: 1.25rem; margin-bottom: 0.5rem; letter-spacing: -0.01em; }
+.prose h2 { font-size: 1.25rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.4rem; }
+.prose h3 { font-size: 1.1rem; font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.3rem; }
+.prose h1:first-child, .prose h2:first-child, .prose h3:first-child { margin-top: 0; }
+.prose p { margin-bottom: 0.5rem; line-height: 1.7; }
 .prose ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 0.5rem; }
 .prose ol { list-style-type: decimal; padding-left: 1.25rem; margin-bottom: 0.5rem; }
-.prose li { margin-bottom: 0.15rem; }
-.prose code {
+.prose li { margin-bottom: 0.2rem; line-height: 1.6; }
+.prose li > ul, .prose li > ol { margin-top: 0.2rem; margin-bottom: 0; }
+.prose strong { font-weight: 600; }
+
+/* 인라인 코드 */
+.prose code:not(pre code) {
   font-size: 0.85em;
   padding: 0.15em 0.4em;
   border-radius: 4px;
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, monospace;
 }
-.prose-invert code {
+.prose-invert code:not(pre code) {
   background-color: #3A3A3C;
   color: #FF6B6B;
 }
-.prose code {
-  background-color: #E5E5EA;
+.prose:not(.prose-invert) code:not(pre code) {
+  background-color: #F2F2F7;
   color: #D63384;
 }
+
+/* 코드 블록 */
 .prose pre {
-  padding: 0.75rem;
-  border-radius: 6px;
+  padding: 0.875rem 1rem;
+  border-radius: 8px;
   overflow-x: auto;
-  margin-bottom: 0.5rem;
-  font-size: 0.85em;
+  margin-bottom: 0.75rem;
+  font-size: 0.8em;
+  line-height: 1.6;
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, monospace;
+}
+.prose pre code {
+  background: none !important;
+  padding: 0 !important;
+  font-size: inherit;
 }
 .prose-invert pre {
   background-color: #1C1C1E;
+  border: 1px solid #2C2C2E;
 }
-.prose pre {
-  background-color: #F2F2F7;
+.prose:not(.prose-invert) pre {
+  background-color: #F8F8FA;
+  border: 1px solid #E5E5EA;
 }
+
+/* 인용 */
 .prose blockquote {
   border-left: 3px solid #4A90D9;
   padding-left: 0.75rem;
   margin-bottom: 0.5rem;
   font-style: italic;
 }
-.prose-invert blockquote { color: #8E8E93; }
-.prose blockquote { color: #636366; }
-.prose a { color: #4A90D9; text-decoration: underline; }
-.prose hr { border-color: #48484A; margin: 0.75rem 0; }
-.prose table { width: 100%; border-collapse: collapse; margin-bottom: 0.5rem; }
-.prose th, .prose td { border: 1px solid #48484A; padding: 0.35rem 0.5rem; text-align: left; font-size: 0.85em; }
-.prose input[type="checkbox"] { margin-right: 0.4rem; }
+.prose-invert blockquote { color: #A1A1A6; }
+.prose:not(.prose-invert) blockquote { color: #636366; }
+
+/* 링크 */
+.prose a { color: #4A90D9; text-decoration: underline; text-underline-offset: 2px; }
+.prose a:hover { color: #5BA0E9; }
+
+/* 구분선 */
+.prose-invert hr { border-color: #3A3A3C; margin: 0.75rem 0; }
+.prose:not(.prose-invert) hr { border-color: #E5E5EA; margin: 0.75rem 0; }
+
+/* 테이블 */
+.prose table { width: 100%; border-collapse: collapse; margin-bottom: 0.75rem; font-size: 0.85em; }
+.prose-invert th { background-color: #2C2C2E; border: 1px solid #3A3A3C; padding: 0.4rem 0.6rem; text-align: left; font-weight: 600; }
+.prose-invert td { border: 1px solid #3A3A3C; padding: 0.35rem 0.6rem; }
+.prose:not(.prose-invert) th { background-color: #F2F2F7; border: 1px solid #E5E5EA; padding: 0.4rem 0.6rem; text-align: left; font-weight: 600; }
+.prose:not(.prose-invert) td { border: 1px solid #E5E5EA; padding: 0.35rem 0.6rem; }
+
+/* 체크박스 */
+.prose input[type="checkbox"] {
+  margin-right: 0.4rem;
+  cursor: pointer;
+  accent-color: #4A90D9;
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+}
+
+/* 이미지 */
+.prose img { max-width: 100%; border-radius: 6px; margin: 0.5rem 0; }
+
+/* highlight.js 다크 테마 */
+.prose-invert .hljs-keyword,
+.prose-invert .hljs-selector-tag,
+.prose-invert .hljs-built_in { color: #C678DD; }
+.prose-invert .hljs-string,
+.prose-invert .hljs-attr { color: #98C379; }
+.prose-invert .hljs-number,
+.prose-invert .hljs-literal { color: #D19A66; }
+.prose-invert .hljs-comment,
+.prose-invert .hljs-doctag { color: #5C6370; font-style: italic; }
+.prose-invert .hljs-function,
+.prose-invert .hljs-title { color: #61AFEF; }
+.prose-invert .hljs-type,
+.prose-invert .hljs-class .hljs-title { color: #E5C07B; }
+.prose-invert .hljs-variable,
+.prose-invert .hljs-template-variable { color: #E06C75; }
+.prose-invert .hljs-tag { color: #E06C75; }
+.prose-invert .hljs-name { color: #E06C75; }
+.prose-invert .hljs-attribute { color: #D19A66; }
+.prose-invert .hljs-regexp,
+.prose-invert .hljs-link { color: #56B6C2; }
+.prose-invert .hljs-params { color: #ABB2BF; }
+.prose-invert .hljs-punctuation { color: #ABB2BF; }
+.prose-invert .hljs-meta { color: #61AFEF; }
+
+/* highlight.js 라이트 테마 */
+.prose:not(.prose-invert) .hljs-keyword,
+.prose:not(.prose-invert) .hljs-selector-tag,
+.prose:not(.prose-invert) .hljs-built_in { color: #A626A4; }
+.prose:not(.prose-invert) .hljs-string,
+.prose:not(.prose-invert) .hljs-attr { color: #50A14F; }
+.prose:not(.prose-invert) .hljs-number,
+.prose:not(.prose-invert) .hljs-literal { color: #986801; }
+.prose:not(.prose-invert) .hljs-comment,
+.prose:not(.prose-invert) .hljs-doctag { color: #A0A1A7; font-style: italic; }
+.prose:not(.prose-invert) .hljs-function,
+.prose:not(.prose-invert) .hljs-title { color: #4078F2; }
+.prose:not(.prose-invert) .hljs-type,
+.prose:not(.prose-invert) .hljs-class .hljs-title { color: #C18401; }
+.prose:not(.prose-invert) .hljs-variable,
+.prose:not(.prose-invert) .hljs-template-variable { color: #E45649; }
+.prose:not(.prose-invert) .hljs-tag { color: #E45649; }
+.prose:not(.prose-invert) .hljs-name { color: #E45649; }
+.prose:not(.prose-invert) .hljs-attribute { color: #986801; }
+.prose:not(.prose-invert) .hljs-regexp,
+.prose:not(.prose-invert) .hljs-link { color: #0184BC; }
+.prose:not(.prose-invert) .hljs-params { color: #383A42; }
+.prose:not(.prose-invert) .hljs-punctuation { color: #383A42; }
+.prose:not(.prose-invert) .hljs-meta { color: #4078F2; }

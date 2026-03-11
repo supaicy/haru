@@ -1,4 +1,4 @@
-import { Moon, Sun, X, Download, Keyboard } from 'lucide-react'
+import { Moon, Sun, X, Download, Keyboard, ArrowUpCircle } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 
 const SHORTCUTS = [
@@ -14,7 +14,7 @@ const SHORTCUTS = [
 ]
 
 export function Settings() {
-  const { theme, setTheme, showSettings, toggleSettings, setShowExport, exportData } = useStore()
+  const { theme, setTheme, showSettings, toggleSettings, setShowExport, exportData, updateAvailable } = useStore()
 
   if (!showSettings) return null
 
@@ -87,8 +87,23 @@ export function Settings() {
 
           {/* 정보 */}
           <div className={`border-t pt-4 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+            {updateAvailable && (
+              <button
+                onClick={() => window.api.openExternal(updateAvailable.downloadUrl)}
+                className={`flex items-center gap-3 w-full px-4 py-3 mb-3 rounded-lg transition-colors ${
+                  theme === 'dark' ? 'bg-primary-500/20 hover:bg-primary-500/30 text-primary-300' : 'bg-primary-50 hover:bg-primary-100 text-primary-600'
+                }`}>
+                <ArrowUpCircle size={18} />
+                <div className="text-left flex-1">
+                  <div className="text-sm font-medium">새 버전 사용 가능</div>
+                  <div className={`text-xs ${theme === 'dark' ? 'text-primary-400' : 'text-primary-500'}`}>
+                    haru {updateAvailable.version} 다운로드
+                  </div>
+                </div>
+              </button>
+            )}
             <div className="flex items-center justify-between">
-              <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>haru v1.0.0</span>
+              <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>haru v1.1.0</span>
               <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Electron + React</span>
             </div>
           </div>
