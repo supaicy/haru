@@ -43,8 +43,6 @@ export function TaskListView() {
   } = useStore()
   const isDark = theme === 'dark'
 
-  if (selectedListId === 'trash') return <TrashView />
-
   const listName = useMemo(() => {
     if (selectedListId in SMART_LABELS) return SMART_LABELS[selectedListId]
     return lists.find((l) => l.id === selectedListId)?.name || ''
@@ -86,6 +84,8 @@ export function TaskListView() {
   }, [dragTaskId, filteredTasks, reorderTasks, setDragTaskId])
 
   const [showSort, setShowSort] = useState(false)
+
+  if (selectedListId === 'trash') return <TrashView />
 
   return (
     <div className={`flex-1 flex flex-col h-full ${isDark ? 'bg-[#1C1C1E]' : 'bg-white'}`}>
