@@ -80,8 +80,9 @@ const api = {
 
   // IPC events
   onGlobalQuickAdd: (callback: () => void) => {
-    ipcRenderer.on('global-quick-add', callback)
-    return () => ipcRenderer.removeListener('global-quick-add', callback)
+    const handler = (_: Electron.IpcRendererEvent): void => callback()
+    ipcRenderer.on('global-quick-add', handler)
+    return () => ipcRenderer.removeListener('global-quick-add', handler)
   }
 }
 

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="../resources/icon-128.png" alt="haru" width="128" height="128">
+  <img src="../resources/icon-128-rounded.png" alt="haru" width="128" height="128">
 </p>
 
 <h1 align="center">haru</h1>
