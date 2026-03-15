@@ -64,6 +64,11 @@ const api = {
     ipcRenderer.on('update-available', handler)
     return () => ipcRenderer.removeListener('update-available', handler)
   },
+  onUpdateNotAvailable: (callback: () => void) => {
+    const handler = (_: Electron.IpcRendererEvent): void => callback()
+    ipcRenderer.on('update-not-available', handler)
+    return () => ipcRenderer.removeListener('update-not-available', handler)
+  },
   onUpdateProgress: (callback: (percent: number) => void) => {
     const handler = (_: Electron.IpcRendererEvent, percent: number): void => callback(percent)
     ipcRenderer.on('update-download-progress', handler)

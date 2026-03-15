@@ -90,7 +90,7 @@ export function Settings() {
             <h3 className={`text-sm font-medium mb-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>버전 정보</h3>
             <div className={`rounded-lg px-4 py-3 mb-3 ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-100'}`}>
               <div className="flex items-center justify-between mb-1">
-                <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>haru v1.2.0</span>
+                <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>haru v{__APP_VERSION__}</span>
                 <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Electron + React</span>
               </div>
               {updateChecked && !updateAvailable && (

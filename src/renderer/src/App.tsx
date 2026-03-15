@@ -48,6 +48,9 @@ export default function App() {
     const cleanupUpdate = window.api.onUpdateAvailable?.((info) => {
       useStore.setState({ updateAvailable: info, updateChecked: true })
     })
+    const cleanupNotAvailable = window.api.onUpdateNotAvailable?.(() => {
+      useStore.setState({ updateChecked: true })
+    })
     const cleanupProgress = window.api.onUpdateProgress?.((percent) => {
       useStore.setState({ updateDownloadProgress: percent })
     })
@@ -62,7 +65,7 @@ export default function App() {
     })
     return () => {
       cleanup?.()
-      cleanupUpdate?.(); cleanupProgress?.(); cleanupDownloaded?.()
+      cleanupUpdate?.(); cleanupNotAvailable?.(); cleanupProgress?.(); cleanupDownloaded?.()
     }
   }, [loadData])
 

@@ -69,6 +69,13 @@ app.whenReady().then(() => {
       }
     })
 
+    autoUpdater.on('update-not-available', () => {
+      const wins = BrowserWindow.getAllWindows()
+      if (wins.length > 0) {
+        wins[0].webContents.send('update-not-available')
+      }
+    })
+
     autoUpdater.on('download-progress', (progress) => {
       const wins = BrowserWindow.getAllWindows()
       if (wins.length > 0) {
