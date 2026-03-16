@@ -12,10 +12,177 @@ const DAY_MAP: Record<string, number> = {
 
 const NEXT_DAY_FN = [nextSunday, nextMonday, nextTuesday, nextWednesday, nextThursday, nextFriday, nextSaturday]
 
+export interface ParsedDateTime {
+  date: string       // "YYYY-MM-DD"
+  time: string | null // "HH:MM" 또는 null
+  consumed: number   // 소비된 단어 수
+}
+
+/**
+ * 시간 표현을 파싱하여 "HH:MM" 형식으로 반환
+ * 지원 패턴:
+ *   "14시50분", "14시 50분", "14시", "3시30분"
+ *   "오전9시", "오후3시30분", "오전 11시 30분"
+ *   "14:50", "9:30"
+ */
+function parseNaturalTime(tokens: string[]): { time: string; consumed: number } | null {
+  if (tokens.length === 0) return null
+  const joined = tokens.slice(0, 3).join(' ')
+
+  // "오전/오후 N시 M분" or "오전/오후 N시M분" or "오전N시M분"
+  const ampmFull = joined.match(/^(오전|오후)\s*(\d{1,2})시\s*(\d{1,2})분?/)
+  if (ampmFull) {
+    let h = parseInt(ampmFull[2])
+    const m = parseInt(ampmFull[3])
+    if (h > 12 || m > 59) return null
+    if (ampmFull[1] === '오후' && h < 12) h += 12
+    if (ampmFull[1] === '오전' && h === 12) h = 0
+    const consumed = countConsumed(tokens, ampmFull[0])
+    return { time: fmtTime(h, m), consumed }
+  }
+
+  // "오전/오후 N시"
+  const ampmHour = joined.match(/^(오전|오후)\s*(\d{1,2})시/)
+  if (ampmHour) {
+    let h = parseInt(ampmHour[2])
+    if (h > 12) return null
+    if (ampmHour[1] === '오후' && h < 12) h += 12
+    if (ampmHour[1] === '오전' && h === 12) h = 0
+    const consumed = countConsumed(tokens, ampmHour[0])
+    return { time: fmtTime(h, 0), consumed }
+  }
+
+  // "N시M분" or "N시 M분"
+  const hourMin = joined.match(/^(\d{1,2})시\s*(\d{1,2})분?/)
+  if (hourMin) {
+    const h = parseInt(hourMin[1])
+    const m = parseInt(hourMin[2])
+    if (h > 23 || m > 59) return null
+    const consumed = countConsumed(tokens, hourMin[0])
+    return { time: fmtTime(h, m), consumed }
+  }
+
+  // "N시"
+  const hourOnly = joined.match(/^(\d{1,2})시/)
+  if (hourOnly) {
+    const h = parseInt(hourOnly[1])
+    if (h > 23) return null
+    const consumed = countConsumed(tokens, hourOnly[0])
+    return { time: fmtTime(h, 0), consumed }
+  }
+
+  // "14:50", "9:30"
+  const colonTime = tokens[0].match(/^(\d{1,2}):(\d{2})$/)
+  if (colonTime) {
+    const h = parseInt(colonTime[1])
+    const m = parseInt(colonTime[2])
+    if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+      return { time: fmtTime(h, m), consumed: 1 }
+    }
+  }
+
+  return null
+}
+
+/** 매칭된 텍스트가 tokens에서 몇 개의 단어를 소비하는지 계산 */
+function countConsumed(tokens: string[], matched: string): number {
+  let count = 0
+  let len = 0
+  for (const tok of tokens) {
+    if (len >= matched.replace(/\s+/g, '').length) break
+    len += tok.replace(/\s+/g, '').length
+    count++
+  }
+  return Math.max(1, count)
+}
+
+function fmtTime(h: number, m: number): string {
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+}
+
 export function parseNaturalDate(input: string): string | null {
-  const text = input.trim()
+  const result = parseNaturalDateTime(input)
+  return result ? result.date : null
+}
+
+/**
+ * 자연어 입력에서 날짜와 시간을 모두 파싱
+ * "내일 14시50분" → { date: "2026-03-17", time: "14:50", consumed: 2 }
+ * "오늘 오후3시" → { date: "2026-03-16", time: "15:00", consumed: 2 }
+ * "내일" → { date: "2026-03-17", time: null, consumed: 1 }
+ */
+export function parseNaturalDateTime(input: string): ParsedDateTime | null {
+  const tokens = input.trim().split(/\s+/)
+  if (tokens.length === 0) return null
+
   const today = startOfDay(new Date())
 
+  // 먼저 날짜 부분을 파싱 (1~N개 토큰 시도)
+  let dateStr: string | null = null
+  let dateConsumed = 0
+
+  // 여러 토큰으로 된 날짜 표현 시도 (예: "다음주 월요일", "이번 주 금요일")
+  for (let i = Math.min(tokens.length, 3); i >= 1; i--) {
+    const candidate = tokens.slice(0, i).join(' ')
+    const parsed = parseDateExpression(candidate, today)
+    if (parsed) {
+      dateStr = parsed
+      dateConsumed = i
+      break
+    }
+  }
+
+  // 붙여쓰기 처리: "내일14시50분" → 첫 토큰에서 날짜+시간을 분리
+  if (!dateStr && tokens.length > 0) {
+    const first = tokens[0]
+    const dateKeywords = ['오늘', '내일', '모레', '글피']
+    for (const kw of dateKeywords) {
+      if (first.startsWith(kw) && first.length > kw.length) {
+        const parsed = parseDateExpression(kw, today)
+        if (parsed) {
+          dateStr = parsed
+          dateConsumed = 0 // 토큰 자체는 소비하지 않고 아래서 시간 파싱
+          // 첫 토큰에서 날짜 키워드를 제거하고 나머지를 시간으로 시도
+          const rest = first.slice(kw.length)
+          const timeParsed = parseNaturalTime([rest, ...tokens.slice(1)])
+          if (timeParsed) {
+            // 시간 부분이 첫 토큰 안에 있으므로 consumed 계산
+            const restLen = rest.replace(/\s+/g, '').length
+            let timeTokens = 0
+            let consumed = 0
+            // rest가 첫 토큰의 나머지이므로 첫 토큰 = 1개 소비
+            const restTokens = [rest, ...tokens.slice(1)]
+            for (const tok of restTokens) {
+              if (consumed >= timeParsed.consumed) break
+              consumed++
+              timeTokens++
+            }
+            // 첫 토큰(날짜+시간)은 1개로 카운트, 추가 토큰은 시간이 소비한 만큼
+            const totalConsumed = 1 + (timeTokens > 1 ? timeTokens - 1 : 0)
+            return { date: dateStr, time: timeParsed.time, consumed: totalConsumed }
+          }
+          // 시간 파싱 안 되면 날짜만 (첫 토큰 전체를 소비)
+          return { date: dateStr, time: null, consumed: 1 }
+        }
+      }
+    }
+  }
+
+  if (!dateStr) return null
+
+  // 날짜 뒤 남은 토큰에서 시간 파싱 시도
+  const remaining = tokens.slice(dateConsumed)
+  const timeParsed = parseNaturalTime(remaining)
+
+  return {
+    date: dateStr,
+    time: timeParsed ? timeParsed.time : null,
+    consumed: dateConsumed + (timeParsed ? timeParsed.consumed : 0)
+  }
+}
+
+/** 날짜 표현만 파싱 (기존 parseNaturalDate 로직) */
+function parseDateExpression(text: string, today: Date): string | null {
   if (/^오늘$/.test(text)) return fmt(today)
   if (/^내일$/.test(text)) return fmt(addDays(today, 1))
   if (/^모레$/.test(text)) return fmt(addDays(today, 2))

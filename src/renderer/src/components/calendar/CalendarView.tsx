@@ -16,7 +16,7 @@ export function CalendarView() {
   const tasksByDate = useMemo(() => {
     const map: Record<string, typeof tasks> = {}
     tasks
-      .filter((t) => t.dueDate && !t.completed)
+      .filter((t) => t.dueDate && !t.completed && !t.deletedAt)
       .forEach((t) => {
         const key = t.dueDate!
         if (!map[key]) map[key] = []

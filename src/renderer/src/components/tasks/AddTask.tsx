@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Calendar, Flag, X } from 'lucide-react'
 import { useStore } from '../../store/useStore'
-import { parseNaturalDate } from '../../utils/naturalDate'
+import { parseNaturalDateTime } from '../../utils/naturalDate'
 import { formatDueDate } from '../../utils/date'
 import type { Priority } from '../../types'
 
@@ -20,19 +20,28 @@ export function AddTask({ onClose }: { onClose: () => void }) {
   const [priority, setPriority] = useState<Priority>('none')
   const [showPriority, setShowPriority] = useState(false)
   const [naturalDateHint, setNaturalDateHint] = useState<string | null>(null)
+  const [naturalTimeHint, setNaturalTimeHint] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { inputRef.current?.focus() }, [])
 
-  // 자연어 날짜 감지
+  // 자연어 날짜+시간 감지
   useEffect(() => {
-    if (!title.trim()) { setNaturalDateHint(null); return }
-    const words = title.trim().split(/\s+/)
-    const parsed = parseNaturalDate(words[0])
-    if (parsed && words.length > 1) {
-      setNaturalDateHint(parsed)
+    if (!title.trim()) { setNaturalDateHint(null); setNaturalTimeHint(null); return }
+    const parsed = parseNaturalDateTime(title.trim())
+    if (parsed) {
+      const words = title.trim().split(/\s+/)
+      // 날짜+시간 토큰을 제외한 나머지가 제목이 되어야 함
+      if (words.length > parsed.consumed) {
+        setNaturalDateHint(parsed.date)
+        setNaturalTimeHint(parsed.time)
+      } else {
+        setNaturalDateHint(null)
+        setNaturalTimeHint(null)
+      }
     } else {
       setNaturalDateHint(null)
+      setNaturalTimeHint(null)
     }
   }, [title])
 
@@ -41,20 +50,24 @@ export function AddTask({ onClose }: { onClose: () => void }) {
     let finalTitle = title.trim()
     let finalDueDate = dueDate || null
 
-    // 자연어 날짜가 감지되면 적용
+    // 자연어 날짜+시간이 감지되면 적용
+    let finalDueTime: string | null = null
     if (naturalDateHint && !dueDate) {
-      const words = finalTitle.split(/\s+/)
-      words.shift()
-      finalTitle = words.join(' ')
-      finalDueDate = naturalDateHint
+      const parsed = parseNaturalDateTime(finalTitle)
+      if (parsed) {
+        const words = finalTitle.split(/\s+/)
+        finalTitle = words.slice(parsed.consumed).join(' ')
+        finalDueDate = parsed.date
+        finalDueTime = parsed.time
+      }
     }
 
     if (!finalTitle) return
 
     const listId = ['today', 'next7days', 'all', 'completed', 'trash'].includes(selectedListId as string)
       ? undefined : (selectedListId as string)
-    await addTask(finalTitle, { listId, dueDate: finalDueDate, priority })
-    setTitle(''); setDueDate(''); setPriority('none'); setNaturalDateHint(null)
+    await addTask(finalTitle, { listId, dueDate: finalDueDate, dueTime: finalDueTime, priority })
+    setTitle(''); setDueDate(''); setPriority('none'); setNaturalDateHint(null); setNaturalTimeHint(null)
     inputRef.current?.focus()
   }
 
@@ -73,7 +86,7 @@ export function AddTask({ onClose }: { onClose: () => void }) {
       {/* 자연어 날짜 힌트 */}
       {naturalDateHint && (
         <div className={`px-3 py-1 text-xs ${isDark ? 'text-primary-400' : 'text-primary-600'}`}>
-          📅 {formatDueDate(naturalDateHint)} ({naturalDateHint})로 설정됨
+          📅 {formatDueDate(naturalDateHint)}{naturalTimeHint ? ` ${naturalTimeHint}` : ''} ({naturalDateHint}{naturalTimeHint ? ` ${naturalTimeHint}` : ''})로 설정됨
         </div>
       )}
 

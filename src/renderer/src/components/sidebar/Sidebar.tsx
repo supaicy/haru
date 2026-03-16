@@ -5,6 +5,7 @@ import {
   ChevronDown, ChevronRight, BarChart3, Columns3, Clock, Grid2X2, CalendarClock, Trophy
 } from 'lucide-react'
 import { useStore } from '../../store/useStore'
+import { toDateString } from '../../utils/date'
 import type { SmartList, ViewType } from '../../types'
 
 const SMART_LISTS: { id: SmartList; label: string; icon: React.ReactNode }[] = [
@@ -57,8 +58,8 @@ export function Sidebar() {
   const isDark = theme === 'dark'
 
   const taskCounts = useMemo(() => {
-    const todayStr = new Date().toISOString().split('T')[0]
-    const next7 = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0]
+    const todayStr = toDateString(new Date())
+    const next7 = toDateString(new Date(Date.now() + 7 * 86400000))
     const incomplete = tasks.filter((t) => !t.completed)
     const counts: Record<string, number> = {
       today: incomplete.filter((t) => t.dueDate && t.dueDate <= todayStr).length,
@@ -69,7 +70,7 @@ export function Sidebar() {
       trash: trashTasks.length,
     }
     for (const list of lists) {
-      if (!counts[list.id]) counts[list.id] = incomplete.filter((t) => t.listId === list.id).length
+      if (!(list.id in counts)) counts[list.id] = incomplete.filter((t) => t.listId === list.id).length
     }
     return counts
   }, [tasks, trashTasks, lists])

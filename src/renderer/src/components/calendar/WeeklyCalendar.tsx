@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import { useStore } from '../../store/useStore'
+import { toDateString } from '../../utils/date'
 import type { Task, Priority } from '../../types'
 import { ChevronLeft, ChevronRight, Calendar, Flag } from 'lucide-react'
 
@@ -43,7 +44,7 @@ function getMonday(date: Date): Date {
 }
 
 function dateToStr(d: Date): string {
-  return d.toISOString().split('T')[0]
+  return toDateString(d)
 }
 
 function parseTime(timeStr: string): { hour: number; minute: number } | null {

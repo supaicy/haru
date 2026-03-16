@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
 import { useStore } from '../../store/useStore'
+import { toDateString } from '../../utils/date'
 import type { Task, Priority } from '../../types'
 import { CheckCircle2, Circle, Flag, Clock, AlertTriangle } from 'lucide-react'
 
@@ -28,17 +29,17 @@ export function TimelineView(): React.ReactElement {
 
   const groups = useMemo(() => {
     const now = new Date()
-    const todayStr = now.toISOString().split('T')[0]
+    const todayStr = toDateString(now)
 
     const tomorrow = new Date(now)
     tomorrow.setDate(tomorrow.getDate() + 1)
-    const tomorrowStr = tomorrow.toISOString().split('T')[0]
+    const tomorrowStr = toDateString(tomorrow)
 
-    // 이번 주 끝 (일요일)
+    // 이번 주 끝 (토요일)
     const endOfWeek = new Date(now)
     const dayOfWeek = endOfWeek.getDay()
-    endOfWeek.setDate(endOfWeek.getDate() + (7 - dayOfWeek))
-    const endOfWeekStr = endOfWeek.toISOString().split('T')[0]
+    endOfWeek.setDate(endOfWeek.getDate() + (6 - dayOfWeek))
+    const endOfWeekStr = toDateString(endOfWeek)
 
     const activeTasks = tasks.filter((t) => !t.completed && !t.deletedAt)
 

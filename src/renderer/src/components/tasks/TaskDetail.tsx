@@ -88,7 +88,7 @@ export function TaskDetail() {
       setDueDate(task.dueDate || ''); setDueTime(task.dueTime || '')
       setPriority(task.priority); setListId(task.listId)
     }
-  }, [task])
+  }, [task?.id])
 
   if (!task) return null
 

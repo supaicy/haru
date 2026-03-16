@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
 import { Command, CornerDownLeft, Calendar } from 'lucide-react'
 import { useStore } from '../../store/useStore'
-import { parseNaturalDate } from '../../utils/naturalDate'
+import { parseNaturalDateTime } from '../../utils/naturalDate'
 
 export function QuickAdd() {
   const { showQuickAdd, setShowQuickAdd, addTask, theme } = useStore()
   const isDark = theme === 'dark'
   const [input, setInput] = useState('')
   const [parsedDate, setParsedDate] = useState<string | null>(null)
+  const [parsedTime, setParsedTime] = useState<string | null>(null)
   const [parsedTitle, setParsedTitle] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -15,6 +16,7 @@ export function QuickAdd() {
     if (showQuickAdd) {
       setInput('')
       setParsedDate(null)
+      setParsedTime(null)
       setParsedTitle('')
       // auto-focus 지연 (모달 렌더링 후)
       setTimeout(() => inputRef.current?.focus(), 50)
@@ -24,19 +26,21 @@ export function QuickAdd() {
   useEffect(() => {
     if (!input.trim()) {
       setParsedDate(null)
+      setParsedTime(null)
       setParsedTitle('')
       return
     }
 
+    const parsed = parseNaturalDateTime(input.trim())
     const words = input.trim().split(/\s+/)
-    const firstWord = words[0]
-    const date = parseNaturalDate(firstWord)
 
-    if (date && words.length > 1) {
-      setParsedDate(date)
-      setParsedTitle(words.slice(1).join(' '))
+    if (parsed && words.length > parsed.consumed) {
+      setParsedDate(parsed.date)
+      setParsedTime(parsed.time)
+      setParsedTitle(words.slice(parsed.consumed).join(' '))
     } else {
       setParsedDate(null)
+      setParsedTime(null)
       setParsedTitle(input.trim())
     }
   }, [input])
@@ -45,7 +49,7 @@ export function QuickAdd() {
     const title = parsedDate ? parsedTitle : input.trim()
     if (!title) return
 
-    await addTask(title, { dueDate: parsedDate })
+    await addTask(title, { dueDate: parsedDate, dueTime: parsedTime })
     setShowQuickAdd(false)
   }
 
@@ -88,7 +92,7 @@ export function QuickAdd() {
               isDark ? 'text-primary-400' : 'text-primary-600'
             }`}>
               <Calendar size={14} />
-              <span>마감일: {parsedDate}</span>
+              <span>마감일: {parsedDate}{parsedTime ? ` ${parsedTime}` : ''}</span>
               <span className={`${isDark ? 'text-gray-500' : 'text-gray-400'}`}>|</span>
               <span className={`${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                 제목: {parsedTitle}

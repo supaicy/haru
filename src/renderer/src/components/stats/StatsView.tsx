@@ -69,7 +69,8 @@ export function StatsView(): React.ReactElement {
       (s) => s.type === 'work' && s.completedAt
     )
     const pomodoroCount = workSessions.length
-    const totalFocusMinutes = workSessions.reduce((sum, s) => sum + s.duration, 0)
+    const totalFocusSeconds = workSessions.reduce((sum, s) => sum + s.duration, 0)
+    const totalFocusMinutes = Math.floor(totalFocusSeconds / 60)
     const totalFocusHours = Math.floor(totalFocusMinutes / 60)
     const remainingMinutes = totalFocusMinutes % 60
 

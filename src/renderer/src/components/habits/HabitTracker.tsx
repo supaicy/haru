@@ -39,7 +39,7 @@ export function HabitTracker() {
         for (let i = 0; i < 365; i++) {
           const d = toDateString(addDays(today, -i))
           if (logSet.has(`${habit.id}:${d}`)) streak++
-          else if (i > 0) break
+          else break
         }
         return [habit.id, streak]
       })

@@ -382,13 +382,16 @@ export const useStore = create<Store>((set, get) => ({
   batchDelete: async () => {
     const ids = get().batchSelectedIds
     const now = new Date().toISOString()
-    const deletedTasks = get().tasks.filter((t) => ids.includes(t.id))
+    const allTasks = get().tasks
+    const subtaskIds = allTasks.filter((t) => t.parentId && ids.includes(t.parentId)).map((t) => t.id)
+    const allDeletedIds = [...new Set([...ids, ...subtaskIds])]
+    const deletedTasks = allTasks.filter((t) => allDeletedIds.includes(t.id))
     set((s) => ({
-      tasks: s.tasks.filter((t) => !ids.includes(t.id)),
+      tasks: s.tasks.filter((t) => !allDeletedIds.includes(t.id)),
       trashTasks: [...s.trashTasks, ...deletedTasks.map((t) => ({ ...t, deletedAt: now }))],
       batchSelectedIds: [], batchMode: false
     }))
-    window.api.batchUpdateTasks(ids, { deleted: true })
+    window.api.batchUpdateTasks(allDeletedIds, { deleted: true })
   },
   batchMove: async (listId) => {
     const ids = get().batchSelectedIds

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
 import { useStore } from '../../store/useStore'
+import { toDateString } from '../../utils/date'
 import type { Task, Priority } from '../../types'
 import { CheckCircle2, Circle, Flag, Zap, Target, Clock, Coffee } from 'lucide-react'
 
@@ -27,12 +28,12 @@ export function EisenhowerMatrix(): React.ReactElement {
 
   const quadrants = useMemo(() => {
     const now = new Date()
-    const todayStr = now.toISOString().split('T')[0]
+    const todayStr = toDateString(now)
 
     // "곧" = 3일 이내
     const soonDate = new Date(now)
     soonDate.setDate(soonDate.getDate() + 3)
-    const soonStr = soonDate.toISOString().split('T')[0]
+    const soonStr = toDateString(soonDate)
 
     const activeTasks = tasks.filter((t) => !t.completed && !t.deletedAt)
 

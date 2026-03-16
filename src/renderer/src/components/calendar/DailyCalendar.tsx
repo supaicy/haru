@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import { useStore } from '../../store/useStore'
+import { toDateString } from '../../utils/date'
 import type { Task, Priority } from '../../types'
 import { ChevronLeft, ChevronRight, Flag, CheckCircle2, Circle } from 'lucide-react'
 
@@ -16,9 +17,7 @@ interface TimeSlot {
 const timeSlots: TimeSlot[] = []
 for (let h = 6; h <= 23; h++) {
   timeSlots.push({ hour: h, minute: 0, label: formatTime(h, 0) })
-  if (h < 23) {
-    timeSlots.push({ hour: h, minute: 30, label: '' }) // 30분은 라벨 생략
-  }
+  timeSlots.push({ hour: h, minute: 30, label: '' })
 }
 
 function formatTime(h: number, m: number): string {
@@ -28,7 +27,7 @@ function formatTime(h: number, m: number): string {
 }
 
 function dateToStr(d: Date): string {
-  return d.toISOString().split('T')[0]
+  return toDateString(d)
 }
 
 function parseTime(timeStr: string): { hour: number; minute: number } | null {

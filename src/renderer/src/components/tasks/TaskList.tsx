@@ -125,17 +125,24 @@ export function TaskListView() {
           </button>
         )}
 
-        {incompleteTasks.map((task) => (
-          <TaskItem key={task.id} task={task} onDrop={handleDrop} />
-        ))}
-
-        {completedTasks.length > 0 && selectedListId !== 'completed' && (
-          <div className="mt-4">
-            <div className={`px-6 py-2 text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-              완료됨 ({completedTasks.length})
-            </div>
-            {completedTasks.map((task) => (<TaskItem key={task.id} task={task} onDrop={handleDrop} />))}
-          </div>
+        {selectedListId === 'completed' ? (
+          filteredTasks.map((task) => (
+            <TaskItem key={task.id} task={task} onDrop={handleDrop} />
+          ))
+        ) : (
+          <>
+            {incompleteTasks.map((task) => (
+              <TaskItem key={task.id} task={task} onDrop={handleDrop} />
+            ))}
+            {completedTasks.length > 0 && (
+              <div className="mt-4">
+                <div className={`px-6 py-2 text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  완료됨 ({completedTasks.length})
+                </div>
+                {completedTasks.map((task) => (<TaskItem key={task.id} task={task} onDrop={handleDrop} />))}
+              </div>
+            )}
+          </>
         )}
 
         {filteredTasks.length === 0 && !showAddTask && (

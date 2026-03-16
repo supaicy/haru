@@ -91,7 +91,8 @@ app.whenReady().then(() => {
     })
 
     autoUpdater.checkForUpdates()
-    setInterval(() => autoUpdater.checkForUpdates(), 60 * 60 * 1000)
+    const updateInterval = setInterval(() => autoUpdater.checkForUpdates(), 60 * 60 * 1000)
+    app.on('will-quit', () => clearInterval(updateInterval))
   }
 
   // 업데이트 다운로드 / 설치 IPC

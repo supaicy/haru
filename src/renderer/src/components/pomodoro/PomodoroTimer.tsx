@@ -63,11 +63,15 @@ export function PomodoroTimer() {
       intervalRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            // 타이머 완료
+            // 타이머 완료 - interval을 즉시 정리하여 이중 실행 방지
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current)
+              intervalRef.current = null
+            }
             new Notification('포모도로', {
               body: mode === 'work' ? '집중 시간이 끝났습니다! 휴식하세요.' : '휴식이 끝났습니다! 집중하세요.'
             })
-            skipToNext()
+            setTimeout(() => skipToNext(), 0)
             return 0
           }
           return prev - 1

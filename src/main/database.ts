@@ -193,8 +193,11 @@ export function updateTask(task: Record<string, unknown>): void {
   save()
 }
 export function deleteTask(id: string): void {
-  const task = data.tasks.find((t) => t.id === id)
-  if (task) { task.deleted_at = new Date().toISOString(); save() }
+  const now = new Date().toISOString()
+  data.tasks.forEach((t) => {
+    if (t.id === id || t.parent_id === id) t.deleted_at = now
+  })
+  save()
 }
 export function restoreTask(id: string): void {
   const task = data.tasks.find((t) => t.id === id)
