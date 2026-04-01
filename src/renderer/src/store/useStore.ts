@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { v4 as uuid } from 'uuid'
-import type { Task, TaskList, Folder, Habit, HabitLog, PomodoroSession, SmartList, ViewType, Priority, SortBy, SortDir, UndoAction } from '../types'
+import type { Task, TaskList, Folder, Habit, HabitLog, PomodoroSession, SmartList, ViewType, Priority, SortBy, SortDir, UndoAction, AiMessage, AiConfig } from '../types'
 
 export type Theme = 'dark' | 'light'
 
@@ -109,6 +109,20 @@ interface Store {
 
   // 내보내기
   exportData: () => Promise<boolean>
+
+  // AI
+  aiMessages: AiMessage[]
+  aiLoading: boolean
+  aiConnected: boolean | null
+  aiConfig: AiConfig | null
+  showAiChat: boolean
+  setShowAiChat: (show: boolean) => void
+  aiCheckConnection: () => Promise<void>
+  aiLoadConfig: () => Promise<void>
+  aiSaveConfig: (updates: Partial<AiConfig>) => Promise<void>
+  aiSendMessage: (message: string) => Promise<void>
+  aiClearMessages: () => void
+  aiCreateTaskFromNL: (input: string) => Promise<{ title: string; dueDate: string | null; dueTime: string | null; priority: Priority; subtasks: { title: string; dueDate: string | null }[] } | null>
 }
 
 function mapTask(row: Record<string, unknown>): Task {
@@ -510,6 +524,117 @@ export const useStore = create<Store>((set, get) => ({
   // === 내보내기 ===
   exportData: async () => {
     return (await window.api.exportData()) as boolean
+  },
+
+  // === AI ===
+  aiMessages: [],
+  aiLoading: false,
+  aiConnected: null,
+  aiConfig: null,
+  showAiChat: false,
+  setShowAiChat: (show) => set({ showAiChat: show }),
+  aiCheckConnection: async () => {
+    try {
+      const result = await window.api.aiCheckConnection() as { connected: boolean }
+      set({ aiConnected: result.connected })
+    } catch {
+      set({ aiConnected: false })
+    }
+  },
+  aiLoadConfig: async () => {
+    try {
+      const config = await window.api.aiGetConfig() as AiConfig
+      set({ aiConfig: config })
+    } catch { /* ignore */ }
+  },
+  aiSaveConfig: async (updates) => {
+    await window.api.aiSetConfig(updates)
+    const config = await window.api.aiGetConfig() as AiConfig
+    set({ aiConfig: config })
+  },
+  aiSendMessage: async (message) => {
+    const userMsg: AiMessage = {
+      id: uuid(),
+      role: 'user',
+      content: message,
+      timestamp: new Date().toISOString()
+    }
+    const assistantMsg: AiMessage = {
+      id: uuid(),
+      role: 'assistant',
+      content: '',
+      timestamp: new Date().toISOString()
+    }
+    set((s) => ({
+      aiMessages: [...s.aiMessages, userMsg, assistantMsg],
+      aiLoading: true
+    }))
+
+    // 태스크 컨텍스트 (요약: title + dueDate + priority + completed)
+    const tasks = get().tasks.slice(0, 50).map((t) => ({
+      title: t.title,
+      dueDate: t.dueDate,
+      priority: t.priority,
+      completed: t.completed
+    }))
+
+    // 스트리밍 이벤트 리스너 등록
+    const cleanupToken = window.api.onAiStreamToken?.((token: string) => {
+      set((s) => ({
+        aiMessages: s.aiMessages.map((m) =>
+          m.id === assistantMsg.id ? { ...m, content: m.content + token } : m
+        )
+      }))
+    })
+    const cleanupDone = window.api.onAiStreamDone?.(() => {
+      set({ aiLoading: false })
+      cleanupToken?.()
+      cleanupDone?.()
+      cleanupError?.()
+    })
+    const cleanupError = window.api.onAiStreamError?.((error: string) => {
+      set((s) => ({
+        aiLoading: false,
+        aiMessages: s.aiMessages.map((m) =>
+          m.id === assistantMsg.id ? { ...m, content: `오류: ${error}` } : m
+        )
+      }))
+      cleanupToken?.()
+      cleanupDone?.()
+      cleanupError?.()
+    })
+
+    try {
+      await window.api.aiStreamChat(message, tasks)
+    } catch {
+      set((s) => ({
+        aiLoading: false,
+        aiMessages: s.aiMessages.map((m) =>
+          m.id === assistantMsg.id ? { ...m, content: 'AI 서비스에 연결할 수 없습니다.' } : m
+        )
+      }))
+      cleanupToken?.()
+      cleanupDone?.()
+      cleanupError?.()
+    }
+  },
+  aiClearMessages: () => set({ aiMessages: [] }),
+  aiCreateTaskFromNL: async (input) => {
+    const tasks = get().tasks.slice(0, 50).map((t) => ({
+      title: t.title,
+      dueDate: t.dueDate,
+      priority: t.priority,
+      completed: t.completed
+    }))
+    try {
+      const result = await window.api.aiCreateTask(input, tasks) as {
+        action: string
+        task: { title: string; dueDate: string | null; dueTime: string | null; priority: Priority; tags: string[]; subtasks: { title: string; dueDate: string | null }[] }
+      }
+      return result.task
+    } catch {
+      return null
+    }
   }
 }))
 

@@ -2,6 +2,7 @@ import { ipcMain, dialog, Notification, globalShortcut, BrowserWindow, shell } f
 import { basename } from 'path'
 import { v4 as uuid } from 'uuid'
 import * as db from './database'
+import * as ai from './ai-service'
 
 function csvCell(value: unknown): string {
   const s = String(value ?? '')
@@ -116,6 +117,25 @@ export function setupIpcHandlers(): void {
   // 외부 링크 열기
   ipcMain.handle('open-external', (_, url: string) => {
     safeOpenExternal(url)
+  })
+
+  // AI
+  ipcMain.handle('ai:check-connection', () => ai.checkConnection())
+  ipcMain.handle('ai:get-config', () => ai.getAiConfig())
+  ipcMain.handle('ai:set-config', (_, updates) => ai.setAiConfig(updates))
+  ipcMain.handle('ai:create-task', (_, input, tasks) => ai.createTaskFromNL(input, tasks))
+  ipcMain.handle('ai:chat', (_, message, tasks) => ai.chat(message, tasks))
+  ipcMain.handle('ai:stream-chat', (_, message, tasks) => {
+    const wins = BrowserWindow.getAllWindows()
+    if (wins.length === 0) return
+    const win = wins[0]
+    ai.streamChat(
+      message,
+      tasks,
+      (token) => win.webContents.send('ai:stream-token', token),
+      () => win.webContents.send('ai:stream-done'),
+      (error) => win.webContents.send('ai:stream-error', error)
+    )
   })
 
   // Quick add (global shortcut)

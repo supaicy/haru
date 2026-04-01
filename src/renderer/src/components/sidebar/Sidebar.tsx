@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import {
   Inbox, CalendarDays, CalendarRange, ListTodo, CheckCircle2, Plus, Timer, Target,
   Calendar, MoreHorizontal, Trash2, Edit3, X, Check, Settings, FolderOpen, FolderPlus,
-  ChevronDown, ChevronRight, BarChart3, Columns3, Clock, Grid2X2, CalendarClock, Trophy
+  ChevronDown, ChevronRight, BarChart3, Columns3, Clock, Grid2X2, CalendarClock, Trophy, Bot
 } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import { toDateString } from '../../utils/date'
@@ -251,6 +251,11 @@ export function Sidebar() {
             <div className="h-full bg-yellow-500 rounded-full transition-all" style={{ width: `${score.total % 100}%` }} />
           </div>
         </div>
+        <button onClick={() => useStore.getState().setShowAiChat(!useStore.getState().showAiChat)}
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors ${isDark ? 'text-sidebar-muted hover:text-white hover:bg-sidebar-hover' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'}`}>
+          <Bot size={18} className="text-blue-500" />
+          <span>AI 어시스턴트</span>
+        </button>
         <button onClick={toggleSettings}
           className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors ${isDark ? 'text-sidebar-muted hover:text-white hover:bg-sidebar-hover' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'}`}>
           <div className="relative">

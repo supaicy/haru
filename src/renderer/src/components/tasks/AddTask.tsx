@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Calendar, Flag, X } from 'lucide-react'
+import { Calendar, Flag, X, Sparkles, Loader2 } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import { parseNaturalDateTime } from '../../utils/naturalDate'
 import { formatDueDate } from '../../utils/date'
@@ -13,7 +13,7 @@ const PRIORITY_OPTIONS: { value: Priority; label: string; color: string }[] = [
 ]
 
 export function AddTask({ onClose }: { onClose: () => void }) {
-  const { addTask, selectedListId, theme } = useStore()
+  const { addTask, selectedListId, theme, aiCreateTaskFromNL, aiConnected } = useStore()
   const isDark = theme === 'dark'
   const [title, setTitle] = useState('')
   const [dueDate, setDueDate] = useState('')
@@ -21,6 +21,7 @@ export function AddTask({ onClose }: { onClose: () => void }) {
   const [showPriority, setShowPriority] = useState(false)
   const [naturalDateHint, setNaturalDateHint] = useState<string | null>(null)
   const [naturalTimeHint, setNaturalTimeHint] = useState<string | null>(null)
+  const [aiLoading, setAiLoading] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { inputRef.current?.focus() }, [])
@@ -44,6 +45,39 @@ export function AddTask({ onClose }: { onClose: () => void }) {
       setNaturalTimeHint(null)
     }
   }, [title])
+
+  const handleAiCreate = async () => {
+    if (!title.trim() || aiLoading) return
+    setAiLoading(true)
+    try {
+      const result = await aiCreateTaskFromNL(title.trim())
+      if (result) {
+        const listId = ['today', 'next7days', 'all', 'completed', 'trash'].includes(selectedListId as string)
+          ? undefined : (selectedListId as string)
+        // 메인 태스크 생성
+        await addTask(result.title, {
+          listId,
+          dueDate: result.dueDate,
+          dueTime: result.dueTime,
+          priority: result.priority
+        })
+        // 서브태스크 생성
+        if (result.subtasks?.length > 0) {
+          const parentTask = useStore.getState().tasks.find((t) => t.title === result.title)
+          if (parentTask) {
+            for (const sub of result.subtasks) {
+              await addTask(sub.title, { listId, parentId: parentTask.id, dueDate: sub.dueDate })
+            }
+          }
+        }
+        setTitle(''); setDueDate(''); setPriority('none'); setNaturalDateHint(null); setNaturalTimeHint(null)
+        setAiLoading(false)
+        inputRef.current?.focus()
+        return
+      }
+    } catch { /* AI 실패 시 아래 일반 생성으로 폴백 */ }
+    setAiLoading(false)
+  }
 
   const handleSubmit = async () => {
     if (!title.trim()) return
@@ -119,6 +153,14 @@ export function AddTask({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="flex-1" />
+        {aiConnected && (
+          <button onClick={handleAiCreate} disabled={!title.trim() || aiLoading}
+            className="text-xs px-3 py-1 rounded bg-blue-600 text-white disabled:opacity-30 hover:bg-blue-700 transition-colors flex items-center gap-1"
+            title="AI가 서브태스크와 우선순위를 자동으로 설정합니다">
+            {aiLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+            AI
+          </button>
+        )}
         <button onClick={handleSubmit} disabled={!title.trim()}
           className="text-xs px-3 py-1 rounded bg-primary-500 text-white disabled:opacity-30 hover:bg-primary-600 transition-colors">추가</button>
       </div>
