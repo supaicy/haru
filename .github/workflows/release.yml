@@ -21,7 +21,10 @@ jobs:
 
       - run: npm ci
 
-      - name: Build and publish
+      - name: Build app
+        run: npx electron-vite build
+
+      - name: Package and publish
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx electron-builder --mac --publish always
