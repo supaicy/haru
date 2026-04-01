@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.2] - 2026-04-01
+
+### Fixed
+- 업데이트 재시작 버튼이 동작하지 않던 문제 수정
+
 ## [1.3.1] - 2026-04-01
 
 ### Fixed
