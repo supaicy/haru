@@ -97,7 +97,9 @@ app.whenReady().then(() => {
 
   // 업데이트 다운로드 / 설치 IPC
   ipcMain.handle('download-update', () => autoUpdater.downloadUpdate())
-  ipcMain.handle('install-update', () => autoUpdater.quitAndInstall())
+  ipcMain.handle('install-update', () => {
+    autoUpdater.quitAndInstall(false, true)
+  })
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
