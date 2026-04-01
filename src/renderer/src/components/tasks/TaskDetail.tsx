@@ -120,7 +120,7 @@ export function TaskDetail() {
   const labelCls = isDark ? 'text-gray-500' : 'text-gray-400'
 
   return (
-    <div className={`w-80 border-l flex flex-col h-full ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
+    <div className={`w-[480px] min-w-[400px] border-l flex flex-col h-full ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
       <div className={`flex items-center justify-between px-4 py-3 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
         <span className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>상세</span>
         <div className="flex items-center gap-2">
@@ -129,7 +129,7 @@ export function TaskDetail() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col">
         {/* 제목 */}
         <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
           onBlur={() => title.trim() && save({ title: title.trim() })}
@@ -230,10 +230,10 @@ export function TaskDetail() {
           onUpdate={(attachments) => save({ attachments })} />
 
         {/* 마크다운 메모 */}
-        <div className="flex items-start gap-3">
-          <AlignLeft size={16} className={`${labelCls} mt-1`} />
-          <div className="flex-1">
-            <div className="flex items-center gap-1 mb-2">
+        <div className="flex items-start gap-3 flex-1 min-h-0">
+          <AlignLeft size={16} className={`${labelCls} mt-1 shrink-0`} />
+          <div className="flex-1 flex flex-col min-h-0 h-full">
+            <div className="flex items-center gap-1 mb-2 shrink-0">
               <button onClick={() => setMdPreview(false)}
                 className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${!mdPreview ? 'text-primary-400 bg-primary-900/30' : isDark ? 'text-gray-500 hover:bg-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}>
                 <Edit3 size={12} /> 편집
@@ -245,9 +245,8 @@ export function TaskDetail() {
             </div>
             {mdPreview ? (
               <div
-                className={`prose prose-sm max-w-none min-h-[120px] rounded-lg px-3 py-2.5 border cursor-text ${isDark ? 'prose-invert bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-200'}`}
+                className={`prose prose-sm max-w-none flex-1 min-h-[200px] rounded-lg px-3 py-2.5 border cursor-text overflow-y-auto ${isDark ? 'prose-invert bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-200'}`}
                 onClick={(e) => {
-                  // 체크박스나 링크 클릭이 아닌 경우 편집 모드 전환
                   const target = e.target as HTMLElement
                   if (target.tagName !== 'INPUT' && target.tagName !== 'A') {
                     setMdPreview(false)
@@ -282,8 +281,8 @@ export function TaskDetail() {
               <textarea value={description} onChange={(e) => setDescription(e.target.value)}
                 onBlur={() => { save({ description }); if (description.trim()) setMdPreview(true) }}
                 autoFocus
-                placeholder="마크다운으로 메모를 작성하세요..." rows={8}
-                className={`w-full text-sm rounded-lg px-3 py-2.5 outline-none border resize-none font-mono leading-relaxed ${inputCls} ${isDark ? 'placeholder-gray-600' : 'placeholder-gray-400'}`} />
+                placeholder="마크다운으로 메모를 작성하세요..."
+                className={`w-full flex-1 min-h-[200px] text-sm rounded-lg px-3 py-2.5 outline-none border resize-none font-mono leading-relaxed ${inputCls} ${isDark ? 'placeholder-gray-600' : 'placeholder-gray-400'}`} />
             )}
           </div>
         </div>
