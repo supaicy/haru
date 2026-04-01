@@ -58,7 +58,7 @@ describe('ai-service', () => {
       ai.setAiConfig({ provider: 'openai', baseUrl: 'https://api.openai.com', apiKey: 'sk-test' })
       const config = ai.getAiConfig()
       expect(config.provider).toBe('openai')
-      expect(config.apiKey).toBe('sk-test')
+      expect(config.apiKey).toBe('••••••test')
     })
   })
 
@@ -193,7 +193,7 @@ describe('ai-service', () => {
       ai.setAiConfig({ provider: 'openai', baseUrl: 'https://api.openai.com', apiKey: 'sk-test' })
       const config = ai.getAiConfig()
       expect(config.provider).toBe('openai')
-      expect(config.apiKey).toBe('sk-test')
+      expect(config.apiKey).toBe('••••••test')
     })
   })
 

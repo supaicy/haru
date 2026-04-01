@@ -125,16 +125,14 @@ export function setupIpcHandlers(): void {
   ipcMain.handle('ai:set-config', (_, updates) => ai.setAiConfig(updates))
   ipcMain.handle('ai:create-task', (_, input, tasks) => ai.createTaskFromNL(input, tasks))
   ipcMain.handle('ai:chat', (_, message, tasks) => ai.chat(message, tasks))
-  ipcMain.handle('ai:stream-chat', (_, message, tasks) => {
-    const wins = BrowserWindow.getAllWindows()
-    if (wins.length === 0) return
-    const win = wins[0]
+  ipcMain.handle('ai:stream-chat', (event, message, tasks) => {
+    const sender = event.sender
     ai.streamChat(
       message,
       tasks,
-      (token) => win.webContents.send('ai:stream-token', token),
-      () => win.webContents.send('ai:stream-done'),
-      (error) => win.webContents.send('ai:stream-error', error)
+      (token) => { if (!sender.isDestroyed()) sender.send('ai:stream-token', token) },
+      () => { if (!sender.isDestroyed()) sender.send('ai:stream-done') },
+      (error) => { if (!sender.isDestroyed()) sender.send('ai:stream-error', error) }
     )
   })
 

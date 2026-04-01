@@ -116,6 +116,7 @@ interface Store {
   aiConnected: boolean | null
   aiConfig: AiConfig | null
   showAiChat: boolean
+  _aiStreamCleanup: (() => void) | null
   setShowAiChat: (show: boolean) => void
   aiCheckConnection: () => Promise<void>
   aiLoadConfig: () => Promise<void>
@@ -532,7 +533,16 @@ export const useStore = create<Store>((set, get) => ({
   aiConnected: null,
   aiConfig: null,
   showAiChat: false,
-  setShowAiChat: (show) => set({ showAiChat: show }),
+  _aiStreamCleanup: null as (() => void) | null,
+  setShowAiChat: (show) => {
+    if (!show) {
+      // 패널 닫을 때 진행 중인 스트리밍 정리
+      const cleanup = get()._aiStreamCleanup
+      if (cleanup) cleanup()
+      set({ aiLoading: false })
+    }
+    set({ showAiChat: show })
+  },
   aiCheckConnection: async () => {
     try {
       const result = await window.api.aiCheckConnection() as { connected: boolean }
@@ -553,6 +563,10 @@ export const useStore = create<Store>((set, get) => ({
     set({ aiConfig: config })
   },
   aiSendMessage: async (message) => {
+    // 이전 스트리밍 리스너 정리 (리스너 누적 방지)
+    const prevCleanup = get()._aiStreamCleanup
+    if (prevCleanup) prevCleanup()
+
     const userMsg: AiMessage = {
       id: uuid(),
       role: 'user',
@@ -570,7 +584,6 @@ export const useStore = create<Store>((set, get) => ({
       aiLoading: true
     }))
 
-    // 태스크 컨텍스트 (요약: title + dueDate + priority + completed)
     const tasks = get().tasks.slice(0, 50).map((t) => ({
       title: t.title,
       dueDate: t.dueDate,
@@ -578,7 +591,14 @@ export const useStore = create<Store>((set, get) => ({
       completed: t.completed
     }))
 
-    // 스트리밍 이벤트 리스너 등록
+    // 리스너를 스트림 호출 전에 등록 (레이스 컨디션 방지)
+    const cleanup = () => {
+      cleanupToken?.()
+      cleanupDone?.()
+      cleanupError?.()
+      set({ _aiStreamCleanup: null })
+    }
+
     const cleanupToken = window.api.onAiStreamToken?.((token: string) => {
       set((s) => ({
         aiMessages: s.aiMessages.map((m) =>
@@ -588,9 +608,7 @@ export const useStore = create<Store>((set, get) => ({
     })
     const cleanupDone = window.api.onAiStreamDone?.(() => {
       set({ aiLoading: false })
-      cleanupToken?.()
-      cleanupDone?.()
-      cleanupError?.()
+      cleanup()
     })
     const cleanupError = window.api.onAiStreamError?.((error: string) => {
       set((s) => ({
@@ -599,10 +617,10 @@ export const useStore = create<Store>((set, get) => ({
           m.id === assistantMsg.id ? { ...m, content: `오류: ${error}` } : m
         )
       }))
-      cleanupToken?.()
-      cleanupDone?.()
-      cleanupError?.()
+      cleanup()
     })
+
+    set({ _aiStreamCleanup: cleanup })
 
     try {
       await window.api.aiStreamChat(message, tasks)
@@ -613,9 +631,7 @@ export const useStore = create<Store>((set, get) => ({
           m.id === assistantMsg.id ? { ...m, content: 'AI 서비스에 연결할 수 없습니다.' } : m
         )
       }))
-      cleanupToken?.()
-      cleanupDone?.()
-      cleanupError?.()
+      cleanup()
     }
   },
   aiClearMessages: () => set({ aiMessages: [] }),

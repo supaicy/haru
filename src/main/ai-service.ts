@@ -33,10 +33,48 @@ export function getAiConfig(): AiConfig {
   if (saved) {
     config = { ...DEFAULT_CONFIG, ...saved } as AiConfig
   }
+  // API 키는 렌더러에 마스킹하여 반환
+  return { ...config, apiKey: config.apiKey ? '••••••' + config.apiKey.slice(-4) : null }
+}
+
+export function getAiConfigInternal(): AiConfig {
+  const saved = db.getAiConfig()
+  if (saved) {
+    config = { ...DEFAULT_CONFIG, ...saved } as AiConfig
+  }
   return { ...config }
 }
 
+function isAllowedUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    if (!['http:', 'https:'].includes(parsed.protocol)) return false
+    const host = parsed.hostname
+    // 내부 네트워크 및 메타데이터 엔드포인트 차단
+    if (host === '169.254.169.254') return false
+    if (host === '0.0.0.0') return false
+    if (host.startsWith('10.')) return false
+    if (host.startsWith('172.') && /^172\.(1[6-9]|2\d|3[01])\./.test(host)) return false
+    if (host.startsWith('192.168.')) return false
+    // localhost는 Ollama용으로 허용
+    return true
+  } catch {
+    return false
+  }
+}
+
 export function setAiConfig(updates: Partial<AiConfig>): void {
+  if (updates.baseUrl && !isAllowedUrl(updates.baseUrl)) {
+    // localhost는 허용, 그 외 내부 IP는 차단
+    const parsed = new URL(updates.baseUrl)
+    if (!['localhost', '127.0.0.1'].includes(parsed.hostname)) {
+      throw new Error('Blocked URL: internal network addresses are not allowed')
+    }
+  }
+  // 마스킹된 API 키('••••••...')가 돌아오면 기존 키 유지
+  if (updates.apiKey && updates.apiKey.startsWith('••••••')) {
+    delete updates.apiKey
+  }
   config = { ...config, ...updates }
   db.saveAiConfig(config)
 }
