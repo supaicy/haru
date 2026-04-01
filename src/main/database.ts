@@ -66,6 +66,7 @@ export function initDatabase(): void {
   const userDataPath = app.getPath('userData')
   if (!existsSync(userDataPath)) mkdirSync(userDataPath, { recursive: true })
   dbPath = path.join(userDataPath, 'ticktick-data.json')
+  aiConfigPath = path.join(userDataPath, 'ai-config.json')
   attachmentsDir = path.join(userDataPath, 'attachments')
   if (!existsSync(attachmentsDir)) mkdirSync(attachmentsDir, { recursive: true })
   data = load()
@@ -283,6 +284,22 @@ export function copyAttachment(sourcePath: string, destName: string): string {
 }
 export function listAttachmentFiles(): string[] {
   return existsSync(attachmentsDir) ? readdirSync(attachmentsDir) : []
+}
+
+// === AI Config ===
+let aiConfigPath: string
+export function getAiConfig(): Record<string, unknown> | null {
+  if (!aiConfigPath) return null
+  if (!existsSync(aiConfigPath)) return null
+  try {
+    return JSON.parse(readFileSync(aiConfigPath, 'utf-8'))
+  } catch {
+    return null
+  }
+}
+export function saveAiConfig(config: Record<string, unknown>): void {
+  if (!aiConfigPath) return
+  writeFileSync(aiConfigPath, JSON.stringify(config, null, 2), 'utf-8')
 }
 
 // === Export ===

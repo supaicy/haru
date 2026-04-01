@@ -80,6 +80,29 @@ const api = {
     return () => ipcRenderer.removeListener('update-downloaded', handler)
   },
 
+  // AI
+  aiCheckConnection: () => ipcRenderer.invoke('ai:check-connection'),
+  aiGetConfig: () => ipcRenderer.invoke('ai:get-config'),
+  aiSetConfig: (updates: Record<string, unknown>) => ipcRenderer.invoke('ai:set-config', updates),
+  aiCreateTask: (input: string, tasks: unknown[]) => ipcRenderer.invoke('ai:create-task', input, tasks),
+  aiChat: (message: string, tasks: unknown[]) => ipcRenderer.invoke('ai:chat', message, tasks),
+  aiStreamChat: (message: string, tasks: unknown[]) => ipcRenderer.invoke('ai:stream-chat', message, tasks),
+  onAiStreamToken: (callback: (token: string) => void) => {
+    const handler = (_: Electron.IpcRendererEvent, token: string): void => callback(token)
+    ipcRenderer.on('ai:stream-token', handler)
+    return () => ipcRenderer.removeListener('ai:stream-token', handler)
+  },
+  onAiStreamDone: (callback: () => void) => {
+    const handler = (_: Electron.IpcRendererEvent): void => callback()
+    ipcRenderer.on('ai:stream-done', handler)
+    return () => ipcRenderer.removeListener('ai:stream-done', handler)
+  },
+  onAiStreamError: (callback: (error: string) => void) => {
+    const handler = (_: Electron.IpcRendererEvent, error: string): void => callback(error)
+    ipcRenderer.on('ai:stream-error', handler)
+    return () => ipcRenderer.removeListener('ai:stream-error', handler)
+  },
+
   // Global shortcut
   registerGlobalShortcut: () => ipcRenderer.invoke('register-global-shortcut'),
 

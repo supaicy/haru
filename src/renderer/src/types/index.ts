@@ -93,3 +93,18 @@ export interface ScoreEvent {
   points: number
   date: string
 }
+
+// AI
+export interface AiMessage {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: string
+}
+
+export interface AiConfig {
+  provider: 'ollama' | 'openai' | 'custom'
+  baseUrl: string
+  model: string
+  apiKey: string | null
+}
