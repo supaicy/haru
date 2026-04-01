@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Moon, Sun, X, Download, Keyboard, ArrowUpCircle, CheckCircle2, RotateCw, Bot, Wifi, WifiOff } from 'lucide-react'
+import { Moon, Sun, X, Keyboard, ArrowUpCircle, CheckCircle2, Bot, Wifi, WifiOff } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 
 const SHORTCUTS = [
@@ -15,7 +15,7 @@ const SHORTCUTS = [
 ]
 
 export function Settings() {
-  const { theme, setTheme, showSettings, toggleSettings, setShowExport, exportData, updateAvailable, updateChecked, updateDownloadProgress, updateReady, aiConfig, aiConnected, aiLoadConfig, aiCheckConnection, aiSaveConfig } = useStore()
+  const { theme, setTheme, showSettings, toggleSettings, setShowExport, exportData, updateAvailable, updateChecked, aiConfig, aiConnected, aiLoadConfig, aiCheckConnection, aiSaveConfig } = useStore()
 
   const [aiBaseUrl, setAiBaseUrl] = useState('')
   const [aiModel, setAiModel] = useState('')
@@ -185,9 +185,9 @@ export function Settings() {
                 </div>
               )}
             </div>
-            {updateAvailable && !updateReady && updateDownloadProgress === null && (
+            {updateAvailable && (
               <button
-                onClick={() => window.api.downloadUpdate()}
+                onClick={() => window.api.openExternal(updateAvailable.downloadUrl)}
                 className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors ${
                   theme === 'dark' ? 'bg-primary-500/20 hover:bg-primary-500/30 text-primary-300' : 'bg-primary-50 hover:bg-primary-100 text-primary-600'
                 }`}>
@@ -195,35 +195,7 @@ export function Settings() {
                 <div className="text-left flex-1">
                   <div className="text-sm font-medium">새 버전 사용 가능</div>
                   <div className={`text-xs ${theme === 'dark' ? 'text-primary-400' : 'text-primary-500'}`}>
-                    haru v{updateAvailable.version} — 클릭하여 업데이트
-                  </div>
-                </div>
-              </button>
-            )}
-            {updateDownloadProgress !== null && (
-              <div className={`px-4 py-3 rounded-lg ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-100'}`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <Download size={16} className="text-primary-400 animate-bounce" />
-                  <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
-                    다운로드 중... {updateDownloadProgress}%
-                  </span>
-                </div>
-                <div className={`w-full h-1.5 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}>
-                  <div className="h-full bg-primary-500 rounded-full transition-all" style={{ width: `${updateDownloadProgress}%` }} />
-                </div>
-              </div>
-            )}
-            {updateReady && (
-              <button
-                onClick={() => window.api.installUpdate()}
-                className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors ${
-                  theme === 'dark' ? 'bg-green-500/20 hover:bg-green-500/30 text-green-300' : 'bg-green-50 hover:bg-green-100 text-green-600'
-                }`}>
-                <RotateCw size={18} />
-                <div className="text-left flex-1">
-                  <div className="text-sm font-medium">업데이트 준비 완료</div>
-                  <div className={`text-xs ${theme === 'dark' ? 'text-green-400' : 'text-green-500'}`}>
-                    클릭하여 재시작 및 설치
+                    haru v{updateAvailable.version} — 클릭하여 다운로드 페이지 열기
                   </div>
                 </div>
               </button>

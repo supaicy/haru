@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.3] - 2026-04-01
+
+### Changed
+- 업데이트 방식 변경: 앱 내 자동 설치 대신 GitHub Releases 페이지로 안내
+- README에 AI 어시스턴트 기능 추가, macOS 설치 안내 개선 (xattr 명령 안내)
+
 ## [1.3.2] - 2026-04-01
 
 ### Fixed
