@@ -1,4 +1,5 @@
-import { Moon, Sun, X, Download, Keyboard, ArrowUpCircle, CheckCircle2, RotateCw } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Moon, Sun, X, Download, Keyboard, ArrowUpCircle, CheckCircle2, RotateCw, Bot, Wifi, WifiOff } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 
 const SHORTCUTS = [
@@ -14,9 +15,35 @@ const SHORTCUTS = [
 ]
 
 export function Settings() {
-  const { theme, setTheme, showSettings, toggleSettings, setShowExport, exportData, updateAvailable, updateChecked, updateDownloadProgress, updateReady } = useStore()
+  const { theme, setTheme, showSettings, toggleSettings, setShowExport, exportData, updateAvailable, updateChecked, updateDownloadProgress, updateReady, aiConfig, aiConnected, aiLoadConfig, aiCheckConnection, aiSaveConfig } = useStore()
+
+  const [aiBaseUrl, setAiBaseUrl] = useState('')
+  const [aiModel, setAiModel] = useState('')
+  const [aiApiKey, setAiApiKey] = useState('')
+  const [aiProvider, setAiProvider] = useState<'ollama' | 'openai' | 'custom'>('ollama')
+
+  useEffect(() => {
+    if (showSettings && !aiConfig) {
+      aiLoadConfig()
+      aiCheckConnection()
+    }
+  }, [showSettings, aiConfig, aiLoadConfig, aiCheckConnection])
+
+  useEffect(() => {
+    if (aiConfig) {
+      setAiBaseUrl(aiConfig.baseUrl)
+      setAiModel(aiConfig.model)
+      setAiApiKey(aiConfig.apiKey || '')
+      setAiProvider(aiConfig.provider)
+    }
+  }, [aiConfig])
 
   if (!showSettings) return null
+
+  const handleAiSave = () => {
+    aiSaveConfig({ provider: aiProvider, baseUrl: aiBaseUrl, model: aiModel, apiKey: aiApiKey || null })
+    aiCheckConnection()
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={toggleSettings}>
@@ -66,6 +93,59 @@ export function Settings() {
                 <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>JSON 또는 CSV로 백업</div>
               </div>
             </button>
+          </div>
+
+          {/* AI 설정 */}
+          <div className={`border-t pt-4 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+            <h3 className={`flex items-center gap-2 text-sm font-medium mb-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+              <Bot size={16} className="text-blue-500" /> AI 어시스턴트
+              {aiConnected === true && <Wifi size={14} className="text-green-500" />}
+              {aiConnected === false && <WifiOff size={14} className="text-red-500" />}
+            </h3>
+            <div className="space-y-3">
+              <div>
+                <label className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>AI 제공자</label>
+                <select value={aiProvider} onChange={(e) => {
+                  const v = e.target.value as 'ollama' | 'openai' | 'custom'
+                  setAiProvider(v)
+                  if (v === 'ollama') { setAiBaseUrl('http://localhost:11434'); setAiModel('llama3.2:latest') }
+                  else if (v === 'openai') { setAiBaseUrl('https://api.openai.com'); setAiModel('gpt-4o-mini') }
+                }}
+                  className={`w-full mt-1 px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-700'}`}>
+                  <option value="ollama">Ollama (로컬)</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="custom">커스텀 API</option>
+                </select>
+              </div>
+              <div>
+                <label className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>API URL</label>
+                <input type="text" value={aiBaseUrl} onChange={(e) => setAiBaseUrl(e.target.value)}
+                  className={`w-full mt-1 px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-700'}`} />
+              </div>
+              <div>
+                <label className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>모델</label>
+                <input type="text" value={aiModel} onChange={(e) => setAiModel(e.target.value)}
+                  className={`w-full mt-1 px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-700'}`} />
+              </div>
+              {aiProvider !== 'ollama' && (
+                <div>
+                  <label className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>API 키</label>
+                  <input type="password" value={aiApiKey} onChange={(e) => setAiApiKey(e.target.value)}
+                    placeholder="sk-..."
+                    className={`w-full mt-1 px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-700'}`} />
+                </div>
+              )}
+              <button onClick={handleAiSave}
+                className="w-full px-3 py-2 rounded-lg text-sm bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                저장 및 연결 테스트
+              </button>
+              {aiConnected === true && (
+                <p className="text-xs text-green-500">AI 서비스에 연결되었습니다</p>
+              )}
+              {aiConnected === false && (
+                <p className="text-xs text-red-500">연결 실패 — {aiProvider === 'ollama' ? 'Ollama 실행 상태를 확인하세요' : 'API URL과 키를 확인하세요'}</p>
+              )}
+            </div>
           </div>
 
           {/* 키보드 단축키 */}

@@ -15,6 +15,7 @@ import { EisenhowerMatrix } from './components/eisenhower/EisenhowerMatrix'
 import { StatsView } from './components/stats/StatsView'
 import { QuickAdd } from './components/common/QuickAdd'
 import { UndoToast } from './components/common/UndoToast'
+import { AiChatPanel } from './components/ai/AiChatPanel'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 
 function MainContent() {
@@ -84,6 +85,7 @@ export default function App() {
         <MainContent />
         {viewType === 'tasks' && selectedTaskId && <TaskDetail />}
       </div>
+      <AiChatPanel />
       <Settings />
       {showQuickAdd && <QuickAdd />}
       <UndoToast />
