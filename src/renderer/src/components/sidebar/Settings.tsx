@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Moon, Sun, X, Keyboard, ArrowUpCircle, CheckCircle2, Bot, Wifi, WifiOff } from 'lucide-react'
+import { Moon, Sun, X, Keyboard, ArrowUpCircle, CheckCircle2, Bot, Wifi, WifiOff, Download } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 
 const SHORTCUTS = [
