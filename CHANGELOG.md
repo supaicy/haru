@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- 타임블로킹 (로컬): 작업을 Daily/Weekly 캘린더로 드래그해서 "언제 할지" 시간대 배정. 블록 이동/리사이즈/우클릭 해제 지원. 반복 작업은 매 인스턴스마다 같은 시각에 자동 반영. Google Calendar 동기화는 Phase 2 예정.
+
 ## [1.3.3] - 2026-04-01
 
 ### Changed
