@@ -168,7 +168,9 @@ export function createTask(task: Record<string, unknown>): void {
     created_at: new Date().toISOString(), completed_at: null, deleted_at: null,
     sort_order: maxOrder + 1,
     is_recurring: task.isRecurring ? 1 : 0,
-    recurring_pattern: task.recurringPattern || null
+    recurring_pattern: task.recurringPattern || null,
+    scheduled_start: task.scheduledStart || null,
+    scheduled_end: task.scheduledEnd || null
   })
   save()
 }
@@ -179,7 +181,8 @@ export function updateTask(task: Record<string, unknown>): void {
     title: 'title', description: 'description', priority: 'priority',
     dueDate: 'due_date', dueTime: 'due_time', reminderAt: 'reminder_at',
     listId: 'list_id', parentId: 'parent_id',
-    isRecurring: 'is_recurring', recurringPattern: 'recurring_pattern'
+    isRecurring: 'is_recurring', recurringPattern: 'recurring_pattern',
+    scheduledStart: 'scheduled_start', scheduledEnd: 'scheduled_end'
   }
   for (const [key, col] of Object.entries(fields)) {
     if (task[key] !== undefined) {
