@@ -62,7 +62,11 @@ export const TaskItem = memo(function TaskItem({ task, onDrop }: { task: Task; o
         onClick={() => batchMode ? toggleBatchSelect(task.id) : selectTask(task.id)}
         onContextMenu={handleContextMenu}
         draggable={!batchMode}
-        onDragStart={() => setDragTaskId(task.id)}
+        onDragStart={(e) => {
+          setDragTaskId(task.id)
+          e.dataTransfer.setData('application/haru-task-id', task.id)
+          e.dataTransfer.effectAllowed = 'copy'
+        }}
         onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }}
         onDrop={(e) => { e.preventDefault(); onDrop?.(task.id) }}
         onDragEnd={() => setDragTaskId(null)}
