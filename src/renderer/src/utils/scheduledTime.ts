@@ -48,3 +48,17 @@ export function getScheduledForOccurrence(
     end: `${occurrenceDate}T${endTimePart}`
   }
 }
+
+const MIN_BLOCK_MS = 15 * 60 * 1000
+
+export function isValidSchedulePair(
+  start: string | null,
+  end: string | null
+): boolean {
+  if (start === null && end === null) return true
+  if (start === null || end === null) return false
+  const s = new Date(start).getTime()
+  const e = new Date(end).getTime()
+  if (!Number.isFinite(s) || !Number.isFinite(e)) return false
+  return e - s >= MIN_BLOCK_MS
+}

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { snapTo15Min, getScheduledForOccurrence } from './scheduledTime'
+import { snapTo15Min, getScheduledForOccurrence, isValidSchedulePair } from './scheduledTime'
 import type { Task } from '../types'
 
 describe('snapTo15Min', () => {
@@ -67,5 +67,25 @@ describe('getScheduledForOccurrence', () => {
       start: '2026-04-21T14:00:00',
       end:   '2026-04-21T15:00:00'
     })
+  })
+})
+
+describe('isValidSchedulePair', () => {
+  it('accepts both null', () => {
+    expect(isValidSchedulePair(null, null)).toBe(true)
+  })
+  it('accepts both set with end > start', () => {
+    expect(isValidSchedulePair('2026-04-22T14:00:00', '2026-04-22T14:30:00')).toBe(true)
+  })
+  it('rejects one set, one null', () => {
+    expect(isValidSchedulePair('2026-04-22T14:00:00', null)).toBe(false)
+    expect(isValidSchedulePair(null, '2026-04-22T14:30:00')).toBe(false)
+  })
+  it('rejects end <= start', () => {
+    expect(isValidSchedulePair('2026-04-22T14:00:00', '2026-04-22T14:00:00')).toBe(false)
+    expect(isValidSchedulePair('2026-04-22T14:30:00', '2026-04-22T14:00:00')).toBe(false)
+  })
+  it('rejects block shorter than 15 min', () => {
+    expect(isValidSchedulePair('2026-04-22T14:00:00', '2026-04-22T14:10:00')).toBe(false)
   })
 })

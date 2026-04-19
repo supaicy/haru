@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { v4 as uuid } from 'uuid'
 import type { Task, TaskList, Folder, Habit, HabitLog, PomodoroSession, SmartList, ViewType, Priority, SortBy, SortDir, UndoAction, AiMessage, AiConfig } from '../types'
+import { isValidSchedulePair } from '../utils/scheduledTime'
 
 export type Theme = 'dark' | 'light'
 
@@ -301,6 +302,17 @@ export const useStore = create<Store>((set, get) => ({
     })
   },
   updateTask: async (task) => {
+    // Invariant guard: if the caller is changing scheduledStart/End, ensure the pair is valid
+    if ('scheduledStart' in task || 'scheduledEnd' in task) {
+      const current = get().tasks.find((t) => t.id === task.id)
+      if (!current) return
+      const nextStart = 'scheduledStart' in task ? task.scheduledStart ?? null : current.scheduledStart
+      const nextEnd = 'scheduledEnd' in task ? task.scheduledEnd ?? null : current.scheduledEnd
+      if (!isValidSchedulePair(nextStart, nextEnd)) {
+        console.warn('[updateTask] rejected invalid schedule pair', { nextStart, nextEnd })
+        return
+      }
+    }
     set((s) => ({
       tasks: s.tasks.map((t) => t.id === task.id ? { ...t, ...task } : t)
     }))
