@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import type { Task } from '../../types'
 import { useStore } from '../../store/useStore'
 import { snapTo15Min } from '../../utils/scheduledTime'
@@ -25,6 +25,11 @@ export function TimeBlock({
   const { updateTask } = useStore()
   const elRef = useRef<HTMLDivElement>(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [isResizing, setIsResizing] = useState(false)
+  const resizeAbortRef = useRef<AbortController | null>(null)
+
+  // Cleanup any in-progress resize when the component unmounts
+  useEffect(() => () => resizeAbortRef.current?.abort(), [])
 
   const durationMin = (end.getTime() - start.getTime()) / 60000
   const topPx = (start.getHours() * 60 + start.getMinutes()) * pxPerMin
@@ -50,8 +55,16 @@ export function TimeBlock({
   const onResizeStart = (e: React.MouseEvent): void => {
     e.preventDefault()
     e.stopPropagation()
+
+    // Abort any previous resize first (shouldn't happen, but defensive)
+    resizeAbortRef.current?.abort()
+    const ac = new AbortController()
+    resizeAbortRef.current = ac
+
     const startY = e.clientY
     const startEnd = new Date(end)
+    setIsResizing(true)
+
     const onMove = (ev: MouseEvent): void => {
       const deltaMin = (ev.clientY - startY) / pxPerMin
       const newEnd = new Date(startEnd.getTime() + deltaMin * 60000)
@@ -67,8 +80,8 @@ export function TimeBlock({
       }
     }
     const onUp = (ev: MouseEvent): void => {
-      document.removeEventListener('mousemove', onMove)
-      document.removeEventListener('mouseup', onUp)
+      ac.abort() // detach both listeners
+      setIsResizing(false)
       const deltaMin = (ev.clientY - startY) / pxPerMin
       const newEnd = new Date(startEnd.getTime() + deltaMin * 60000)
       const minEnd = new Date(start.getTime() + MIN_BLOCK_MIN * 60000)
@@ -80,8 +93,9 @@ export function TimeBlock({
       const snapped = snapTo15Min(toIso(clampedEnd))
       void updateTask({ id: task.id, scheduledEnd: snapped })
     }
-    document.addEventListener('mousemove', onMove)
-    document.addEventListener('mouseup', onUp)
+
+    document.addEventListener('mousemove', onMove, { signal: ac.signal })
+    document.addEventListener('mouseup', onUp, { signal: ac.signal })
   }
 
   // Context menu
@@ -110,7 +124,7 @@ export function TimeBlock({
         top: `${topPx}px`,
         left: `${leftPct}%`,
         width: `${widthPct}%`,
-        height: `${heightPx}px`
+        ...(isResizing ? {} : { height: `${heightPx}px` })
       }}
       className={`rounded-md border-l-4 px-2 py-1 text-xs overflow-hidden cursor-grab select-none ${
         isDark ? 'bg-blue-500/20 border-l-blue-400 text-gray-100' : 'bg-blue-100 border-l-blue-400 text-gray-800'
