@@ -6,10 +6,16 @@ import type { Task } from '../types'
  */
 export function snapTo15Min(iso: string): string {
   const d = new Date(iso)
+  const originalDate = iso.slice(0, 10) // "YYYY-MM-DD"
   const minutes = d.getMinutes()
   const snapped = Math.round(minutes / 15) * 15
   d.setMinutes(snapped, 0, 0)
-  return toLocalIso(d)
+  let result = toLocalIso(d)
+  // Clamp: if snapping rolled into the next day, pin to 23:45 of the original day
+  if (result.slice(0, 10) !== originalDate) {
+    result = `${originalDate}T23:45:00`
+  }
+  return result
 }
 
 function toLocalIso(d: Date): string {

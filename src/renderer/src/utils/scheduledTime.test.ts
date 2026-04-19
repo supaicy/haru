@@ -21,6 +21,9 @@ describe('snapTo15Min', () => {
   it('leaves 14:00 unchanged', () => {
     expect(snapTo15Min('2026-04-22T14:00:00')).toBe('2026-04-22T14:00:00')
   })
+  it('clamps to 23:45 when snapping would roll past midnight', () => {
+    expect(snapTo15Min('2026-04-22T23:53:00')).toBe('2026-04-22T23:45:00')
+  })
 })
 
 const baseTask: Task = {

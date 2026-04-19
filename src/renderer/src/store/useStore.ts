@@ -287,7 +287,9 @@ export const useStore = create<Store>((set, get) => ({
       createdAt: now, completedAt: null, deletedAt: null,
       sortOrder: maxOrder + 1,
       isRecurring: opts.isRecurring || false,
-      recurringPattern: opts.recurringPattern || null
+      recurringPattern: opts.recurringPattern || null,
+      scheduledStart: null,
+      scheduledEnd: null
     }
     set((s) => ({ tasks: [...s.tasks, newTask] }))
 
