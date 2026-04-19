@@ -3,6 +3,9 @@ import { useStore } from '../../store/useStore'
 import { toDateString } from '../../utils/date'
 import type { Task, Priority } from '../../types'
 import { ChevronLeft, ChevronRight, Flag, CheckCircle2, Circle } from 'lucide-react'
+import { TimeBlock } from './TimeBlock'
+import { layoutOverlappingBlocks } from '../../utils/timeBlockLayout'
+import { getScheduledForOccurrence, snapTo15Min } from '../../utils/scheduledTime'
 
 // 요일 이름
 const dayLabels = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
@@ -19,6 +22,15 @@ for (let h = 6; h <= 23; h++) {
   timeSlots.push({ hour: h, minute: 0, label: formatTime(h, 0) })
   timeSlots.push({ hour: h, minute: 30, label: '' })
 }
+
+// Pixels per minute: derived from the time-slot row height in the JSX below.
+// Each 30-min row has minHeight: '40px', so 40 / 30 ≈ 1.333.
+// Update if the slot row height changes.
+const PX_PER_MIN = 40 / 30
+
+// Time-slot column visible range: 6:00 (inclusive) to 24:00 (exclusive).
+const DAY_START_HOUR = 6
+const DAY_END_HOUR_EXCLUSIVE = 24
 
 function formatTime(h: number, m: number): string {
   const period = h < 12 ? '오전' : '오후'
@@ -45,7 +57,7 @@ const priorityBg: Record<Priority, { dark: string; light: string }> = {
 }
 
 export function DailyCalendar(): React.ReactElement {
-  const { theme, tasks, selectTask, selectedTaskId, toggleTask } = useStore()
+  const { theme, tasks, selectTask, selectedTaskId, toggleTask, updateTask } = useStore()
   const isDark = theme === 'dark'
 
   const [currentDate, setCurrentDate] = useState(() => new Date())
@@ -53,6 +65,25 @@ export function DailyCalendar(): React.ReactElement {
   const dateStr = useMemo(() => dateToStr(currentDate), [currentDate])
   const todayStr = useMemo(() => dateToStr(new Date()), [])
   const isToday = dateStr === todayStr
+
+  // Scheduled time blocks that fall on the visible day.
+  const blocks = useMemo(() => {
+    const items: { task: Task; start: Date; end: Date }[] = []
+    for (const t of tasks) {
+      if (t.deletedAt) continue
+      const sch = getScheduledForOccurrence(t, dateStr)
+      if (!sch) continue
+      // For non-recurring, only include if the block's start date matches dateStr
+      if (!t.isRecurring && sch.start.slice(0, 10) !== dateStr) continue
+      items.push({ task: t, start: new Date(sch.start), end: new Date(sch.end) })
+    }
+    return items
+  }, [tasks, dateStr])
+
+  const layout = useMemo(
+    () => layoutOverlappingBlocks(blocks.map((b) => ({ id: b.task.id, start: b.start, end: b.end }))),
+    [blocks]
+  )
 
   // 해당 날짜의 태스크
   const { allDayTasks, timedTasks } = useMemo(() => {
@@ -243,7 +274,64 @@ export function DailyCalendar(): React.ReactElement {
         )}
 
         {/* 시간 슬롯 */}
-        <div className="px-2">
+        <div
+          className="px-2 relative"
+          style={{
+            minHeight: `${(DAY_END_HOUR_EXCLUSIVE - DAY_START_HOUR) * 60 * PX_PER_MIN}px`
+          }}
+          onDragOver={(e) => {
+            if (
+              e.dataTransfer.types.includes('application/haru-task-id') ||
+              e.dataTransfer.types.includes('application/haru-task-block')
+            ) {
+              e.preventDefault()
+              e.dataTransfer.dropEffect = 'move'
+            }
+          }}
+          onDrop={(e) => {
+            const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
+            const yPx = e.clientY - rect.top
+            const minutesFromTop = yPx / PX_PER_MIN
+            const totalMin = DAY_START_HOUR * 60 + minutesFromTop
+            const hour = Math.floor(totalMin / 60)
+            const minute = Math.floor(totalMin % 60)
+            const pad = (n: number): string => String(n).padStart(2, '0')
+            const rawStart = `${dateStr}T${pad(hour)}:${pad(minute)}:00`
+            const snappedStart = snapTo15Min(rawStart)
+            const startMs = new Date(snappedStart).getTime()
+            const dayEnd = new Date(`${dateStr}T23:59:00`).getTime()
+            const toIso = (ms: number): string => {
+              const d = new Date(ms)
+              return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`
+            }
+
+            const taskId =
+              e.dataTransfer.getData('application/haru-task-id') ||
+              e.dataTransfer.getData('application/haru-task-block')
+            if (!taskId) return
+            const existing = tasks.find((t) => t.id === taskId)
+            if (!existing) return
+
+            // Move of an existing block: preserve duration
+            let endMs = startMs + 30 * 60000
+            if (
+              e.dataTransfer.types.includes('application/haru-task-block') &&
+              existing.scheduledStart && existing.scheduledEnd
+            ) {
+              const origDur =
+                new Date(existing.scheduledEnd).getTime() -
+                new Date(existing.scheduledStart).getTime()
+              endMs = startMs + origDur
+            }
+            const endMsClamped = Math.min(endMs, dayEnd)
+
+            void updateTask({
+              id: taskId,
+              scheduledStart: snappedStart,
+              scheduledEnd: toIso(endMsClamped)
+            })
+          }}
+        >
           {timeSlots.map((slot) => {
             const slotTasks = getTasksAtSlot(slot.hour, slot.minute)
             const isHourMark = slot.minute === 0
@@ -346,6 +434,39 @@ export function DailyCalendar(): React.ReactElement {
               </div>
             )
           })}
+
+          {/* Render scheduled time blocks absolutely on top of slot rows.
+              TimeBlock computes top from start.getHours() * 60 * pxPerMin (i.e. from 0:00),
+              so this layer is offset by -DAY_START_HOUR hours to align with the
+              6:00-based time-slot column. Left offset matches the w-20 label column. */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              top: `${-DAY_START_HOUR * 60 * PX_PER_MIN}px`,
+              left: 'calc(0.5rem + 5rem)', // px-2 (8px) + w-20 label (80px)
+              right: 'calc(0.5rem + 1rem)', // px-2 (8px) + pr-4 (16px)
+              height: `${24 * 60 * PX_PER_MIN}px`
+            }}
+          >
+            <div className="relative w-full h-full pointer-events-auto">
+              {blocks.map((b) => {
+                const entry = layout.find((l) => l.id === b.task.id)
+                if (!entry) return null
+                return (
+                  <TimeBlock
+                    key={b.task.id}
+                    task={b.task}
+                    start={b.start}
+                    end={b.end}
+                    pxPerMin={PX_PER_MIN}
+                    column={entry.column}
+                    columns={entry.columns}
+                    isDark={isDark}
+                  />
+                )
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </div>
