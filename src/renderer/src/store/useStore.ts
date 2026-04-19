@@ -145,7 +145,9 @@ function mapTask(row: Record<string, unknown>): Task {
     deletedAt: (row.deleted_at as string) || null,
     sortOrder: (row.sort_order as number) || 0,
     isRecurring: Boolean(row.is_recurring),
-    recurringPattern: (row.recurring_pattern as string) || null
+    recurringPattern: (row.recurring_pattern as string) || null,
+    scheduledStart: (row.scheduled_start as string) || null,
+    scheduledEnd: (row.scheduled_end as string) || null
   }
 }
 function mapList(row: Record<string, unknown>): TaskList {

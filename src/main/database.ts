@@ -77,6 +77,8 @@ export function initDatabase(): void {
     if (t.due_time === undefined) t.due_time = null
     if (t.reminder_at === undefined) t.reminder_at = null
     if (t.attachments === undefined) t.attachments = '[]'
+    if (t.scheduled_start === undefined) t.scheduled_start = null
+    if (t.scheduled_end === undefined) t.scheduled_end = null
   })
   data.lists.forEach((l) => {
     if (l.folder_id === undefined) l.folder_id = null
