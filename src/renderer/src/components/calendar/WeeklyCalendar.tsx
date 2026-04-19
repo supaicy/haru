@@ -22,7 +22,6 @@ const PX_PER_MIN = 48 / 60
 
 // WeeklyCalendar shows 8:00 through 22:59 — i.e. [8, 23).
 const WEEK_START_HOUR = 8
-const WEEK_END_HOUR_EXCLUSIVE = 23
 
 // 우선순위 색상 (배경용)
 const priorityBg: Record<Priority, string> = {
@@ -311,87 +310,48 @@ export function WeeklyCalendar(): React.ReactElement {
             </div>
           )}
 
-          {/* 시간 슬롯 */}
-          <div
-            className="relative"
-            style={{
-              minHeight: `${(WEEK_END_HOUR_EXCLUSIVE - WEEK_START_HOUR) * 60 * PX_PER_MIN}px`
-            }}
-          >
-            {timeSlots.map((hour) => (
-              <div
-                key={hour}
-                className={`flex border-b ${isDark ? 'border-gray-800' : 'border-gray-100'}`}
-                style={{ minHeight: '48px' }}
-              >
-                {/* 시간 라벨 */}
+          {/* 시간 슬롯 — day-first layout.
+              Left: fixed time-axis column with hour labels.
+              Right: 7 day columns, each containing:
+                - hour-cell background rows with legacy dueTime task cards
+                - an absolute TimeBlock layer offset by -WEEK_START_HOUR.
+              Drop handlers live on each day column so clicks on legacy task
+              cards (direct children of hour-cells) are not intercepted. */}
+          <div className="flex">
+            {/* Time axis column — one hour label per row, matching 48px height */}
+            <div className="w-16 flex-shrink-0">
+              {timeSlots.map((hour) => (
                 <div
-                  className={`w-16 flex-shrink-0 text-[10px] text-right pr-2 pt-0.5 ${
-                    isDark ? 'text-gray-500' : 'text-gray-400'
+                  key={`label-${hour}`}
+                  className={`text-[10px] text-right pr-2 pt-0.5 border-b ${
+                    isDark ? 'border-gray-800 text-gray-500' : 'border-gray-100 text-gray-400'
                   }`}
+                  style={{ height: '48px' }}
                 >
                   {formatHour(hour)}
                 </div>
+              ))}
+            </div>
 
-                {/* 각 요일 셀 */}
-                {weekDays.map((day) => {
-                  const dateStr = dateToStr(day)
-                  const cellTasks = getTasksAtHour(dateStr, hour)
-                  const isToday = dateStr === todayStr
-                  return (
-                    <div
-                      key={`${dateStr}-${hour}`}
-                      className={`flex-1 border-l p-0.5 ${
-                        isToday
-                          ? isDark
-                            ? 'bg-blue-900/10 border-gray-700'
-                            : 'bg-blue-50/50 border-gray-200'
-                          : isDark
-                            ? 'border-gray-700'
-                            : 'border-gray-200'
-                      }`}
-                    >
-                      {cellTasks.map((task) => (
-                        <div
-                          key={task.id}
-                          onClick={() => selectTask(task.id)}
-                          className={taskCardClass(task)}
-                        >
-                          <div className="flex items-center gap-1">
-                            {task.priority !== 'none' && (
-                              <Flag size={8} className="flex-shrink-0" />
-                            )}
-                            <span className="truncate">{task.title}</span>
-                          </div>
-                          {task.dueTime && (
-                            <div
-                              className={`text-[9px] ${
-                                isDark ? 'text-gray-400' : 'text-gray-500'
-                              }`}
-                            >
-                              {task.dueTime}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )
-                })}
-              </div>
-            ))}
-
-            {/* Drop-target + scheduled TimeBlock overlay.
-                Sits on top of the hour-grid, with one drop column per day.
-                Starts at left:64px (width of the w-16 hour-label column) so
-                it lines up with the day cells inside each hour row. */}
-            <div
-              className="absolute top-0 bottom-0 flex pointer-events-none"
-              style={{ left: '4rem', right: 0 }}
-            >
-              {perDay.map(({ dayStr, items, layout }) => (
+            {/* 7 day columns */}
+            {weekDays.map((day) => {
+              const dayStr = dateToStr(day)
+              const isToday = dayStr === todayStr
+              const dayBlocks = perDay.find((p) => p.dayStr === dayStr)
+              const items = dayBlocks?.items ?? []
+              const layout = dayBlocks?.layout ?? []
+              return (
                 <div
-                  key={`dropcol-${dayStr}`}
-                  className="relative flex-1 pointer-events-auto"
+                  key={`daycol-${dayStr}`}
+                  className={`relative flex-1 border-l ${
+                    isToday
+                      ? isDark
+                        ? 'bg-blue-900/10 border-gray-700'
+                        : 'bg-blue-50/50 border-gray-200'
+                      : isDark
+                        ? 'border-gray-700'
+                        : 'border-gray-200'
+                  }`}
                   onDragOver={(e) => {
                     if (
                       e.dataTransfer.types.includes('application/haru-task-id') ||
@@ -445,11 +405,49 @@ export function WeeklyCalendar(): React.ReactElement {
                     })
                   }}
                 >
-                  {/* Block layer offset by -WEEK_START_HOUR hours.
-                      TimeBlock positions from 0:00, but this column is anchored
-                      at WEEK_START_HOUR, so shift the block layer up so that a
-                      block at 8:00 lands at y=0 relative to the column top.
-                      pointer-events-none so empty areas fall through to drop target. */}
+                  {/* Background: hour-cell rows with legacy dueTime tasks */}
+                  {timeSlots.map((hour) => {
+                    const cellTasks = getTasksAtHour(dayStr, hour)
+                    return (
+                      <div
+                        key={`${dayStr}-${hour}`}
+                        className={`border-b p-0.5 ${
+                          isDark ? 'border-gray-800' : 'border-gray-100'
+                        }`}
+                        style={{ height: '48px' }}
+                      >
+                        {cellTasks.map((task) => (
+                          <div
+                            key={task.id}
+                            onClick={() => selectTask(task.id)}
+                            className={taskCardClass(task)}
+                          >
+                            <div className="flex items-center gap-1">
+                              {task.priority !== 'none' && (
+                                <Flag size={8} className="flex-shrink-0" />
+                              )}
+                              <span className="truncate">{task.title}</span>
+                            </div>
+                            {task.dueTime && (
+                              <div
+                                className={`text-[9px] ${
+                                  isDark ? 'text-gray-400' : 'text-gray-500'
+                                }`}
+                              >
+                                {task.dueTime}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  })}
+
+                  {/* TimeBlock layer: absolute, offset by -WEEK_START_HOUR * 60 * PX_PER_MIN
+                      so a block at 8:00 lands at y=0 relative to the first hour-row.
+                      pointer-events-none on the layer so empty space falls through to
+                      the column-level drop handler; each TimeBlock wrapper enables
+                      pointer-events-auto. */}
                   <div
                     className="absolute left-0 right-0 pointer-events-none"
                     style={{
@@ -478,8 +476,8 @@ export function WeeklyCalendar(): React.ReactElement {
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              )
+            })}
           </div>
         </div>
       </div>
