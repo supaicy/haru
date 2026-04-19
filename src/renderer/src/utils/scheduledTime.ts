@@ -1,4 +1,4 @@
-import type { Task } from '../../types'
+import type { Task } from '../types'
 
 /**
  * Snap an ISO local datetime string to the nearest 15-minute grid point
@@ -29,6 +29,9 @@ function toLocalIso(d: Date): string {
  *   the template's time-of-day and duration.
  *
  * Returns null if the task has no scheduled template.
+ *
+ * Input strings must be naive local ISO ("YYYY-MM-DDTHH:mm:ss"); any timezone
+ * suffix (Z or ±HH:MM) would be silently propagated and cause parsing drift.
  */
 export function getScheduledForOccurrence(
   task: Pick<Task, 'scheduledStart' | 'scheduledEnd' | 'isRecurring'>,

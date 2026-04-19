@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { snapTo15Min } from './scheduledTime'
+import { snapTo15Min, getScheduledForOccurrence } from './scheduledTime'
+import type { Task } from '../types'
 
 describe('snapTo15Min', () => {
   it('snaps 14:07 down to 14:00', () => {
@@ -21,9 +22,6 @@ describe('snapTo15Min', () => {
     expect(snapTo15Min('2026-04-22T14:00:00')).toBe('2026-04-22T14:00:00')
   })
 })
-
-import { getScheduledForOccurrence } from './scheduledTime'
-import type { Task } from '../../types'
 
 const baseTask: Task = {
   id: 't1', title: 'weekly sync', description: '', completed: false, priority: 'none',
