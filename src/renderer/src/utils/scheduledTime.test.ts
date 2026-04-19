@@ -21,3 +21,53 @@ describe('snapTo15Min', () => {
     expect(snapTo15Min('2026-04-22T14:00:00')).toBe('2026-04-22T14:00:00')
   })
 })
+
+import { getScheduledForOccurrence } from './scheduledTime'
+import type { Task } from '../../types'
+
+const baseTask: Task = {
+  id: 't1', title: 'weekly sync', description: '', completed: false, priority: 'none',
+  dueDate: null, dueTime: null, reminderAt: null, listId: 'inbox', parentId: null,
+  tags: [], createdAt: '2026-04-21T00:00:00', completedAt: null, deletedAt: null,
+  sortOrder: 0, isRecurring: true, recurringPattern: 'weekly',
+  attachments: [],
+  scheduledStart: '2026-04-21T14:00:00',
+  scheduledEnd: '2026-04-21T15:00:00'
+}
+
+describe('getScheduledForOccurrence', () => {
+  it('returns null when task has no scheduledStart', () => {
+    const t = { ...baseTask, scheduledStart: null, scheduledEnd: null }
+    expect(getScheduledForOccurrence(t, '2026-04-28')).toBeNull()
+  })
+
+  it('projects template time onto the occurrence date', () => {
+    const result = getScheduledForOccurrence(baseTask, '2026-04-28')
+    expect(result).toEqual({
+      start: '2026-04-28T14:00:00',
+      end: '2026-04-28T15:00:00'
+    })
+  })
+
+  it('preserves duration across occurrences', () => {
+    const t = {
+      ...baseTask,
+      scheduledStart: '2026-04-21T09:30:00',
+      scheduledEnd:   '2026-04-21T11:15:00'  // 1h 45m duration
+    }
+    const result = getScheduledForOccurrence(t, '2026-05-05')
+    expect(result).toEqual({
+      start: '2026-05-05T09:30:00',
+      end: '2026-05-05T11:15:00'
+    })
+  })
+
+  it('non-recurring task: returns raw start/end regardless of date arg', () => {
+    const t = { ...baseTask, isRecurring: false, recurringPattern: null }
+    const result = getScheduledForOccurrence(t, '2026-05-05')
+    expect(result).toEqual({
+      start: '2026-04-21T14:00:00',
+      end:   '2026-04-21T15:00:00'
+    })
+  })
+})
