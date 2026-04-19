@@ -59,6 +59,16 @@ const CodeBlock = memo(function CodeBlock({
   return <code ref={codeRef} className={className} {...props}>{children}</code>
 })
 
+function formatScheduledRange(startIso: string, endIso: string): string {
+  const start = new Date(startIso)
+  const end = new Date(endIso)
+  const pad = (n: number): string => String(n).padStart(2, '0')
+  const date = `${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}`
+  const s = `${pad(start.getHours())}:${pad(start.getMinutes())}`
+  const e = `${pad(end.getHours())}:${pad(end.getMinutes())}`
+  return `${date} ${s}–${e}`
+}
+
 const PRIORITY_OPTIONS: { value: Priority; label: string; color: string }[] = [
   { value: 'none', label: '없음', color: 'text-gray-400' },
   { value: 'low', label: '낮음', color: 'text-blue-400' },
@@ -157,6 +167,16 @@ export function TaskDetail() {
             <button onClick={() => { setDueDate(''); setDueTime(''); save({ dueDate: null, dueTime: null }) }} className={labelCls}><X size={14} /></button>
           )}
         </div>
+
+        {/* 예정된 블록 (읽기 전용) */}
+        {task.scheduledStart && task.scheduledEnd && (
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <Clock size={14} />
+            <span>
+              예정: {formatScheduledRange(task.scheduledStart, task.scheduledEnd)}
+            </span>
+          </div>
+        )}
 
         {/* 우선순위 */}
         <div className="flex items-center gap-3">
