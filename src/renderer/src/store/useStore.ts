@@ -139,8 +139,8 @@ function mapTask(row: Record<string, unknown>): Task {
     reminderAt: (row.reminder_at as string) || null,
     listId: (row.list_id as string) || 'inbox',
     parentId: (row.parent_id as string) || null,
-    tags: safeParseArray(row.tags as string),
-    attachments: safeParseArray(row.attachments as string),
+    tags: safeParseArray<string>(row.tags as string),
+    attachments: safeParseArray<string>(row.attachments as string),
     createdAt: row.created_at as string,
     completedAt: (row.completed_at as string) || null,
     deletedAt: (row.deleted_at as string) || null,
@@ -158,7 +158,7 @@ function mapFolder(row: Record<string, unknown>): Folder {
   return { id: row.id as string, name: row.name as string, collapsed: Boolean(row.collapsed), sortOrder: (row.sort_order as number) || 0, createdAt: row.created_at as string }
 }
 function mapHabit(row: Record<string, unknown>): Habit {
-  return { id: row.id as string, name: row.name as string, color: row.color as string, frequency: row.frequency as 'daily' | 'weekly', targetDays: safeParseArray(row.target_days as string), createdAt: row.created_at as string }
+  return { id: row.id as string, name: row.name as string, color: row.color as string, frequency: row.frequency as 'daily' | 'weekly', targetDays: safeParseArray<number>(row.target_days as string), createdAt: row.created_at as string }
 }
 function mapHabitLog(row: Record<string, unknown>): HabitLog {
   return { id: row.id as string, habitId: row.habit_id as string, date: row.date as string, completed: Boolean(row.completed) }
@@ -166,8 +166,8 @@ function mapHabitLog(row: Record<string, unknown>): HabitLog {
 function mapPomodoroSession(row: Record<string, unknown>): PomodoroSession {
   return { id: row.id as string, taskId: (row.taskId as string) || null, duration: row.duration as number, type: row.type as 'work' | 'break', startedAt: row.startedAt as string, completedAt: (row.completedAt as string) || null }
 }
-function safeParseArray(s: string | undefined | null): string[] {
-  try { return JSON.parse(s || '[]') } catch { return [] }
+function safeParseArray<T = unknown>(s: string | undefined | null): T[] {
+  try { return JSON.parse(s || '[]') as T[] } catch { return [] }
 }
 
 export const useStore = create<Store>((set, get) => ({
