@@ -142,6 +142,7 @@ export function AddTask({ onClose }: { onClose: () => void }) {
           className={`flex-1 bg-transparent text-sm outline-none ${isDark ? 'text-gray-100 placeholder-gray-500' : 'text-gray-800 placeholder-gray-400'}`}
         />
         <button
+          type="button"
           onClick={onClose}
           className={`ml-2 ${isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'}`}
         >
@@ -182,6 +183,7 @@ export function AddTask({ onClose }: { onClose: () => void }) {
 
         <div className="relative">
           <button
+            type="button"
             onClick={() => setShowPriority(!showPriority)}
             className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
               priority !== 'none'
@@ -200,6 +202,7 @@ export function AddTask({ onClose }: { onClose: () => void }) {
             >
               {PRIORITY_OPTIONS.map((opt) => (
                 <button
+                  type="button"
                   key={opt.value}
                   onClick={() => {
                     setPriority(opt.value)
@@ -217,6 +220,7 @@ export function AddTask({ onClose }: { onClose: () => void }) {
         <div className="flex-1" />
         {aiConnected && (
           <button
+            type="button"
             onClick={handleAiCreate}
             disabled={!title.trim() || aiLoading}
             className="text-xs px-3 py-1 rounded bg-blue-600 text-white disabled:opacity-30 hover:bg-blue-700 transition-colors flex items-center gap-1"
@@ -227,6 +231,7 @@ export function AddTask({ onClose }: { onClose: () => void }) {
           </button>
         )}
         <button
+          type="button"
           onClick={handleSubmit}
           disabled={!title.trim()}
           className="text-xs px-3 py-1 rounded bg-primary-500 text-white disabled:opacity-30 hover:bg-primary-600 transition-colors"

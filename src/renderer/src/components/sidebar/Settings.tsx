@@ -76,7 +76,11 @@ export function Settings() {
           className={`flex items-center justify-between px-5 py-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}
         >
           <h2 className="text-base font-semibold">설정</h2>
-          <button onClick={toggleSettings} className="text-gray-500 hover:text-gray-300 transition-colors">
+          <button
+            type="button"
+            onClick={toggleSettings}
+            className="text-gray-500 hover:text-gray-300 transition-colors"
+          >
             <X size={18} />
           </button>
         </div>
@@ -87,6 +91,7 @@ export function Settings() {
             <h3 className={`text-sm font-medium mb-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>테마</h3>
             <div className="flex gap-3">
               <button
+                type="button"
                 onClick={() => setTheme('dark')}
                 className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
                   theme === 'dark' ? 'border-primary-500 bg-primary-500/10' : 'border-gray-300 hover:border-gray-400'
@@ -100,6 +105,7 @@ export function Settings() {
                 </span>
               </button>
               <button
+                type="button"
                 onClick={() => setTheme('light')}
                 className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
                   theme === 'light'
@@ -127,6 +133,7 @@ export function Settings() {
               데이터
             </h3>
             <button
+              type="button"
               onClick={() => {
                 exportData()
                 toggleSettings()
@@ -201,10 +208,7 @@ export function Settings() {
                 />
               </div>
               <div>
-                <label
-                  htmlFor="ai-model"
-                  className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
-                >
+                <label htmlFor="ai-model" className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                   모델
                 </label>
                 <input
@@ -254,6 +258,7 @@ export function Settings() {
                 </p>
               </div>
               <button
+                type="button"
                 onClick={handleAiSave}
                 className="w-full px-3 py-2 rounded-lg text-sm bg-blue-600 text-white hover:bg-blue-700 transition-colors"
               >
@@ -323,6 +328,7 @@ export function Settings() {
             </div>
             {updateAvailable && (
               <button
+                type="button"
                 onClick={() => window.api.openExternal(updateAvailable.downloadUrl)}
                 className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors ${
                   theme === 'dark'

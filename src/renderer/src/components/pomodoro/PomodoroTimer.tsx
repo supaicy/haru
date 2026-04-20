@@ -100,6 +100,7 @@ export function PomodoroTimer() {
       <div className="flex gap-2 mb-12">
         {MODES.map((m) => (
           <button
+            type="button"
             key={m.key}
             onClick={() => switchMode(m.key)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -147,12 +148,14 @@ export function PomodoroTimer() {
       {/* 컨트롤 */}
       <div className="flex items-center gap-4">
         <button
+          type="button"
           onClick={reset}
           className={`p-3 rounded-full transition-colors ${isDark ? 'text-gray-500 hover:text-gray-300 hover:bg-gray-800' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
         >
           <RotateCcw size={22} />
         </button>
         <button
+          type="button"
           onClick={() => {
             if (!isRunning && !sessionStartRef.current) sessionStartRef.current = new Date().toISOString()
             setIsRunning(!isRunning)
@@ -163,6 +166,7 @@ export function PomodoroTimer() {
           {isRunning ? <Pause size={28} /> : <Play size={28} className="ml-1" />}
         </button>
         <button
+          type="button"
           onClick={skipToNext}
           className={`p-3 rounded-full transition-colors ${isDark ? 'text-gray-500 hover:text-gray-300 hover:bg-gray-800' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
         >

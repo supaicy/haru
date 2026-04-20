@@ -66,18 +66,21 @@ export function HabitTracker() {
           <h1 className={`text-xl font-bold ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>습관 트래커</h1>
           <div className="flex items-center gap-1">
             <button
+              type="button"
               onClick={() => setWeekOffset((w) => w - 1)}
               className={`p-1 rounded ${isDark ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
             >
               <ChevronLeft size={18} />
             </button>
             <button
+              type="button"
               onClick={() => setWeekOffset(0)}
               className={`px-2 py-0.5 rounded text-xs ${isDark ? 'text-gray-400 hover:bg-gray-800' : 'text-gray-500 hover:bg-gray-200'}`}
             >
               이번 주
             </button>
             <button
+              type="button"
               onClick={() => setWeekOffset((w) => w + 1)}
               className={`p-1 rounded ${isDark ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
             >
@@ -86,6 +89,7 @@ export function HabitTracker() {
           </div>
         </div>
         <button
+          type="button"
           onClick={() => setShowAdd(true)}
           className="flex items-center gap-1 text-sm text-primary-400 hover:text-primary-300"
         >
@@ -118,6 +122,7 @@ export function HabitTracker() {
               <span className={`text-sm truncate ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>{habit.name}</span>
               <span className="text-xs text-gray-500 flex-shrink-0">{streaks[habit.id] || 0}일 연속</span>
               <button
+                type="button"
                 onClick={() => removeHabit(habit.id)}
                 className="opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 transition-all ml-auto flex-shrink-0"
               >
@@ -130,6 +135,7 @@ export function HabitTracker() {
               return (
                 <div key={dateStr} className="flex-1 flex justify-center">
                   <button
+                    type="button"
                     onClick={() => toggleHabitLog(habit.id, dateStr)}
                     className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center transition-all ${
                       logged
@@ -154,7 +160,11 @@ export function HabitTracker() {
             className={`flex flex-col items-center justify-center py-20 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}
           >
             <p className="text-sm">추적 중인 습관이 없습니다</p>
-            <button onClick={() => setShowAdd(true)} className="mt-2 text-sm text-primary-400 hover:text-primary-300">
+            <button
+              type="button"
+              onClick={() => setShowAdd(true)}
+              className="mt-2 text-sm text-primary-400 hover:text-primary-300"
+            >
               첫 습관 추가하기
             </button>
           </div>
@@ -184,10 +194,10 @@ export function HabitTracker() {
               placeholder="습관 이름..."
               className={`flex-1 bg-transparent text-sm outline-none ${isDark ? 'text-gray-200 placeholder-gray-600' : 'text-gray-700 placeholder-gray-400'}`}
             />
-            <button onClick={handleAdd} className="text-green-400 hover:text-green-300">
+            <button type="button" onClick={handleAdd} className="text-green-400 hover:text-green-300">
               <Check size={18} />
             </button>
-            <button onClick={() => setShowAdd(false)} className="text-gray-500 hover:text-gray-300">
+            <button type="button" onClick={() => setShowAdd(false)} className="text-gray-500 hover:text-gray-300">
               <X size={18} />
             </button>
           </div>

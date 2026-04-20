@@ -172,15 +172,16 @@ export function Sidebar() {
             onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
             className="flex-1 bg-sidebar-hover text-white text-sm px-2 py-1 rounded outline-none"
           />
-          <button onClick={saveEdit} className="text-green-400">
+          <button type="button" onClick={saveEdit} className="text-green-400">
             <Check size={14} />
           </button>
-          <button onClick={() => setEditingList(null)} className={mutedClass}>
+          <button type="button" onClick={() => setEditingList(null)} className={mutedClass}>
             <X size={14} />
           </button>
         </div>
       ) : (
         <button
+          type="button"
           onClick={() => setSelectedList(list.id)}
           className={btnClass(selectedListId === list.id && viewType === 'tasks')}
         >
@@ -203,12 +204,14 @@ export function Sidebar() {
           className={`absolute right-2 top-full z-50 rounded-lg shadow-xl py-1 min-w-[120px] ${isDark ? 'bg-[#3A3A3C]' : 'bg-white border border-gray-200'}`}
         >
           <button
+            type="button"
             onClick={() => startEdit(list.id, list.name, list.color)}
             className={`w-full flex items-center gap-2 px-3 py-2 text-sm ${isDark ? 'text-sidebar-text hover:bg-sidebar-hover' : 'text-gray-700 hover:bg-gray-100'}`}
           >
             <Edit3 size={14} /> 편집
           </button>
           <button
+            type="button"
             onClick={() => {
               removeList(list.id)
               setContextMenu(null)
@@ -234,6 +237,7 @@ export function Sidebar() {
         <div className="mb-3">
           {SMART_LISTS.map((item) => (
             <button
+              type="button"
               key={item.id}
               onClick={() => setSelectedList(item.id)}
               className={btnClass(selectedListId === item.id && viewType === 'tasks')}
@@ -249,7 +253,12 @@ export function Sidebar() {
         <div className={`mb-3 border-t pt-3 ${isDark ? 'border-sidebar-hover' : 'border-gray-300'}`}>
           <div className={`px-3 mb-1 text-xs font-semibold uppercase tracking-wider ${mutedClass}`}>뷰</div>
           {VIEW_ITEMS.map((item) => (
-            <button key={item.type} onClick={() => setViewType(item.type)} className={btnClass(viewType === item.type)}>
+            <button
+              type="button"
+              key={item.type}
+              onClick={() => setViewType(item.type)}
+              className={btnClass(viewType === item.type)}
+            >
               <span className={mutedClass}>{item.icon}</span>
               <span className="flex-1 text-left">{item.label}</span>
             </button>
@@ -262,6 +271,7 @@ export function Sidebar() {
             <span className={`text-xs font-semibold uppercase tracking-wider ${mutedClass}`}>리스트</span>
             <div className="flex items-center gap-1">
               <button
+                type="button"
                 onClick={() => setShowNewFolder(true)}
                 className={`${mutedClass} hover:text-white transition-colors`}
                 title="폴더 추가"
@@ -269,6 +279,7 @@ export function Sidebar() {
                 <FolderPlus size={14} />
               </button>
               <button
+                type="button"
                 onClick={() => setShowNewList(true)}
                 className={`${mutedClass} hover:text-white transition-colors`}
                 title="리스트 추가"
@@ -294,10 +305,10 @@ export function Sidebar() {
                 placeholder="폴더 이름"
                 className={`flex-1 text-sm px-2 py-1 rounded outline-none ${isDark ? 'bg-sidebar-hover text-white placeholder-sidebar-muted' : 'bg-gray-200 text-gray-800 placeholder-gray-400'}`}
               />
-              <button onClick={handleAddFolder} className="text-green-400">
+              <button type="button" onClick={handleAddFolder} className="text-green-400">
                 <Check size={14} />
               </button>
-              <button onClick={() => setShowNewFolder(false)} className={mutedClass}>
+              <button type="button" onClick={() => setShowNewFolder(false)} className={mutedClass}>
                 <X size={14} />
               </button>
             </div>
@@ -307,7 +318,11 @@ export function Sidebar() {
           {folders.map((folder) => (
             <div key={folder.id} className="mb-1">
               <div className="flex items-center gap-2 px-3 py-1.5 group">
-                <button onClick={() => updateFolder(folder.id, folder.name, !folder.collapsed)} className={mutedClass}>
+                <button
+                  type="button"
+                  onClick={() => updateFolder(folder.id, folder.name, !folder.collapsed)}
+                  className={mutedClass}
+                >
                   {folder.collapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
                 </button>
                 <FolderOpen size={14} className={mutedClass} />
@@ -315,6 +330,7 @@ export function Sidebar() {
                   {folder.name}
                 </span>
                 <button
+                  type="button"
                   onClick={() => {
                     setNewListFolderId(folder.id)
                     setShowNewList(true)
@@ -324,6 +340,7 @@ export function Sidebar() {
                   <Plus size={12} />
                 </button>
                 <button
+                  type="button"
                   onClick={() => removeFolder(folder.id)}
                   className="opacity-0 group-hover:opacity-100 text-red-400"
                 >
@@ -363,10 +380,11 @@ export function Sidebar() {
                 placeholder="리스트 이름"
                 className={`flex-1 text-sm px-2 py-1 rounded outline-none ${isDark ? 'bg-sidebar-hover text-white placeholder-sidebar-muted' : 'bg-gray-200 text-gray-800 placeholder-gray-400'}`}
               />
-              <button onClick={handleAddList} className="text-green-400">
+              <button type="button" onClick={handleAddList} className="text-green-400">
                 <Check size={14} />
               </button>
               <button
+                type="button"
                 onClick={() => {
                   setShowNewList(false)
                   setNewListFolderId(null)
@@ -398,6 +416,7 @@ export function Sidebar() {
           </div>
         </div>
         <button
+          type="button"
           onClick={() => useStore.getState().setShowAiChat(!useStore.getState().showAiChat)}
           className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors ${isDark ? 'text-sidebar-muted hover:text-white hover:bg-sidebar-hover' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'}`}
         >
@@ -405,6 +424,7 @@ export function Sidebar() {
           <span>AI 어시스턴트</span>
         </button>
         <button
+          type="button"
           onClick={toggleSettings}
           className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors ${isDark ? 'text-sidebar-muted hover:text-white hover:bg-sidebar-hover' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'}`}
         >

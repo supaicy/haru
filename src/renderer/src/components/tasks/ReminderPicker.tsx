@@ -110,6 +110,7 @@ export function ReminderPicker({
     <div className="relative">
       {/* 트리거 버튼 */}
       <button
+        type="button"
         onClick={() => setOpen(!open)}
         className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
           value
@@ -134,6 +135,7 @@ export function ReminderPicker({
           <div className="py-1">
             {QUICK_OPTIONS.map((option) => (
               <button
+                type="button"
                 key={option.label}
                 onClick={() => handleQuickOption(option)}
                 className={`w-full text-left px-4 py-2 text-sm transition-colors ${
@@ -170,6 +172,7 @@ export function ReminderPicker({
               />
             </div>
             <button
+              type="button"
               onClick={handleCustomApply}
               disabled={!customDate}
               className="w-full text-xs px-3 py-1.5 rounded bg-primary-500 text-white disabled:opacity-30 hover:bg-primary-600 transition-colors"
@@ -183,6 +186,7 @@ export function ReminderPicker({
             <>
               <div className={isDark ? 'border-t border-gray-700' : 'border-t border-gray-200'} />
               <button
+                type="button"
                 onClick={handleClear}
                 className={`w-full flex items-center gap-2 px-4 py-2 text-sm transition-colors ${
                   isDark ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-500 hover:bg-gray-100'

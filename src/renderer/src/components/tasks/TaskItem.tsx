@@ -115,6 +115,7 @@ export const TaskItem = memo(function TaskItem({ task, onDrop }: { task: Task; o
           </span>
         ) : (
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation()
               toggleTask(task.id)
@@ -188,6 +189,7 @@ export const TaskItem = memo(function TaskItem({ task, onDrop }: { task: Task; o
           onClick={(e) => e.stopPropagation()}
         >
           <button
+            type="button"
             onClick={() => {
               toggleTask(task.id)
               setContextMenu(null)
@@ -199,6 +201,7 @@ export const TaskItem = memo(function TaskItem({ task, onDrop }: { task: Task; o
           </button>
           <div className="relative">
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation()
                 setShowMoveMenu(!showMoveMenu)
@@ -214,6 +217,7 @@ export const TaskItem = memo(function TaskItem({ task, onDrop }: { task: Task; o
               >
                 {lists.map((list) => (
                   <button
+                    type="button"
                     key={list.id}
                     onClick={() => {
                       updateTask({ id: task.id, listId: list.id })
@@ -235,6 +239,7 @@ export const TaskItem = memo(function TaskItem({ task, onDrop }: { task: Task; o
             )}
           </div>
           <button
+            type="button"
             onClick={() => {
               navigator.clipboard.writeText(task.title)
               setContextMenu(null)
@@ -246,6 +251,7 @@ export const TaskItem = memo(function TaskItem({ task, onDrop }: { task: Task; o
           </button>
           <div className={`my-1 ${isDark ? 'border-t border-gray-700' : 'border-t border-gray-200'}`} />
           <button
+            type="button"
             onClick={() => {
               removeTask(task.id)
               setContextMenu(null)

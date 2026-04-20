@@ -161,6 +161,7 @@ export function TaskListView() {
           </div>
           <div className="relative">
             <button
+              type="button"
               onClick={() => setShowSort(!showSort)}
               className={`p-1.5 rounded-lg transition-colors ${isDark ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
               title="정렬"
@@ -170,6 +171,7 @@ export function TaskListView() {
             {showSort && <SortMenu onClose={() => setShowSort(false)} />}
           </div>
           <button
+            type="button"
             onClick={toggleBatchMode}
             className={`p-1.5 rounded-lg transition-colors ${batchMode ? 'text-primary-400 bg-primary-900/30' : isDark ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
             title="일괄 편집"
@@ -186,6 +188,7 @@ export function TaskListView() {
           </div>
         ) : (
           <button
+            type="button"
             onClick={() => setShowAddTask(true)}
             className="flex items-center gap-2 px-6 py-3 text-sm text-primary-500 hover:text-primary-400 transition-colors w-full"
           >
@@ -221,6 +224,7 @@ export function TaskListView() {
           >
             <p className="text-sm">할 일이 없습니다</p>
             <button
+              type="button"
               onClick={() => setShowAddTask(true)}
               className="mt-2 text-sm text-primary-500 hover:text-primary-400"
             >

@@ -65,6 +65,7 @@ export function AttachmentList({
                   {name}
                 </span>
                 <button
+                  type="button"
                   onClick={() => handleRemove(index)}
                   className={`opacity-0 group-hover:opacity-100 flex-shrink-0 transition-opacity ${
                     isDark ? 'text-gray-500 hover:text-red-400' : 'text-gray-400 hover:text-red-500'
@@ -80,6 +81,7 @@ export function AttachmentList({
 
       {/* 파일 추가 버튼 */}
       <button
+        type="button"
         onClick={handleAdd}
         className={`flex items-center gap-2 px-2 py-1.5 text-sm rounded transition-colors w-full ${
           isDark
