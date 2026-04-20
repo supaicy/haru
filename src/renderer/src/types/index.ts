@@ -109,4 +109,5 @@ export interface AiConfig {
   baseUrl: string
   model: string
   apiKey: string | null
+  maxHistoryMessages: number
 }
