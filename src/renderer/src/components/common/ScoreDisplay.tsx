@@ -87,8 +87,8 @@ export function ScoreDisplay({ compact = false }: ScoreDisplayProps) {
           {score.events
             .slice(-3)
             .reverse()
-            .map((event, i) => (
-              <div key={i} className="flex items-center justify-between">
+            .map((event) => (
+              <div key={`${event.date}-${event.type}-${event.points}`} className="flex items-center justify-between">
                 <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                   {event.type === 'taskComplete' && '태스크 완료'}
                   {event.type === 'habitComplete' && '습관 달성'}

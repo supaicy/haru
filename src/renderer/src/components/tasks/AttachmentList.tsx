@@ -52,7 +52,7 @@ export function AttachmentList({
             const { name } = parseAttachment(entry)
             return (
               <div
-                key={`${taskId}-attachment-${index}`}
+                key={`${taskId}-${entry}`}
                 className={`group flex items-center gap-2 px-2 py-1.5 rounded transition-colors ${
                   isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-100'
                 }`}

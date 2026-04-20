@@ -10,6 +10,8 @@ const MODES: { key: TimerMode; label: string; duration: number; color: string }[
   { key: 'longBreak', label: '긴 휴식', duration: 15 * 60, color: '#4A90D9' }
 ]
 
+const SESSION_DOTS = ['dot-a', 'dot-b', 'dot-c', 'dot-d'] as const
+
 export function PomodoroTimer() {
   const { theme, savePomodoroSession } = useStore()
   const isDark = theme === 'dark'
@@ -20,7 +22,7 @@ export function PomodoroTimer() {
   const [sessions, setSessions] = useState(0)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const currentMode = MODES.find((m) => m.key === mode)!
+  const currentMode = MODES.find((m) => m.key === mode) ?? MODES[0]
 
   const reset = useCallback(() => {
     setIsRunning(false)
@@ -31,7 +33,7 @@ export function PomodoroTimer() {
   const switchMode = useCallback((newMode: TimerMode) => {
     if (intervalRef.current) clearInterval(intervalRef.current)
     setIsRunning(false)
-    const m = MODES.find((m) => m.key === newMode)!
+    const m = MODES.find((m) => m.key === newMode) ?? MODES[0]
     setMode(newMode)
     setTimeLeft(m.duration)
   }, [])
@@ -39,7 +41,7 @@ export function PomodoroTimer() {
   const skipToNext = useCallback(() => {
     // 세션 완료 시 저장
     if (sessionStartRef.current) {
-      const m = MODES.find((m) => m.key === mode)!
+      const m = MODES.find((m) => m.key === mode) ?? MODES[0]
       savePomodoroSession({
         taskId: null,
         duration: m.duration,
@@ -117,6 +119,7 @@ export function PomodoroTimer() {
       {/* 원형 타이머 */}
       <div className="relative w-80 h-80 mb-10">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 300 300">
+          <title>포모도로 타이머 진행률</title>
           {/* 배경 원 */}
           <circle cx="150" cy="150" r="140" fill="none" stroke={isDark ? '#333' : '#E5E5E5'} strokeWidth="6" />
           {/* 진행 원 */}
@@ -169,9 +172,9 @@ export function PomodoroTimer() {
 
       {/* 세션 카운트 */}
       <div className="flex items-center gap-2 mt-8">
-        {Array.from({ length: 4 }).map((_, i) => (
+        {SESSION_DOTS.map((dot, i) => (
           <div
-            key={i}
+            key={dot}
             className={`w-3 h-3 rounded-full transition-colors ${
               i < sessions % 4 ? '' : isDark ? 'bg-gray-700' : 'bg-gray-300'
             }`}

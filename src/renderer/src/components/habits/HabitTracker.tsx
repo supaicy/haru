@@ -97,7 +97,7 @@ export function HabitTracker() {
         {/* 주간 날짜 헤더 */}
         <div className="flex items-center mb-4 pl-48">
           {weekDays.map((day, i) => (
-            <div key={i} className="flex-1 text-center">
+            <div key={day.toISOString()} className="flex-1 text-center">
               <div className="text-xs text-gray-500">{WEEKDAY_LABELS[i]}</div>
               <div
                 className={`text-sm mt-1 w-8 h-8 flex items-center justify-center rounded-full mx-auto ${
