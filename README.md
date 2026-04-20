@@ -40,6 +40,7 @@
 | **AI Chat** | Ask about your schedule, deadlines, and productivity with streaming responses |
 | **Natural Language Input** | "내일 장보기", "next monday meeting", "글피 치과" — Korean and English supported |
 | **Calendar** | Monthly, weekly, and daily views |
+| **Time Blocking** | Drag tasks onto calendar slots to schedule when you'll work on them — resize, move, unschedule. Recurring tasks repeat the block automatically. |
 | **Kanban Board** | Drag-and-drop tasks across To Do / In Progress / Done |
 | **Pomodoro Timer** | 25-min focus + 5-min break cycles with session history |
 | **Habit Tracker** | Daily habit checklist |
