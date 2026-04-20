@@ -55,6 +55,7 @@ export default function App() {
 
   useEffect(() => {
     loadData()
+    void useStore.getState().aiLoadHistory()
     // 자동 업데이트 이벤트 수신 (electron-updater에서 push)
     const cleanupUpdate = window.api.onUpdateAvailable?.((info) => {
       useStore.setState({ updateAvailable: info, updateChecked: true })
