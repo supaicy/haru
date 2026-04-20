@@ -60,6 +60,18 @@ describe('ai-service', () => {
       expect(config.provider).toBe('openai')
       expect(config.apiKey).toBe('••••••test')
     })
+
+    it('maxHistoryMessages 기본값은 200', async () => {
+      const ai = await loadAiService()
+      const config = ai.getAiConfig()
+      expect(config.maxHistoryMessages).toBe(200)
+    })
+
+    it('maxHistoryMessages 변경이 반영됨', async () => {
+      const ai = await loadAiService()
+      ai.setAiConfig({ maxHistoryMessages: 50 })
+      expect(ai.getAiConfig().maxHistoryMessages).toBe(50)
+    })
   })
 
   describe('createTaskFromNL', () => {
