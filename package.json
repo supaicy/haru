@@ -1,8 +1,9 @@
 {
   "name": "ticktick",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "TickTick 스타일 일정관리 macOS 앱",
   "main": "./out/main/index.js",
+  "license": "MIT",
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
