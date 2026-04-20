@@ -12,6 +12,20 @@ interface DbData {
   score: { total: number; events: Record<string, unknown>[] }
 }
 
+export function readHistoryFile(filePath: string): Record<string, unknown>[] {
+  if (!existsSync(filePath)) return []
+  try {
+    const raw = JSON.parse(readFileSync(filePath, 'utf-8'))
+    return Array.isArray(raw?.messages) ? raw.messages : []
+  } catch {
+    return []
+  }
+}
+
+export function writeHistoryFile(filePath: string, messages: Record<string, unknown>[]): void {
+  writeFileSync(filePath, JSON.stringify({ version: 1, messages }, null, 2), 'utf-8')
+}
+
 let data: DbData = {
   lists: [],
   tasks: [],
