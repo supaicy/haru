@@ -88,7 +88,20 @@ export function TaskListView() {
   if (selectedListId === 'trash') return <TrashView />
 
   return (
-    <div className={`flex-1 flex flex-col h-full ${isDark ? 'bg-[#1C1C1E]' : 'bg-white'}`}>
+    <div
+      className={`flex-1 flex flex-col h-full ${isDark ? 'bg-[#1C1C1E]' : 'bg-white'}`}
+      onDragOver={(e) => {
+        if (e.dataTransfer.types.includes('application/haru-task-block')) {
+          e.preventDefault()
+          e.dataTransfer.dropEffect = 'move'
+        }
+      }}
+      onDrop={(e) => {
+        const id = e.dataTransfer.getData('application/haru-task-block')
+        if (!id) return
+        void useStore.getState().updateTask({ id, scheduledStart: null, scheduledEnd: null })
+      }}
+    >
       <div className={`flex items-center justify-between px-6 py-4 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
         <h1 className={`text-xl font-bold ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>{listName}</h1>
         <div className="flex items-center gap-2">

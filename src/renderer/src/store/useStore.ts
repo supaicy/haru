@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { v4 as uuid } from 'uuid'
 import type { Task, TaskList, Folder, Habit, HabitLog, PomodoroSession, SmartList, ViewType, Priority, SortBy, SortDir, UndoAction, AiMessage, AiConfig } from '../types'
+import { isValidSchedulePair } from '../utils/scheduledTime'
 
 export type Theme = 'dark' | 'light'
 
@@ -145,7 +146,9 @@ function mapTask(row: Record<string, unknown>): Task {
     deletedAt: (row.deleted_at as string) || null,
     sortOrder: (row.sort_order as number) || 0,
     isRecurring: Boolean(row.is_recurring),
-    recurringPattern: (row.recurring_pattern as string) || null
+    recurringPattern: (row.recurring_pattern as string) || null,
+    scheduledStart: (row.scheduled_start as string) || null,
+    scheduledEnd: (row.scheduled_end as string) || null
   }
 }
 function mapList(row: Record<string, unknown>): TaskList {
@@ -284,7 +287,9 @@ export const useStore = create<Store>((set, get) => ({
       createdAt: now, completedAt: null, deletedAt: null,
       sortOrder: maxOrder + 1,
       isRecurring: opts.isRecurring || false,
-      recurringPattern: opts.recurringPattern || null
+      recurringPattern: opts.recurringPattern || null,
+      scheduledStart: null,
+      scheduledEnd: null
     }
     set((s) => ({ tasks: [...s.tasks, newTask] }))
 
@@ -299,6 +304,17 @@ export const useStore = create<Store>((set, get) => ({
     })
   },
   updateTask: async (task) => {
+    // Invariant guard: if the caller is changing scheduledStart/End, ensure the pair is valid
+    if ('scheduledStart' in task || 'scheduledEnd' in task) {
+      const current = get().tasks.find((t) => t.id === task.id)
+      if (!current) return
+      const nextStart = 'scheduledStart' in task ? task.scheduledStart ?? null : current.scheduledStart
+      const nextEnd = 'scheduledEnd' in task ? task.scheduledEnd ?? null : current.scheduledEnd
+      if (!isValidSchedulePair(nextStart, nextEnd)) {
+        console.warn('[updateTask] rejected invalid schedule pair', { nextStart, nextEnd })
+        return
+      }
+    }
     set((s) => ({
       tasks: s.tasks.map((t) => t.id === task.id ? { ...t, ...task } : t)
     }))

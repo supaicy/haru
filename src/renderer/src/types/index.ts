@@ -19,6 +19,8 @@ export interface Task {
   isRecurring: boolean
   recurringPattern: string | null
   attachments: string[]
+  scheduledStart: string | null
+  scheduledEnd: string | null
 }
 
 export interface TaskList {

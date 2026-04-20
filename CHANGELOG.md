@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-04-20
+
+### Added
+- **타임블로킹 (로컬)**: 작업을 Daily/Weekly 캘린더의 시간 슬롯으로 드래그해서 "언제 할지" 시간대를 직접 배정할 수 있습니다. 마감일(dueDate)과 별개로 실행 예정 시각(scheduledStart/End)을 기록합니다.
+- 캘린더 안에서 블록을 드래그해 다른 시간대로 이동 (지속시간 유지), 아래쪽 edge를 끌어 15분 단위로 리사이즈 가능.
+- 블록 우클릭 → "일정 해제" 또는 블록을 TaskList로 되돌려 놓아 해제.
+- 반복 작업은 한 번 배정한 시각이 매 발생일에 자동 반영 (예: "매주 화요일 2시~3시 회의").
+- 겹치는 블록은 Google Calendar 방식으로 나란히 렌더링 (각 블록이 사용 가능한 너비를 균등 분할).
+- 완료된 블록은 사선 줄무늬로 시각 구분.
+- 작업 상세 패널에 예정 시각 표시 (읽기 전용).
+
+### Changed
+- Weekly 캘린더 구조를 day-first 레이아웃으로 재편 — 각 요일이 독립 칼럼이 되어 레거시 `dueTime` 작업과 새 시간 블록이 한 칼럼 안에 자연스럽게 공존.
+
+### Fixed
+- Settings 모달이 렌더링되지 않던 런타임 버그(누락된 `Download` 아이콘 import) 수정.
+- `package-lock.json` 버전 불일치(1.2.1 → 1.3.3) 동기화.
+
+### Planned (Phase 2)
+- Google Calendar / iCal 양방향 동기화 — 별도 스펙 예정.
+
 ## [1.3.3] - 2026-04-01
 
 ### Changed

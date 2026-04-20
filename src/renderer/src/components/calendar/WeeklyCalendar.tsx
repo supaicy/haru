@@ -3,6 +3,9 @@ import { useStore } from '../../store/useStore'
 import { toDateString } from '../../utils/date'
 import type { Task, Priority } from '../../types'
 import { ChevronLeft, ChevronRight, Calendar, Flag } from 'lucide-react'
+import { TimeBlock } from './TimeBlock'
+import { layoutOverlappingBlocks } from '../../utils/timeBlockLayout'
+import { getScheduledForOccurrence, snapTo15Min } from '../../utils/scheduledTime'
 
 // 요일 이름
 const dayLabels = ['일', '월', '화', '수', '목', '금', '토']
@@ -12,6 +15,13 @@ const timeSlots: number[] = []
 for (let h = 8; h <= 22; h++) {
   timeSlots.push(h)
 }
+
+// Pixels per minute: derived from hour-row minHeight: '48px' below.
+// 48px / 60min = 0.8 px/min. Update if the slot row height changes.
+const PX_PER_MIN = 48 / 60
+
+// WeeklyCalendar shows 8:00 through 22:59 — i.e. [8, 23).
+const WEEK_START_HOUR = 8
 
 // 우선순위 색상 (배경용)
 const priorityBg: Record<Priority, string> = {
@@ -55,7 +65,7 @@ function parseTime(timeStr: string): { hour: number; minute: number } | null {
 }
 
 export function WeeklyCalendar(): React.ReactElement {
-  const { theme, tasks, selectTask, selectedTaskId } = useStore()
+  const { theme, tasks, selectTask, selectedTaskId, updateTask } = useStore()
   const isDark = theme === 'dark'
 
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()))
@@ -96,6 +106,25 @@ export function WeeklyCalendar(): React.ReactElement {
     }
 
     return map
+  }, [tasks, weekDays])
+
+  // Per-day scheduled blocks + overlap layout.
+  const perDay = useMemo(() => {
+    return weekDays.map((date) => {
+      const dayStr = dateToStr(date)
+      const items: { task: Task; start: Date; end: Date }[] = []
+      for (const t of tasks) {
+        if (t.deletedAt) continue
+        const sch = getScheduledForOccurrence(t, dayStr)
+        if (!sch) continue
+        if (!t.isRecurring && sch.start.slice(0, 10) !== dayStr) continue
+        items.push({ task: t, start: new Date(sch.start), end: new Date(sch.end) })
+      }
+      const layout = layoutOverlappingBlocks(
+        items.map((b) => ({ id: b.task.id, start: b.start, end: b.end }))
+      )
+      return { dayStr, items, layout }
+    })
   }, [tasks, weekDays])
 
   // 네비게이션
@@ -281,68 +310,175 @@ export function WeeklyCalendar(): React.ReactElement {
             </div>
           )}
 
-          {/* 시간 슬롯 */}
-          {timeSlots.map((hour) => (
-            <div
-              key={hour}
-              className={`flex border-b ${isDark ? 'border-gray-800' : 'border-gray-100'}`}
-              style={{ minHeight: '48px' }}
-            >
-              {/* 시간 라벨 */}
-              <div
-                className={`w-16 flex-shrink-0 text-[10px] text-right pr-2 pt-0.5 ${
-                  isDark ? 'text-gray-500' : 'text-gray-400'
-                }`}
-              >
-                {formatHour(hour)}
-              </div>
-
-              {/* 각 요일 셀 */}
-              {weekDays.map((day) => {
-                const dateStr = dateToStr(day)
-                const cellTasks = getTasksAtHour(dateStr, hour)
-                const isToday = dateStr === todayStr
-                return (
-                  <div
-                    key={`${dateStr}-${hour}`}
-                    className={`flex-1 border-l p-0.5 ${
-                      isToday
-                        ? isDark
-                          ? 'bg-blue-900/10 border-gray-700'
-                          : 'bg-blue-50/50 border-gray-200'
-                        : isDark
-                          ? 'border-gray-700'
-                          : 'border-gray-200'
-                    }`}
-                  >
-                    {cellTasks.map((task) => (
-                      <div
-                        key={task.id}
-                        onClick={() => selectTask(task.id)}
-                        className={taskCardClass(task)}
-                      >
-                        <div className="flex items-center gap-1">
-                          {task.priority !== 'none' && (
-                            <Flag size={8} className="flex-shrink-0" />
-                          )}
-                          <span className="truncate">{task.title}</span>
-                        </div>
-                        {task.dueTime && (
-                          <div
-                            className={`text-[9px] ${
-                              isDark ? 'text-gray-400' : 'text-gray-500'
-                            }`}
-                          >
-                            {task.dueTime}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )
-              })}
+          {/* 시간 슬롯 — day-first layout.
+              Left: fixed time-axis column with hour labels.
+              Right: 7 day columns, each containing:
+                - hour-cell background rows with legacy dueTime task cards
+                - an absolute TimeBlock layer offset by -WEEK_START_HOUR.
+              Drop handlers live on each day column so clicks on legacy task
+              cards (direct children of hour-cells) are not intercepted. */}
+          <div className="flex">
+            {/* Time axis column — one hour label per row, matching 48px height */}
+            <div className="w-16 flex-shrink-0">
+              {timeSlots.map((hour) => (
+                <div
+                  key={`label-${hour}`}
+                  className={`text-[10px] text-right pr-2 pt-0.5 border-b ${
+                    isDark ? 'border-gray-800 text-gray-500' : 'border-gray-100 text-gray-400'
+                  }`}
+                  style={{ height: '48px' }}
+                >
+                  {formatHour(hour)}
+                </div>
+              ))}
             </div>
-          ))}
+
+            {/* 7 day columns */}
+            {weekDays.map((day) => {
+              const dayStr = dateToStr(day)
+              const isToday = dayStr === todayStr
+              const dayBlocks = perDay.find((p) => p.dayStr === dayStr)
+              const items = dayBlocks?.items ?? []
+              const layout = dayBlocks?.layout ?? []
+              return (
+                <div
+                  key={`daycol-${dayStr}`}
+                  className={`relative flex-1 border-l ${
+                    isToday
+                      ? isDark
+                        ? 'bg-blue-900/10 border-gray-700'
+                        : 'bg-blue-50/50 border-gray-200'
+                      : isDark
+                        ? 'border-gray-700'
+                        : 'border-gray-200'
+                  }`}
+                  onDragOver={(e) => {
+                    if (
+                      e.dataTransfer.types.includes('application/haru-task-id') ||
+                      e.dataTransfer.types.includes('application/haru-task-block')
+                    ) {
+                      e.preventDefault()
+                      e.dataTransfer.dropEffect = 'move'
+                    }
+                  }}
+                  onDrop={(e) => {
+                    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
+                    const yPx = e.clientY - rect.top
+                    const minutesFromTop = yPx / PX_PER_MIN
+                    const totalMin = WEEK_START_HOUR * 60 + minutesFromTop
+                    const hour = Math.floor(totalMin / 60)
+                    const minute = Math.floor(totalMin % 60)
+                    const pad = (n: number): string => String(n).padStart(2, '0')
+                    const rawStart = `${dayStr}T${pad(hour)}:${pad(minute)}:00`
+                    const snappedStart = snapTo15Min(rawStart)
+                    const startMs = new Date(snappedStart).getTime()
+                    const dayEnd = new Date(`${dayStr}T23:59:00`).getTime()
+                    const toIso = (ms: number): string => {
+                      const d = new Date(ms)
+                      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`
+                    }
+
+                    const taskId =
+                      e.dataTransfer.getData('application/haru-task-id') ||
+                      e.dataTransfer.getData('application/haru-task-block')
+                    if (!taskId) return
+                    const existing = tasks.find((t) => t.id === taskId)
+                    if (!existing) return
+
+                    // Move of an existing block: preserve duration
+                    let endMs = startMs + 30 * 60000
+                    if (
+                      e.dataTransfer.types.includes('application/haru-task-block') &&
+                      existing.scheduledStart && existing.scheduledEnd
+                    ) {
+                      const origDur =
+                        new Date(existing.scheduledEnd).getTime() -
+                        new Date(existing.scheduledStart).getTime()
+                      endMs = startMs + origDur
+                    }
+                    const endMsClamped = Math.min(endMs, dayEnd)
+
+                    void updateTask({
+                      id: taskId,
+                      scheduledStart: snappedStart,
+                      scheduledEnd: toIso(endMsClamped)
+                    })
+                  }}
+                >
+                  {/* Background: hour-cell rows with legacy dueTime tasks */}
+                  {timeSlots.map((hour) => {
+                    const cellTasks = getTasksAtHour(dayStr, hour)
+                    return (
+                      <div
+                        key={`${dayStr}-${hour}`}
+                        className={`border-b p-0.5 ${
+                          isDark ? 'border-gray-800' : 'border-gray-100'
+                        }`}
+                        style={{ height: '48px' }}
+                      >
+                        {cellTasks.map((task) => (
+                          <div
+                            key={task.id}
+                            onClick={() => selectTask(task.id)}
+                            className={taskCardClass(task)}
+                          >
+                            <div className="flex items-center gap-1">
+                              {task.priority !== 'none' && (
+                                <Flag size={8} className="flex-shrink-0" />
+                              )}
+                              <span className="truncate">{task.title}</span>
+                            </div>
+                            {task.dueTime && (
+                              <div
+                                className={`text-[9px] ${
+                                  isDark ? 'text-gray-400' : 'text-gray-500'
+                                }`}
+                              >
+                                {task.dueTime}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  })}
+
+                  {/* TimeBlock layer: absolute, offset by -WEEK_START_HOUR * 60 * PX_PER_MIN
+                      so a block at 8:00 lands at y=0 relative to the first hour-row.
+                      pointer-events-none on the layer so empty space falls through to
+                      the column-level drop handler; each TimeBlock wrapper enables
+                      pointer-events-auto. */}
+                  <div
+                    className="absolute left-0 right-0 pointer-events-none"
+                    style={{
+                      top: `${-WEEK_START_HOUR * 60 * PX_PER_MIN}px`,
+                      height: `${24 * 60 * PX_PER_MIN}px`
+                    }}
+                  >
+                    <div className="relative w-full h-full">
+                      {items.map((b) => {
+                        const entry = layout.find((l) => l.id === b.task.id)
+                        if (!entry) return null
+                        return (
+                          <div key={b.task.id} className="pointer-events-auto">
+                            <TimeBlock
+                              task={b.task}
+                              start={b.start}
+                              end={b.end}
+                              pxPerMin={PX_PER_MIN}
+                              column={entry.column}
+                              columns={entry.columns}
+                              isDark={isDark}
+                            />
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       </div>
     </div>
