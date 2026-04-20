@@ -137,9 +137,7 @@ export function ReminderPicker({
                 key={option.label}
                 onClick={() => handleQuickOption(option)}
                 className={`w-full text-left px-4 py-2 text-sm transition-colors ${
-                  isDark
-                    ? 'text-gray-200 hover:bg-gray-700'
-                    : 'text-gray-700 hover:bg-gray-100'
+                  isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 {option.label}
@@ -152,18 +150,14 @@ export function ReminderPicker({
 
           {/* 사용자 지정 */}
           <div className="p-3">
-            <div className={`text-xs mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-              사용자 지정
-            </div>
+            <div className={`text-xs mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>사용자 지정</div>
             <div className="flex gap-2 mb-2">
               <input
                 type="date"
                 value={customDate}
                 onChange={(e) => setCustomDate(e.target.value)}
                 className={`flex-1 text-sm px-2 py-1 rounded border outline-none ${
-                  isDark
-                    ? 'bg-gray-700 border-gray-600 text-gray-200'
-                    : 'bg-white border-gray-300 text-gray-700'
+                  isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-white border-gray-300 text-gray-700'
                 }`}
               />
               <input
@@ -171,9 +165,7 @@ export function ReminderPicker({
                 value={customTime}
                 onChange={(e) => setCustomTime(e.target.value)}
                 className={`w-24 text-sm px-2 py-1 rounded border outline-none ${
-                  isDark
-                    ? 'bg-gray-700 border-gray-600 text-gray-200'
-                    : 'bg-white border-gray-300 text-gray-700'
+                  isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-white border-gray-300 text-gray-700'
                 }`}
               />
             </div>

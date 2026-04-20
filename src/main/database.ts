@@ -12,7 +12,15 @@ interface DbData {
   score: { total: number; events: Record<string, unknown>[] }
 }
 
-let data: DbData = { lists: [], tasks: [], habits: [], habitLogs: [], folders: [], pomodoroSessions: [], score: { total: 0, events: [] } }
+let data: DbData = {
+  lists: [],
+  tasks: [],
+  habits: [],
+  habitLogs: [],
+  folders: [],
+  pomodoroSessions: [],
+  score: { total: 0, events: [] }
+}
 let dbPath: string
 let attachmentsDir: string
 
@@ -59,7 +67,15 @@ function load(): DbData {
       score: raw.score || { total: 0, events: [] }
     }
   }
-  return { lists: [], tasks: [], habits: [], habitLogs: [], folders: [], pomodoroSessions: [], score: { total: 0, events: [] } }
+  return {
+    lists: [],
+    tasks: [],
+    habits: [],
+    habitLogs: [],
+    folders: [],
+    pomodoroSessions: [],
+    score: { total: 0, events: [] }
+  }
 }
 
 export function initDatabase(): void {
@@ -86,8 +102,13 @@ export function initDatabase(): void {
 
   if (!data.lists.find((l) => l.id === 'inbox')) {
     data.lists.push({
-      id: 'inbox', name: '수신함', color: '#4A90D9', icon: 'inbox',
-      folder_id: null, sort_order: 0, created_at: new Date().toISOString()
+      id: 'inbox',
+      name: '수신함',
+      color: '#4A90D9',
+      icon: 'inbox',
+      folder_id: null,
+      sort_order: 0,
+      created_at: new Date().toISOString()
     })
   }
   save()
@@ -104,11 +125,17 @@ export function createFolder(id: string, name: string): void {
 }
 export function updateFolder(id: string, name: string, collapsed: boolean): void {
   const f = data.folders.find((f) => f.id === id)
-  if (f) { f.name = name; f.collapsed = collapsed ? 1 : 0; save() }
+  if (f) {
+    f.name = name
+    f.collapsed = collapsed ? 1 : 0
+    save()
+  }
 }
 export function deleteFolder(id: string): void {
   data.folders = data.folders.filter((f) => f.id !== id)
-  data.lists.forEach((l) => { if (l.folder_id === id) l.folder_id = null })
+  data.lists.forEach((l) => {
+    if (l.folder_id === id) l.folder_id = null
+  })
   save()
 }
 
@@ -118,7 +145,15 @@ export function getLists(): unknown[] {
 }
 export function createList(id: string, name: string, color: string, icon: string, folderId: string | null): void {
   const max = data.lists.reduce((m, l) => Math.max(m, (l.sort_order as number) || 0), 0)
-  data.lists.push({ id, name, color, icon, folder_id: folderId, sort_order: max + 1, created_at: new Date().toISOString() })
+  data.lists.push({
+    id,
+    name,
+    color,
+    icon,
+    folder_id: folderId,
+    sort_order: max + 1,
+    created_at: new Date().toISOString()
+  })
   save()
 }
 export function updateList(id: string, updates: Record<string, unknown>): void {
@@ -133,7 +168,9 @@ export function updateList(id: string, updates: Record<string, unknown>): void {
 export function deleteList(id: string): void {
   if (id === 'inbox') return
   data.lists = data.lists.filter((l) => l.id !== id)
-  data.tasks.forEach((t) => { if (t.list_id === id) t.list_id = 'inbox' })
+  data.tasks.forEach((t) => {
+    if (t.list_id === id) t.list_id = 'inbox'
+  })
   save()
 }
 export function reorderLists(orderedIds: string[]): void {
@@ -158,14 +195,21 @@ export function createTask(task: Record<string, unknown>): void {
     .filter((t) => t.list_id === task.listId && !t.deleted_at)
     .reduce((m, t) => Math.max(m, (t.sort_order as number) || 0), 0)
   data.tasks.push({
-    id: task.id, title: task.title, description: task.description || '',
-    completed: 0, priority: task.priority || 'none',
-    due_date: task.dueDate || null, due_time: task.dueTime || null,
+    id: task.id,
+    title: task.title,
+    description: task.description || '',
+    completed: 0,
+    priority: task.priority || 'none',
+    due_date: task.dueDate || null,
+    due_time: task.dueTime || null,
     reminder_at: task.reminderAt || null,
-    list_id: task.listId || 'inbox', parent_id: task.parentId || null,
+    list_id: task.listId || 'inbox',
+    parent_id: task.parentId || null,
     tags: JSON.stringify(task.tags || []),
     attachments: JSON.stringify(task.attachments || []),
-    created_at: new Date().toISOString(), completed_at: null, deleted_at: null,
+    created_at: new Date().toISOString(),
+    completed_at: null,
+    deleted_at: null,
     sort_order: maxOrder + 1,
     is_recurring: task.isRecurring ? 1 : 0,
     recurring_pattern: task.recurringPattern || null,
@@ -178,11 +222,18 @@ export function updateTask(task: Record<string, unknown>): void {
   const existing = data.tasks.find((t) => t.id === task.id)
   if (!existing) return
   const fields: Record<string, string> = {
-    title: 'title', description: 'description', priority: 'priority',
-    dueDate: 'due_date', dueTime: 'due_time', reminderAt: 'reminder_at',
-    listId: 'list_id', parentId: 'parent_id',
-    isRecurring: 'is_recurring', recurringPattern: 'recurring_pattern',
-    scheduledStart: 'scheduled_start', scheduledEnd: 'scheduled_end'
+    title: 'title',
+    description: 'description',
+    priority: 'priority',
+    dueDate: 'due_date',
+    dueTime: 'due_time',
+    reminderAt: 'reminder_at',
+    listId: 'list_id',
+    parentId: 'parent_id',
+    isRecurring: 'is_recurring',
+    recurringPattern: 'recurring_pattern',
+    scheduledStart: 'scheduled_start',
+    scheduledEnd: 'scheduled_end'
   }
   for (const [key, col] of Object.entries(fields)) {
     if (task[key] !== undefined) {
@@ -207,7 +258,10 @@ export function deleteTask(id: string): void {
 }
 export function restoreTask(id: string): void {
   const task = data.tasks.find((t) => t.id === id)
-  if (task) { task.deleted_at = null; save() }
+  if (task) {
+    task.deleted_at = null
+    save()
+  }
 }
 export function permanentDeleteTask(id: string): void {
   data.tasks = data.tasks.filter((t) => t.id !== id && t.parent_id !== id)
@@ -242,10 +296,19 @@ export function batchUpdateTasks(ids: string[], updates: Record<string, unknown>
 
 // === Habits ===
 export function getHabits(): unknown[] {
-  return [...data.habits].sort((a, b) => new Date(a.created_at as string).getTime() - new Date(b.created_at as string).getTime())
+  return [...data.habits].sort(
+    (a, b) => new Date(a.created_at as string).getTime() - new Date(b.created_at as string).getTime()
+  )
 }
 export function createHabit(id: string, name: string, color: string, frequency: string, targetDays: number[]): void {
-  data.habits.push({ id, name, color, frequency, target_days: JSON.stringify(targetDays), created_at: new Date().toISOString() })
+  data.habits.push({
+    id,
+    name,
+    color,
+    frequency,
+    target_days: JSON.stringify(targetDays),
+    created_at: new Date().toISOString()
+  })
   save()
 }
 export function deleteHabit(id: string): void {
@@ -253,7 +316,9 @@ export function deleteHabit(id: string): void {
   data.habitLogs = data.habitLogs.filter((l) => l.habit_id !== id)
   save()
 }
-export function getHabitLogs(): unknown[] { return data.habitLogs }
+export function getHabitLogs(): unknown[] {
+  return data.habitLogs
+}
 export function toggleHabitLog(id: string, habitId: string, date: string): void {
   const idx = data.habitLogs.findIndex((l) => l.habit_id === habitId && l.date === date)
   if (idx >= 0) data.habitLogs.splice(idx, 1)
@@ -262,14 +327,18 @@ export function toggleHabitLog(id: string, habitId: string, date: string): void 
 }
 
 // === Pomodoro Sessions ===
-export function getPomodoroSessions(): unknown[] { return data.pomodoroSessions }
+export function getPomodoroSessions(): unknown[] {
+  return data.pomodoroSessions
+}
 export function savePomodoroSession(session: Record<string, unknown>): void {
   data.pomodoroSessions.push(session)
   save()
 }
 
 // === Score ===
-export function getScore(): unknown { return data.score }
+export function getScore(): unknown {
+  return data.score
+}
 export function addScoreEvent(event: Record<string, unknown>): void {
   data.score.events.push(event)
   data.score.total += (event.points as number) || 0
@@ -277,7 +346,9 @@ export function addScoreEvent(event: Record<string, unknown>): void {
 }
 
 // === Attachments ===
-export function getAttachmentsDir(): string { return attachmentsDir }
+export function getAttachmentsDir(): string {
+  return attachmentsDir
+}
 export function copyAttachment(sourcePath: string, destName: string): string {
   const safeName = path.basename(destName)
   const destPath = path.resolve(attachmentsDir, safeName)
@@ -312,4 +383,6 @@ export function exportData(): string {
   return JSON.stringify(data, null, 2)
 }
 
-export function closeDatabase(): void { flushSave() }
+export function closeDatabase(): void {
+  flushSave()
+}

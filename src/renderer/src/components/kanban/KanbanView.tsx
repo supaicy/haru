@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useCallback } from 'react'
+import type React from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useStore } from '../../store/useStore'
 import { toDateString } from '../../utils/date'
 import type { Task, Priority } from '../../types'
@@ -170,9 +171,7 @@ export function KanbanView(): React.ReactElement {
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       {/* 헤더 */}
       <div className={`px-6 py-4 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-        <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          칸반 보드
-        </h2>
+        <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>칸반 보드</h2>
       </div>
 
       {/* 칸반 보드 */}
@@ -189,11 +188,7 @@ export function KanbanView(): React.ReactElement {
             >
               {/* 칼럼 헤더 */}
               <div className="px-4 py-3 flex items-center justify-between">
-                <h3
-                  className={`font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}
-                >
-                  {col.title}
-                </h3>
+                <h3 className={`font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>{col.title}</h3>
                 <span
                   className={`text-xs px-2 py-0.5 rounded-full ${
                     isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'
@@ -206,11 +201,7 @@ export function KanbanView(): React.ReactElement {
               {/* 태스크 카드 목록 */}
               <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-2">
                 {colTasks.length === 0 ? (
-                  <div
-                    className={`text-center py-8 text-sm ${
-                      isDark ? 'text-gray-500' : 'text-gray-400'
-                    }`}
-                  >
+                  <div className={`text-center py-8 text-sm ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                     {col.emptyText}
                   </div>
                 ) : (
@@ -253,10 +244,7 @@ export function KanbanView(): React.ReactElement {
                           {task.completed ? (
                             <CheckCircle2 size={16} className="text-green-500" />
                           ) : (
-                            <Circle
-                              size={16}
-                              className={isDark ? 'text-gray-500' : 'text-gray-400'}
-                            />
+                            <Circle size={16} className={isDark ? 'text-gray-500' : 'text-gray-400'} />
                           )}
                         </button>
 
@@ -264,20 +252,14 @@ export function KanbanView(): React.ReactElement {
                         <div className="flex-1 min-w-0">
                           <p
                             className={`text-sm leading-snug ${
-                              task.completed
-                                ? 'line-through text-gray-500'
-                                : isDark
-                                  ? 'text-gray-200'
-                                  : 'text-gray-800'
+                              task.completed ? 'line-through text-gray-500' : isDark ? 'text-gray-200' : 'text-gray-800'
                             }`}
                           >
                             {task.title}
                           </p>
                           <div className="flex items-center gap-2 mt-1.5">
                             {/* 우선순위 */}
-                            {task.priority !== 'none' && (
-                              <Flag size={12} className={priorityColor[task.priority]} />
-                            )}
+                            {task.priority !== 'none' && <Flag size={12} className={priorityColor[task.priority]} />}
                             {/* 마감일 */}
                             {task.dueDate && (
                               <span
@@ -297,11 +279,7 @@ export function KanbanView(): React.ReactElement {
                             )}
                             {/* 태그 */}
                             {task.tags.length > 0 && (
-                              <span
-                                className={`text-xs ${
-                                  isDark ? 'text-gray-500' : 'text-gray-400'
-                                }`}
-                              >
+                              <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                                 #{task.tags[0]}
                               </span>
                             )}

@@ -32,7 +32,9 @@ function createWindow(): void {
       if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
         shell.openExternal(details.url)
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     return { action: 'deny' }
   })
 

@@ -174,7 +174,14 @@ describe('ai-service', () => {
       const ai = await loadAiService()
       const badJson = {
         action: 'create_task',
-        task: { title: '테스트', dueDate: '2026-04-01', dueTime: '14:30', priority: 'low', tags: 'not-array', subtasks: [] }
+        task: {
+          title: '테스트',
+          dueDate: '2026-04-01',
+          dueTime: '14:30',
+          priority: 'low',
+          tags: 'not-array',
+          subtasks: []
+        }
       }
       mockFetch.mockResolvedValueOnce({
         ok: true,

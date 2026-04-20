@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react'
+import type React from 'react'
+import { useMemo } from 'react'
 import { useStore } from '../../store/useStore'
 import { toDateString } from '../../utils/date'
 import type { Task, Priority } from '../../types'
@@ -44,8 +45,7 @@ export function EisenhowerMatrix(): React.ReactElement {
 
     for (const task of activeTasks) {
       const isHighPriority = task.priority === 'high' || task.priority === 'medium'
-      const isDueSoon =
-        task.dueDate !== null && task.dueDate <= soonStr
+      const isDueSoon = task.dueDate !== null && task.dueDate <= soonStr
 
       if (isHighPriority && isDueSoon) {
         doNow.push(task)
@@ -144,15 +144,9 @@ export function EisenhowerMatrix(): React.ReactElement {
         )}
       </button>
 
-      <span
-        className={`flex-1 text-xs truncate ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
-      >
-        {task.title}
-      </span>
+      <span className={`flex-1 text-xs truncate ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{task.title}</span>
 
-      {task.priority !== 'none' && (
-        <Flag size={10} className={`flex-shrink-0 ${priorityColor[task.priority]}`} />
-      )}
+      {task.priority !== 'none' && <Flag size={10} className={`flex-shrink-0 ${priorityColor[task.priority]}`} />}
 
       {task.dueDate && (
         <span
@@ -174,9 +168,7 @@ export function EisenhowerMatrix(): React.ReactElement {
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       {/* 헤더 */}
       <div className={`px-6 py-4 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-        <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          아이젠하워 매트릭스
-        </h2>
+        <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>아이젠하워 매트릭스</h2>
         <p className={`text-sm mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
           우선순위와 마감일 기반으로 자동 분류됩니다
         </p>
@@ -188,18 +180,10 @@ export function EisenhowerMatrix(): React.ReactElement {
         <div className="flex mb-2">
           <div className="w-12" />
           <div className="flex-1 flex">
-            <div
-              className={`flex-1 text-center text-xs font-medium ${
-                isDark ? 'text-gray-400' : 'text-gray-500'
-              }`}
-            >
+            <div className={`flex-1 text-center text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
               긴급
             </div>
-            <div
-              className={`flex-1 text-center text-xs font-medium ${
-                isDark ? 'text-gray-400' : 'text-gray-500'
-              }`}
-            >
+            <div className={`flex-1 text-center text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
               긴급하지 않음
             </div>
           </div>
@@ -230,30 +214,13 @@ export function EisenhowerMatrix(): React.ReactElement {
           {/* 2x2 그리드 */}
           <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-3 overflow-hidden">
             {quadrants.map((q) => (
-              <div
-                key={q.id}
-                className={`flex flex-col rounded-xl border ${q.borderColor} overflow-hidden`}
-              >
+              <div key={q.id} className={`flex flex-col rounded-xl border ${q.borderColor} overflow-hidden`}>
                 {/* 사분면 헤더 */}
                 <div className={`px-3 py-2 ${q.headerBg} flex items-center gap-2`}>
-                  <span
-                    className={isDark ? 'text-gray-300' : 'text-gray-600'}
-                  >
-                    {q.icon}
-                  </span>
+                  <span className={isDark ? 'text-gray-300' : 'text-gray-600'}>{q.icon}</span>
                   <div>
-                    <h3
-                      className={`text-sm font-medium ${
-                        isDark ? 'text-gray-200' : 'text-gray-700'
-                      }`}
-                    >
-                      {q.title}
-                    </h3>
-                    <p
-                      className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}
-                    >
-                      {q.subtitle}
-                    </p>
+                    <h3 className={`text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>{q.title}</h3>
+                    <p className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{q.subtitle}</p>
                   </div>
                   <span
                     className={`ml-auto text-xs px-1.5 py-0.5 rounded-full ${
@@ -267,13 +234,7 @@ export function EisenhowerMatrix(): React.ReactElement {
                 {/* 태스크 목록 */}
                 <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
                   {q.tasks.length === 0 ? (
-                    <div
-                      className={`text-center py-4 text-xs ${
-                        isDark ? 'text-gray-600' : 'text-gray-400'
-                      }`}
-                    >
-                      없음
-                    </div>
+                    <div className={`text-center py-4 text-xs ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>없음</div>
                   ) : (
                     q.tasks.map(renderTaskItem)
                   )}

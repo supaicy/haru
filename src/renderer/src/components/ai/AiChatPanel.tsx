@@ -51,26 +51,33 @@ export function AiChatPanel() {
   }
 
   return (
-    <div className={`flex flex-col w-80 border-l ${isDark ? 'bg-[#2C2C2E] border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+    <div
+      className={`flex flex-col w-80 border-l ${isDark ? 'bg-[#2C2C2E] border-gray-700' : 'bg-gray-50 border-gray-200'}`}
+    >
       {/* Header */}
-      <div className={`flex items-center justify-between px-4 py-3 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+      <div
+        className={`flex items-center justify-between px-4 py-3 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}
+      >
         <div className="flex items-center gap-2">
           <Bot size={18} className="text-blue-500" />
           <span className="font-medium text-sm">AI 어시스턴트</span>
-          {aiConnected === true && (
-            <span className="w-2 h-2 rounded-full bg-green-500" title="연결됨" />
-          )}
-          {aiConnected === false && (
-            <span className="w-2 h-2 rounded-full bg-red-500" title="연결 안 됨" />
-          )}
+          {aiConnected === true && <span className="w-2 h-2 rounded-full bg-green-500" title="연결됨" />}
+          {aiConnected === false && <span className="w-2 h-2 rounded-full bg-red-500" title="연결 안 됨" />}
         </div>
         <div className="flex items-center gap-1">
           {aiMessages.length > 0 && (
-            <button onClick={aiClearMessages} className={`p-1 rounded hover:${isDark ? 'bg-gray-600' : 'bg-gray-200'}`} title="대화 지우기">
+            <button
+              onClick={aiClearMessages}
+              className={`p-1 rounded hover:${isDark ? 'bg-gray-600' : 'bg-gray-200'}`}
+              title="대화 지우기"
+            >
               <Trash2 size={14} className="opacity-50" />
             </button>
           )}
-          <button onClick={() => setShowAiChat(false)} className={`p-1 rounded hover:${isDark ? 'bg-gray-600' : 'bg-gray-200'}`}>
+          <button
+            onClick={() => setShowAiChat(false)}
+            className={`p-1 rounded hover:${isDark ? 'bg-gray-600' : 'bg-gray-200'}`}
+          >
             <X size={16} />
           </button>
         </div>
@@ -79,32 +86,42 @@ export function AiChatPanel() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
         {aiConnected === false && (
-          <div className={`flex flex-col items-center gap-2 py-8 text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+          <div
+            className={`flex flex-col items-center gap-2 py-8 text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
+          >
             <WifiOff size={32} className="opacity-50" />
             <p className="text-sm font-medium">AI 서비스에 연결할 수 없습니다</p>
             <p className="text-xs opacity-70">
-              {aiConfig?.provider === 'ollama'
-                ? <>Ollama가 실행 중인지 확인하세요.<br />설치: <span className="text-blue-400">ollama.com</span></>
-                : '설정에서 API URL과 키를 확인하세요.'}
+              {aiConfig?.provider === 'ollama' ? (
+                <>
+                  Ollama가 실행 중인지 확인하세요.
+                  <br />
+                  설치: <span className="text-blue-400">ollama.com</span>
+                </>
+              ) : (
+                '설정에서 API URL과 키를 확인하세요.'
+              )}
             </p>
-            <button
-              onClick={aiCheckConnection}
-              className="mt-2 text-xs text-blue-500 hover:underline"
-            >
+            <button onClick={aiCheckConnection} className="mt-2 text-xs text-blue-500 hover:underline">
               다시 연결 시도
             </button>
           </div>
         )}
 
         {aiConnected !== false && aiMessages.length === 0 && (
-          <div className={`flex flex-col items-center gap-3 py-8 text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+          <div
+            className={`flex flex-col items-center gap-3 py-8 text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
+          >
             <Bot size={40} className="opacity-30" />
             <p className="text-sm">무엇이든 물어보세요</p>
             <div className="space-y-1">
               {['이번 주에 뭐 해야 하지?', '가장 급한 거 3개 알려줘', '오늘 뭘 완료했지?'].map((q) => (
                 <button
                   key={q}
-                  onClick={() => { setInput(q); inputRef.current?.focus() }}
+                  onClick={() => {
+                    setInput(q)
+                    inputRef.current?.focus()
+                  }}
                   className={`block w-full text-left text-xs px-3 py-1.5 rounded ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'}`}
                 >
                   {q}
@@ -125,9 +142,8 @@ export function AiChatPanel() {
                     : 'bg-gray-200 text-gray-800'
               }`}
             >
-              {msg.content || (aiLoading && msg.role === 'assistant' ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : null)}
+              {msg.content ||
+                (aiLoading && msg.role === 'assistant' ? <Loader2 size={14} className="animate-spin" /> : null)}
             </div>
           </div>
         ))}

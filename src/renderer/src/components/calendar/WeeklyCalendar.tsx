@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useCallback } from 'react'
+import type React from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useStore } from '../../store/useStore'
 import { toDateString } from '../../utils/date'
 import type { Task, Priority } from '../../types'
@@ -120,9 +121,7 @@ export function WeeklyCalendar(): React.ReactElement {
         if (!t.isRecurring && sch.start.slice(0, 10) !== dayStr) continue
         items.push({ task: t, start: new Date(sch.start), end: new Date(sch.end) })
       }
-      const layout = layoutOverlappingBlocks(
-        items.map((b) => ({ id: b.task.id, start: b.start, end: b.end }))
-      )
+      const layout = layoutOverlappingBlocks(items.map((b) => ({ id: b.task.id, start: b.start, end: b.end })))
       return { dayStr, items, layout }
     })
   }, [tasks, weekDays])
@@ -175,12 +174,7 @@ export function WeeklyCalendar(): React.ReactElement {
 
   const taskCardClass = (task: Task) => {
     const base = isDark ? priorityBg[task.priority] : priorityBgLight[task.priority]
-    const selected =
-      selectedTaskId === task.id
-        ? isDark
-          ? 'ring-1 ring-blue-500'
-          : 'ring-1 ring-blue-400'
-        : ''
+    const selected = selectedTaskId === task.id ? (isDark ? 'ring-1 ring-blue-500' : 'ring-1 ring-blue-400') : ''
     const completed = task.completed ? 'opacity-50 line-through' : ''
     return `${base} ${selected} ${completed} rounded px-1.5 py-0.5 text-[10px] leading-tight cursor-pointer border truncate`
   }
@@ -194,9 +188,7 @@ export function WeeklyCalendar(): React.ReactElement {
         }`}
       >
         <div>
-          <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {headerMonth}
-          </h2>
+          <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{headerMonth}</h2>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -245,13 +237,9 @@ export function WeeklyCalendar(): React.ReactElement {
               return (
                 <div
                   key={dateStr}
-                  className={`flex-1 text-center py-2 border-l ${
-                    isDark ? 'border-gray-700' : 'border-gray-200'
-                  }`}
+                  className={`flex-1 text-center py-2 border-l ${isDark ? 'border-gray-700' : 'border-gray-200'}`}
                 >
-                  <div
-                    className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
-                  >
+                  <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                     {dayLabels[day.getDay()]}
                   </div>
                   <div
@@ -275,9 +263,7 @@ export function WeeklyCalendar(): React.ReactElement {
             const dateStr = dateToStr(day)
             return (tasksByDate[dateStr]?.allDay.length ?? 0) > 0
           }) && (
-            <div
-              className={`flex border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}
-            >
+            <div className={`flex border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
               <div
                 className={`w-16 flex-shrink-0 text-[10px] text-right pr-2 py-1 ${
                   isDark ? 'text-gray-500' : 'text-gray-400'
@@ -296,11 +282,7 @@ export function WeeklyCalendar(): React.ReactElement {
                     }`}
                   >
                     {allDayTasks.map((task) => (
-                      <div
-                        key={task.id}
-                        onClick={() => selectTask(task.id)}
-                        className={taskCardClass(task)}
-                      >
+                      <div key={task.id} onClick={() => selectTask(task.id)} className={taskCardClass(task)}>
                         {task.title}
                       </div>
                     ))}
@@ -389,11 +371,11 @@ export function WeeklyCalendar(): React.ReactElement {
                     let endMs = startMs + 30 * 60000
                     if (
                       e.dataTransfer.types.includes('application/haru-task-block') &&
-                      existing.scheduledStart && existing.scheduledEnd
+                      existing.scheduledStart &&
+                      existing.scheduledEnd
                     ) {
                       const origDur =
-                        new Date(existing.scheduledEnd).getTime() -
-                        new Date(existing.scheduledStart).getTime()
+                        new Date(existing.scheduledEnd).getTime() - new Date(existing.scheduledStart).getTime()
                       endMs = startMs + origDur
                     }
                     const endMsClamped = Math.min(endMs, dayEnd)
@@ -411,29 +393,17 @@ export function WeeklyCalendar(): React.ReactElement {
                     return (
                       <div
                         key={`${dayStr}-${hour}`}
-                        className={`border-b p-0.5 ${
-                          isDark ? 'border-gray-800' : 'border-gray-100'
-                        }`}
+                        className={`border-b p-0.5 ${isDark ? 'border-gray-800' : 'border-gray-100'}`}
                         style={{ height: '48px' }}
                       >
                         {cellTasks.map((task) => (
-                          <div
-                            key={task.id}
-                            onClick={() => selectTask(task.id)}
-                            className={taskCardClass(task)}
-                          >
+                          <div key={task.id} onClick={() => selectTask(task.id)} className={taskCardClass(task)}>
                             <div className="flex items-center gap-1">
-                              {task.priority !== 'none' && (
-                                <Flag size={8} className="flex-shrink-0" />
-                              )}
+                              {task.priority !== 'none' && <Flag size={8} className="flex-shrink-0" />}
                               <span className="truncate">{task.title}</span>
                             </div>
                             {task.dueTime && (
-                              <div
-                                className={`text-[9px] ${
-                                  isDark ? 'text-gray-400' : 'text-gray-500'
-                                }`}
-                              >
+                              <div className={`text-[9px] ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                                 {task.dueTime}
                               </div>
                             )}

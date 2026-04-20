@@ -1,21 +1,41 @@
-import { addDays, addWeeks, addMonths, nextMonday, nextTuesday, nextWednesday, nextThursday, nextFriday, nextSaturday, nextSunday, startOfDay, format } from 'date-fns'
+import {
+  addDays,
+  addWeeks,
+  addMonths,
+  nextMonday,
+  nextTuesday,
+  nextWednesday,
+  nextThursday,
+  nextFriday,
+  nextSaturday,
+  nextSunday,
+  startOfDay,
+  format
+} from 'date-fns'
 
 const DAY_MAP: Record<string, number> = {
-  '일요일': 0, '일': 0,
-  '월요일': 1, '월': 1,
-  '화요일': 2, '화': 2,
-  '수요일': 3, '수': 3,
-  '목요일': 4, '목': 4,
-  '금요일': 5, '금': 5,
-  '토요일': 6, '토': 6,
+  일요일: 0,
+  일: 0,
+  월요일: 1,
+  월: 1,
+  화요일: 2,
+  화: 2,
+  수요일: 3,
+  수: 3,
+  목요일: 4,
+  목: 4,
+  금요일: 5,
+  금: 5,
+  토요일: 6,
+  토: 6
 }
 
 const NEXT_DAY_FN = [nextSunday, nextMonday, nextTuesday, nextWednesday, nextThursday, nextFriday, nextSaturday]
 
 export interface ParsedDateTime {
-  date: string       // "YYYY-MM-DD"
+  date: string // "YYYY-MM-DD"
   time: string | null // "HH:MM" 또는 null
-  consumed: number   // 소비된 단어 수
+  consumed: number // 소비된 단어 수
 }
 
 /**
@@ -231,7 +251,7 @@ function parseDateExpression(text: string, today: Date): string | null {
   if (monthDay) {
     const m = parseInt(monthDay[1]) - 1
     const d = parseInt(monthDay[2])
-    let year = today.getFullYear()
+    const year = today.getFullYear()
     let date = new Date(year, m, d)
     if (date < today) date = new Date(year + 1, m, d)
     return fmt(date)
@@ -262,7 +282,7 @@ export function getDateSuggestions(input: string): { label: string; date: string
   const defaults = [
     { label: '오늘', text: '오늘' },
     { label: '내일', text: '내일' },
-    { label: '다음 주', text: '다음주' },
+    { label: '다음 주', text: '다음주' }
   ]
 
   for (const d of defaults) {

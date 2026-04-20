@@ -57,9 +57,7 @@ export function SortMenu({ onClose }: SortMenuProps = {}) {
       >
         <ArrowUpDown size={14} />
         {currentLabel}
-        {sortBy !== 'default' && (
-          sortDir === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />
-        )}
+        {sortBy !== 'default' && (sortDir === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />)}
       </button>
 
       {/* 드롭다운 */}

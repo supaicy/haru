@@ -1,6 +1,21 @@
 import { create } from 'zustand'
 import { v4 as uuid } from 'uuid'
-import type { Task, TaskList, Folder, Habit, HabitLog, PomodoroSession, SmartList, ViewType, Priority, SortBy, SortDir, UndoAction, AiMessage, AiConfig } from '../types'
+import type {
+  Task,
+  TaskList,
+  Folder,
+  Habit,
+  HabitLog,
+  PomodoroSession,
+  SmartList,
+  ViewType,
+  Priority,
+  SortBy,
+  SortDir,
+  UndoAction,
+  AiMessage,
+  AiConfig
+} from '../types'
 import { isValidSchedulePair } from '../utils/scheduledTime'
 
 export type Theme = 'dark' | 'light'
@@ -55,7 +70,19 @@ interface Store {
   reorderLists: (ids: string[]) => Promise<void>
 
   // 태스크
-  addTask: (title: string, opts?: { listId?: string; dueDate?: string | null; priority?: Priority; parentId?: string | null; dueTime?: string | null; reminderAt?: string | null; isRecurring?: boolean; recurringPattern?: string | null }) => Promise<void>
+  addTask: (
+    title: string,
+    opts?: {
+      listId?: string
+      dueDate?: string | null
+      priority?: Priority
+      parentId?: string | null
+      dueTime?: string | null
+      reminderAt?: string | null
+      isRecurring?: boolean
+      recurringPattern?: string | null
+    }
+  ) => Promise<void>
   updateTask: (task: Partial<Task> & { id: string }) => Promise<void>
   toggleTask: (id: string) => Promise<void>
   removeTask: (id: string) => Promise<void>
@@ -124,7 +151,13 @@ interface Store {
   aiSaveConfig: (updates: Partial<AiConfig>) => Promise<void>
   aiSendMessage: (message: string) => Promise<void>
   aiClearMessages: () => void
-  aiCreateTaskFromNL: (input: string) => Promise<{ title: string; dueDate: string | null; dueTime: string | null; priority: Priority; subtasks: { title: string; dueDate: string | null }[] } | null>
+  aiCreateTaskFromNL: (input: string) => Promise<{
+    title: string
+    dueDate: string | null
+    dueTime: string | null
+    priority: Priority
+    subtasks: { title: string; dueDate: string | null }[]
+  } | null>
 }
 
 function mapTask(row: Record<string, unknown>): Task {
@@ -152,44 +185,103 @@ function mapTask(row: Record<string, unknown>): Task {
   }
 }
 function mapList(row: Record<string, unknown>): TaskList {
-  return { id: row.id as string, name: row.name as string, color: row.color as string, icon: row.icon as string, folderId: (row.folder_id as string) || null, sortOrder: (row.sort_order as number) || 0, createdAt: row.created_at as string }
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    color: row.color as string,
+    icon: row.icon as string,
+    folderId: (row.folder_id as string) || null,
+    sortOrder: (row.sort_order as number) || 0,
+    createdAt: row.created_at as string
+  }
 }
 function mapFolder(row: Record<string, unknown>): Folder {
-  return { id: row.id as string, name: row.name as string, collapsed: Boolean(row.collapsed), sortOrder: (row.sort_order as number) || 0, createdAt: row.created_at as string }
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    collapsed: Boolean(row.collapsed),
+    sortOrder: (row.sort_order as number) || 0,
+    createdAt: row.created_at as string
+  }
 }
 function mapHabit(row: Record<string, unknown>): Habit {
-  return { id: row.id as string, name: row.name as string, color: row.color as string, frequency: row.frequency as 'daily' | 'weekly', targetDays: safeParseArray<number>(row.target_days as string), createdAt: row.created_at as string }
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    color: row.color as string,
+    frequency: row.frequency as 'daily' | 'weekly',
+    targetDays: safeParseArray<number>(row.target_days as string),
+    createdAt: row.created_at as string
+  }
 }
 function mapHabitLog(row: Record<string, unknown>): HabitLog {
-  return { id: row.id as string, habitId: row.habit_id as string, date: row.date as string, completed: Boolean(row.completed) }
+  return {
+    id: row.id as string,
+    habitId: row.habit_id as string,
+    date: row.date as string,
+    completed: Boolean(row.completed)
+  }
 }
 function mapPomodoroSession(row: Record<string, unknown>): PomodoroSession {
-  return { id: row.id as string, taskId: (row.taskId as string) || null, duration: row.duration as number, type: row.type as 'work' | 'break', startedAt: row.startedAt as string, completedAt: (row.completedAt as string) || null }
+  return {
+    id: row.id as string,
+    taskId: (row.taskId as string) || null,
+    duration: row.duration as number,
+    type: row.type as 'work' | 'break',
+    startedAt: row.startedAt as string,
+    completedAt: (row.completedAt as string) || null
+  }
 }
 function safeParseArray<T = unknown>(s: string | undefined | null): T[] {
-  try { return JSON.parse(s || '[]') as T[] } catch { return [] }
+  try {
+    return JSON.parse(s || '[]') as T[]
+  } catch {
+    return []
+  }
 }
 
 export const useStore = create<Store>((set, get) => ({
-  tasks: [], trashTasks: [], lists: [], folders: [], habits: [], habitLogs: [],
-  pomodoroSessions: [], score: { total: 0, events: [] },
-  selectedListId: 'today', selectedTaskId: null, viewType: 'tasks',
-  searchQuery: '', showAddTask: false, editingListId: null,
+  tasks: [],
+  trashTasks: [],
+  lists: [],
+  folders: [],
+  habits: [],
+  habitLogs: [],
+  pomodoroSessions: [],
+  score: { total: 0, events: [] },
+  selectedListId: 'today',
+  selectedTaskId: null,
+  viewType: 'tasks',
+  searchQuery: '',
+  showAddTask: false,
+  editingListId: null,
   theme: (localStorage.getItem('ticktick-theme') as Theme) || 'dark',
-  showSettings: false, sortBy: 'default', sortDir: 'asc',
-  batchSelectedIds: [], batchMode: false,
-  undoStack: [], showQuickAdd: false, showExport: false, dragTaskId: null,
+  showSettings: false,
+  sortBy: 'default',
+  sortDir: 'asc',
+  batchSelectedIds: [],
+  batchMode: false,
+  undoStack: [],
+  showQuickAdd: false,
+  showExport: false,
+  dragTaskId: null,
   updateAvailable: null as { version: string; downloadUrl: string } | null,
   updateChecked: false,
   updateDownloadProgress: null as number | null,
   updateReady: false,
 
   loadData: async () => {
-    const [rawLists, rawTasks, rawTrash, rawHabits, rawHabitLogs, rawFolders, rawSessions, rawScore] = await Promise.all([
-      window.api.getLists(), window.api.getTasks(), window.api.getTrashTasks(),
-      window.api.getHabits(), window.api.getHabitLogs(), window.api.getFolders(),
-      window.api.getPomodoroSessions(), window.api.getScore()
-    ])
+    const [rawLists, rawTasks, rawTrash, rawHabits, rawHabitLogs, rawFolders, rawSessions, rawScore] =
+      await Promise.all([
+        window.api.getLists(),
+        window.api.getTasks(),
+        window.api.getTrashTasks(),
+        window.api.getHabits(),
+        window.api.getHabitLogs(),
+        window.api.getFolders(),
+        window.api.getPomodoroSessions(),
+        window.api.getScore()
+      ])
     set({
       lists: (rawLists as Record<string, unknown>[]).map(mapList),
       tasks: (rawTasks as Record<string, unknown>[]).map(mapTask),
@@ -213,31 +305,40 @@ export const useStore = create<Store>((set, get) => ({
   },
   updateFolder: async (id, name, collapsed) => {
     set((s) => ({
-      folders: s.folders.map((f) => f.id === id ? { ...f, name, collapsed } : f)
+      folders: s.folders.map((f) => (f.id === id ? { ...f, name, collapsed } : f))
     }))
     window.api.updateFolder(id, name, collapsed)
   },
   removeFolder: async (id) => {
     set((s) => ({
       folders: s.folders.filter((f) => f.id !== id),
-      lists: s.lists.map((l) => l.folderId === id ? { ...l, folderId: null } : l)
+      lists: s.lists.map((l) => (l.folderId === id ? { ...l, folderId: null } : l))
     }))
     window.api.deleteFolder(id)
   },
 
   // === 리스트 ===
-  setSelectedList: (id) => set({ selectedListId: id, selectedTaskId: null, viewType: 'tasks', batchMode: false, batchSelectedIds: [] }),
+  setSelectedList: (id) =>
+    set({ selectedListId: id, selectedTaskId: null, viewType: 'tasks', batchMode: false, batchSelectedIds: [] }),
   addList: async (name, color, folderId) => {
     const id = uuid()
     const now = new Date().toISOString()
     const maxOrder = get().lists.reduce((m, l) => Math.max(m, l.sortOrder || 0), 0)
-    const newList: TaskList = { id, name, color, icon: 'list', folderId: folderId || null, sortOrder: maxOrder + 1, createdAt: now }
+    const newList: TaskList = {
+      id,
+      name,
+      color,
+      icon: 'list',
+      folderId: folderId || null,
+      sortOrder: maxOrder + 1,
+      createdAt: now
+    }
     set((s) => ({ lists: [...s.lists, newList] }))
     window.api.createList(id, name, color, 'list', folderId || null)
   },
   updateList: async (id, updates) => {
     set((s) => ({
-      lists: s.lists.map((l) => l.id === id ? { ...l, ...updates } : l)
+      lists: s.lists.map((l) => (l.id === id ? { ...l, ...updates } : l))
     }))
     const mapped: Record<string, unknown> = {}
     if (updates.name !== undefined) mapped.name = updates.name
@@ -249,7 +350,7 @@ export const useStore = create<Store>((set, get) => ({
   removeList: async (id) => {
     set((s) => ({
       lists: s.lists.filter((l) => l.id !== id),
-      tasks: s.tasks.map((t) => t.listId === id ? { ...t, listId: 'inbox' } : t),
+      tasks: s.tasks.map((t) => (t.listId === id ? { ...t, listId: 'inbox' } : t)),
       selectedListId: s.selectedListId === id ? 'inbox' : s.selectedListId
     }))
     window.api.deleteList(id)
@@ -257,10 +358,12 @@ export const useStore = create<Store>((set, get) => ({
   setEditingList: (id) => set({ editingListId: id }),
   reorderLists: async (ids) => {
     set((s) => ({
-      lists: s.lists.map((l) => {
-        const idx = ids.indexOf(l.id)
-        return idx >= 0 ? { ...l, sortOrder: idx } : l
-      }).sort((a, b) => a.sortOrder - b.sortOrder)
+      lists: s.lists
+        .map((l) => {
+          const idx = ids.indexOf(l.id)
+          return idx >= 0 ? { ...l, sortOrder: idx } : l
+        })
+        .sort((a, b) => a.sortOrder - b.sortOrder)
     }))
     window.api.reorderLists(ids)
   },
@@ -269,22 +372,33 @@ export const useStore = create<Store>((set, get) => ({
   addTask: async (title, opts = {}) => {
     const currentList = get().selectedListId
     const smartLists = ['today', 'next7days', 'all', 'completed', 'inbox', 'trash']
-    const targetList = opts.listId || (typeof currentList === 'string' && !smartLists.includes(currentList) ? currentList : 'inbox')
+    const targetList =
+      opts.listId || (typeof currentList === 'string' && !smartLists.includes(currentList) ? currentList : 'inbox')
     let finalDueDate = opts.dueDate || null
     if (!finalDueDate && currentList === 'today') finalDueDate = new Date().toISOString().split('T')[0]
 
     const id = uuid()
     const now = new Date().toISOString()
-    const maxOrder = get().tasks.filter((t) => t.listId === targetList).reduce((m, t) => Math.max(m, t.sortOrder || 0), 0)
+    const maxOrder = get()
+      .tasks.filter((t) => t.listId === targetList)
+      .reduce((m, t) => Math.max(m, t.sortOrder || 0), 0)
 
     const newTask: Task = {
-      id, title, description: '', completed: false,
+      id,
+      title,
+      description: '',
+      completed: false,
       priority: opts.priority || 'none',
-      dueDate: finalDueDate, dueTime: opts.dueTime || null,
+      dueDate: finalDueDate,
+      dueTime: opts.dueTime || null,
       reminderAt: opts.reminderAt || null,
-      listId: targetList, parentId: opts.parentId || null,
-      tags: [], attachments: [],
-      createdAt: now, completedAt: null, deletedAt: null,
+      listId: targetList,
+      parentId: opts.parentId || null,
+      tags: [],
+      attachments: [],
+      createdAt: now,
+      completedAt: null,
+      deletedAt: null,
       sortOrder: maxOrder + 1,
       isRecurring: opts.isRecurring || false,
       recurringPattern: opts.recurringPattern || null,
@@ -294,11 +408,17 @@ export const useStore = create<Store>((set, get) => ({
     set((s) => ({ tasks: [...s.tasks, newTask] }))
 
     window.api.createTask({
-      id, title, description: '', priority: opts.priority || 'none',
-      dueDate: finalDueDate, dueTime: opts.dueTime || null,
+      id,
+      title,
+      description: '',
+      priority: opts.priority || 'none',
+      dueDate: finalDueDate,
+      dueTime: opts.dueTime || null,
       reminderAt: opts.reminderAt || null,
-      listId: targetList, parentId: opts.parentId || null,
-      tags: [], attachments: [],
+      listId: targetList,
+      parentId: opts.parentId || null,
+      tags: [],
+      attachments: [],
       isRecurring: opts.isRecurring || false,
       recurringPattern: opts.recurringPattern || null
     })
@@ -308,15 +428,15 @@ export const useStore = create<Store>((set, get) => ({
     if ('scheduledStart' in task || 'scheduledEnd' in task) {
       const current = get().tasks.find((t) => t.id === task.id)
       if (!current) return
-      const nextStart = 'scheduledStart' in task ? task.scheduledStart ?? null : current.scheduledStart
-      const nextEnd = 'scheduledEnd' in task ? task.scheduledEnd ?? null : current.scheduledEnd
+      const nextStart = 'scheduledStart' in task ? (task.scheduledStart ?? null) : current.scheduledStart
+      const nextEnd = 'scheduledEnd' in task ? (task.scheduledEnd ?? null) : current.scheduledEnd
       if (!isValidSchedulePair(nextStart, nextEnd)) {
         console.warn('[updateTask] rejected invalid schedule pair', { nextStart, nextEnd })
         return
       }
     }
     set((s) => ({
-      tasks: s.tasks.map((t) => t.id === task.id ? { ...t, ...task } : t)
+      tasks: s.tasks.map((t) => (t.id === task.id ? { ...t, ...task } : t))
     }))
     window.api.updateTask(task)
   },
@@ -327,7 +447,7 @@ export const useStore = create<Store>((set, get) => ({
     const completedAt = newCompleted ? new Date().toISOString() : null
 
     set((s) => ({
-      tasks: s.tasks.map((t) => t.id === id ? { ...t, completed: newCompleted, completedAt } : t)
+      tasks: s.tasks.map((t) => (t.id === id ? { ...t, completed: newCompleted, completedAt } : t))
     }))
     window.api.updateTask({ id, completed: newCompleted })
 
@@ -344,7 +464,10 @@ export const useStore = create<Store>((set, get) => ({
     const now = new Date().toISOString()
     set((s) => {
       const subtasks = s.tasks.filter((t) => t.parentId === id)
-      const deletedItems = [...(task ? [{ ...task, deletedAt: now }] : []), ...subtasks.map((t) => ({ ...t, deletedAt: now }))]
+      const deletedItems = [
+        ...(task ? [{ ...task, deletedAt: now }] : []),
+        ...subtasks.map((t) => ({ ...t, deletedAt: now }))
+      ]
       return {
         tasks: s.tasks.filter((t) => t.id !== id && t.parentId !== id),
         trashTasks: [...s.trashTasks, ...deletedItems],
@@ -390,11 +513,12 @@ export const useStore = create<Store>((set, get) => ({
 
   // === 일괄 ===
   toggleBatchMode: () => set((s) => ({ batchMode: !s.batchMode, batchSelectedIds: [] })),
-  toggleBatchSelect: (id) => set((s) => ({
-    batchSelectedIds: s.batchSelectedIds.includes(id)
-      ? s.batchSelectedIds.filter((i) => i !== id)
-      : [...s.batchSelectedIds, id]
-  })),
+  toggleBatchSelect: (id) =>
+    set((s) => ({
+      batchSelectedIds: s.batchSelectedIds.includes(id)
+        ? s.batchSelectedIds.filter((i) => i !== id)
+        : [...s.batchSelectedIds, id]
+    })),
   selectAllBatch: () => {
     const { tasks, selectedListId } = get()
     const filtered = getFilteredTaskIds(tasks, selectedListId)
@@ -405,8 +529,9 @@ export const useStore = create<Store>((set, get) => ({
     const ids = get().batchSelectedIds
     const now = new Date().toISOString()
     set((s) => ({
-      tasks: s.tasks.map((t) => ids.includes(t.id) ? { ...t, completed: true, completedAt: now } : t),
-      batchSelectedIds: [], batchMode: false
+      tasks: s.tasks.map((t) => (ids.includes(t.id) ? { ...t, completed: true, completedAt: now } : t)),
+      batchSelectedIds: [],
+      batchMode: false
     }))
     window.api.batchUpdateTasks(ids, { completed: true })
   },
@@ -420,22 +545,24 @@ export const useStore = create<Store>((set, get) => ({
     set((s) => ({
       tasks: s.tasks.filter((t) => !allDeletedIds.includes(t.id)),
       trashTasks: [...s.trashTasks, ...deletedTasks.map((t) => ({ ...t, deletedAt: now }))],
-      batchSelectedIds: [], batchMode: false
+      batchSelectedIds: [],
+      batchMode: false
     }))
     window.api.batchUpdateTasks(allDeletedIds, { deleted: true })
   },
   batchMove: async (listId) => {
     const ids = get().batchSelectedIds
     set((s) => ({
-      tasks: s.tasks.map((t) => ids.includes(t.id) ? { ...t, listId } : t),
-      batchSelectedIds: [], batchMode: false
+      tasks: s.tasks.map((t) => (ids.includes(t.id) ? { ...t, listId } : t)),
+      batchSelectedIds: [],
+      batchMode: false
     }))
     window.api.batchUpdateTasks(ids, { listId })
   },
   batchSetPriority: async (priority) => {
     const ids = get().batchSelectedIds
     set((s) => ({
-      tasks: s.tasks.map((t) => ids.includes(t.id) ? { ...t, priority } : t),
+      tasks: s.tasks.map((t) => (ids.includes(t.id) ? { ...t, priority } : t)),
       batchSelectedIds: []
     }))
     window.api.batchUpdateTasks(ids, { priority })
@@ -448,7 +575,10 @@ export const useStore = create<Store>((set, get) => ({
   // === 뷰 ===
   setViewType: (type) => set({ viewType: type, selectedTaskId: null }),
   setSearchQuery: (query) => set({ searchQuery: query }),
-  setTheme: (theme) => { localStorage.setItem('ticktick-theme', theme); set({ theme }) },
+  setTheme: (theme) => {
+    localStorage.setItem('ticktick-theme', theme)
+    set({ theme })
+  },
   toggleSettings: () => set((s) => ({ showSettings: !s.showSettings })),
   setShowQuickAdd: (show) => set({ showQuickAdd: show }),
   setShowExport: (show) => set({ showExport: show }),
@@ -561,7 +691,7 @@ export const useStore = create<Store>((set, get) => ({
   },
   aiCheckConnection: async () => {
     try {
-      const result = await window.api.aiCheckConnection() as { connected: boolean }
+      const result = (await window.api.aiCheckConnection()) as { connected: boolean }
       set({ aiConnected: result.connected })
     } catch {
       set({ aiConnected: false })
@@ -569,13 +699,15 @@ export const useStore = create<Store>((set, get) => ({
   },
   aiLoadConfig: async () => {
     try {
-      const config = await window.api.aiGetConfig() as AiConfig
+      const config = (await window.api.aiGetConfig()) as AiConfig
       set({ aiConfig: config })
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   },
   aiSaveConfig: async (updates) => {
     await window.api.aiSetConfig(updates)
-    const config = await window.api.aiGetConfig() as AiConfig
+    const config = (await window.api.aiGetConfig()) as AiConfig
     set({ aiConfig: config })
   },
   aiSendMessage: async (message) => {
@@ -600,12 +732,14 @@ export const useStore = create<Store>((set, get) => ({
       aiLoading: true
     }))
 
-    const tasks = get().tasks.slice(0, 50).map((t) => ({
-      title: t.title,
-      dueDate: t.dueDate,
-      priority: t.priority,
-      completed: t.completed
-    }))
+    const tasks = get()
+      .tasks.slice(0, 50)
+      .map((t) => ({
+        title: t.title,
+        dueDate: t.dueDate,
+        priority: t.priority,
+        completed: t.completed
+      }))
 
     // 리스너를 스트림 호출 전에 등록 (레이스 컨디션 방지)
     const cleanup = () => {
@@ -617,9 +751,7 @@ export const useStore = create<Store>((set, get) => ({
 
     const cleanupToken = window.api.onAiStreamToken?.((token: string) => {
       set((s) => ({
-        aiMessages: s.aiMessages.map((m) =>
-          m.id === assistantMsg.id ? { ...m, content: m.content + token } : m
-        )
+        aiMessages: s.aiMessages.map((m) => (m.id === assistantMsg.id ? { ...m, content: m.content + token } : m))
       }))
     })
     const cleanupDone = window.api.onAiStreamDone?.(() => {
@@ -629,9 +761,7 @@ export const useStore = create<Store>((set, get) => ({
     const cleanupError = window.api.onAiStreamError?.((error: string) => {
       set((s) => ({
         aiLoading: false,
-        aiMessages: s.aiMessages.map((m) =>
-          m.id === assistantMsg.id ? { ...m, content: `오류: ${error}` } : m
-        )
+        aiMessages: s.aiMessages.map((m) => (m.id === assistantMsg.id ? { ...m, content: `오류: ${error}` } : m))
       }))
       cleanup()
     })
@@ -652,16 +782,25 @@ export const useStore = create<Store>((set, get) => ({
   },
   aiClearMessages: () => set({ aiMessages: [] }),
   aiCreateTaskFromNL: async (input) => {
-    const tasks = get().tasks.slice(0, 50).map((t) => ({
-      title: t.title,
-      dueDate: t.dueDate,
-      priority: t.priority,
-      completed: t.completed
-    }))
+    const tasks = get()
+      .tasks.slice(0, 50)
+      .map((t) => ({
+        title: t.title,
+        dueDate: t.dueDate,
+        priority: t.priority,
+        completed: t.completed
+      }))
     try {
-      const result = await window.api.aiCreateTask(input, tasks) as {
+      const result = (await window.api.aiCreateTask(input, tasks)) as {
         action: string
-        task: { title: string; dueDate: string | null; dueTime: string | null; priority: Priority; tags: string[]; subtasks: { title: string; dueDate: string | null }[] }
+        task: {
+          title: string
+          dueDate: string | null
+          dueTime: string | null
+          priority: Priority
+          tags: string[]
+          subtasks: { title: string; dueDate: string | null }[]
+        }
       }
       return result.task
     } catch {
@@ -675,10 +814,15 @@ function getFilteredTaskIds(tasks: Task[], listId: string | SmartList): string[]
   const todayStr = now.toISOString().split('T')[0]
   const next7 = new Date(now.getTime() + 7 * 86400000).toISOString().split('T')[0]
   switch (listId) {
-    case 'today': return tasks.filter((t) => !t.completed && t.dueDate && t.dueDate <= todayStr).map((t) => t.id)
-    case 'next7days': return tasks.filter((t) => !t.completed && t.dueDate && t.dueDate <= next7).map((t) => t.id)
-    case 'all': return tasks.filter((t) => !t.completed).map((t) => t.id)
-    case 'completed': return tasks.filter((t) => t.completed).map((t) => t.id)
-    default: return tasks.filter((t) => t.listId === listId && !t.completed).map((t) => t.id)
+    case 'today':
+      return tasks.filter((t) => !t.completed && t.dueDate && t.dueDate <= todayStr).map((t) => t.id)
+    case 'next7days':
+      return tasks.filter((t) => !t.completed && t.dueDate && t.dueDate <= next7).map((t) => t.id)
+    case 'all':
+      return tasks.filter((t) => !t.completed).map((t) => t.id)
+    case 'completed':
+      return tasks.filter((t) => t.completed).map((t) => t.id)
+    default:
+      return tasks.filter((t) => t.listId === listId && !t.completed).map((t) => t.id)
   }
 }

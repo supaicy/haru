@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react'
+import type React from 'react'
+import { useMemo } from 'react'
 import { useStore } from '../../store/useStore'
 import { toDateString } from '../../utils/date'
 import type { Task, Priority } from '../../types'
@@ -141,20 +142,14 @@ export function TimelineView(): React.ReactElement {
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       {/* 헤더 */}
       <div className={`px-6 py-4 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-        <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          타임라인
-        </h2>
-        <p className={`text-sm mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-          {totalTasks}개의 할 일
-        </p>
+        <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>타임라인</h2>
+        <p className={`text-sm mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{totalTasks}개의 할 일</p>
       </div>
 
       {/* 타임라인 본문 */}
       <div className="flex-1 overflow-y-auto p-6">
         {groups.length === 0 ? (
-          <div
-            className={`text-center py-16 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}
-          >
+          <div className={`text-center py-16 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
             <Clock size={40} className="mx-auto mb-3 opacity-50" />
             <p>할 일이 없습니다</p>
           </div>
@@ -165,9 +160,7 @@ export function TimelineView(): React.ReactElement {
                 {/* 세로 타임라인 선 */}
                 {groupIdx < groups.length - 1 && (
                   <div
-                    className={`absolute left-[11px] top-6 bottom-0 w-0.5 ${
-                      isDark ? 'bg-gray-700' : 'bg-gray-200'
-                    }`}
+                    className={`absolute left-[11px] top-6 bottom-0 w-0.5 ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}
                   />
                 )}
 
@@ -180,14 +173,10 @@ export function TimelineView(): React.ReactElement {
 
                 {/* 그룹 라벨 */}
                 <div className="mb-3">
-                  <h3
-                    className={`text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}
-                  >
+                  <h3 className={`text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                     {group.label}
                   </h3>
-                  <span
-                    className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}
-                  >
+                  <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                     {group.tasks.length}개
                   </span>
                 </div>
@@ -219,45 +208,28 @@ export function TimelineView(): React.ReactElement {
                         {task.completed ? (
                           <CheckCircle2 size={16} className="text-green-500" />
                         ) : (
-                          <Circle
-                            size={16}
-                            className={isDark ? 'text-gray-500' : 'text-gray-400'}
-                          />
+                          <Circle size={16} className={isDark ? 'text-gray-500' : 'text-gray-400'} />
                         )}
                       </button>
 
                       {/* 제목 */}
-                      <span
-                        className={`flex-1 text-sm truncate ${
-                          isDark ? 'text-gray-200' : 'text-gray-800'
-                        }`}
-                      >
+                      <span className={`flex-1 text-sm truncate ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
                         {task.title}
                       </span>
 
                       {/* 우선순위 */}
-                      {task.priority !== 'none' && (
-                        <Flag size={12} className={priorityColor[task.priority]} />
-                      )}
+                      {task.priority !== 'none' && <Flag size={12} className={priorityColor[task.priority]} />}
 
                       {/* 시간 */}
                       {task.dueTime && (
-                        <span
-                          className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
-                        >
-                          {task.dueTime}
-                        </span>
+                        <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{task.dueTime}</span>
                       )}
 
                       {/* 날짜 */}
                       {task.dueDate && (
                         <span
                           className={`text-xs ${
-                            group.id === 'overdue'
-                              ? 'text-red-500'
-                              : isDark
-                                ? 'text-gray-500'
-                                : 'text-gray-400'
+                            group.id === 'overdue' ? 'text-red-500' : isDark ? 'text-gray-500' : 'text-gray-400'
                           }`}
                         >
                           {task.dueDate}

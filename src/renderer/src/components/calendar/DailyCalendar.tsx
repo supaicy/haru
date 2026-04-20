@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useCallback } from 'react'
+import type React from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useStore } from '../../store/useStore'
 import { toDateString } from '../../utils/date'
 import type { Task, Priority } from '../../types'
@@ -87,9 +88,7 @@ export function DailyCalendar(): React.ReactElement {
 
   // 해당 날짜의 태스크
   const { allDayTasks, timedTasks } = useMemo(() => {
-    const dayTasks = tasks.filter(
-      (t) => !t.deletedAt && t.dueDate === dateStr
-    )
+    const dayTasks = tasks.filter((t) => !t.deletedAt && t.dueDate === dateStr)
 
     const allDay: Task[] = []
     const timed: Task[] = []
@@ -160,12 +159,8 @@ export function DailyCalendar(): React.ReactElement {
         }`}
       >
         <div>
-          <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {headerText}
-          </h2>
-          {isToday && (
-            <span className="text-xs text-blue-500 font-medium">오늘</span>
-          )}
+          <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{headerText}</h2>
+          {isToday && <span className="text-xs text-blue-500 font-medium">오늘</span>}
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -201,32 +196,16 @@ export function DailyCalendar(): React.ReactElement {
       <div className="flex-1 overflow-y-auto">
         {/* 종일 태스크 */}
         {allDayTasks.length > 0 && (
-          <div
-            className={`px-6 py-3 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}
-          >
-            <div
-              className={`text-xs font-medium mb-2 ${
-                isDark ? 'text-gray-400' : 'text-gray-500'
-              }`}
-            >
-              종일
-            </div>
+          <div className={`px-6 py-3 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+            <div className={`text-xs font-medium mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>종일</div>
             <div className="space-y-1.5">
               {allDayTasks.map((task) => (
                 <div
                   key={task.id}
                   onClick={() => selectTask(task.id)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer border-l-2 ${
-                    isDark
-                      ? priorityBg[task.priority].dark
-                      : priorityBg[task.priority].light
-                  } ${
-                    selectedTaskId === task.id
-                      ? isDark
-                        ? 'ring-1 ring-blue-500'
-                        : 'ring-1 ring-blue-400'
-                      : ''
-                  }`}
+                    isDark ? priorityBg[task.priority].dark : priorityBg[task.priority].light
+                  } ${selectedTaskId === task.id ? (isDark ? 'ring-1 ring-blue-500' : 'ring-1 ring-blue-400') : ''}`}
                 >
                   <button
                     onClick={(e) => {
@@ -238,19 +217,12 @@ export function DailyCalendar(): React.ReactElement {
                     {task.completed ? (
                       <CheckCircle2 size={14} className="text-green-500" />
                     ) : (
-                      <Circle
-                        size={14}
-                        className={isDark ? 'text-gray-500' : 'text-gray-400'}
-                      />
+                      <Circle size={14} className={isDark ? 'text-gray-500' : 'text-gray-400'} />
                     )}
                   </button>
                   <span
                     className={`text-sm flex-1 truncate ${
-                      task.completed
-                        ? 'line-through text-gray-500'
-                        : isDark
-                          ? 'text-gray-200'
-                          : 'text-gray-800'
+                      task.completed ? 'line-through text-gray-500' : isDark ? 'text-gray-200' : 'text-gray-800'
                     }`}
                   >
                     {task.title}
@@ -316,11 +288,10 @@ export function DailyCalendar(): React.ReactElement {
             let endMs = startMs + 30 * 60000
             if (
               e.dataTransfer.types.includes('application/haru-task-block') &&
-              existing.scheduledStart && existing.scheduledEnd
+              existing.scheduledStart &&
+              existing.scheduledEnd
             ) {
-              const origDur =
-                new Date(existing.scheduledEnd).getTime() -
-                new Date(existing.scheduledStart).getTime()
+              const origDur = new Date(existing.scheduledEnd).getTime() - new Date(existing.scheduledStart).getTime()
               endMs = startMs + origDur
             }
             const endMsClamped = Math.min(endMs, dayEnd)
@@ -348,13 +319,7 @@ export function DailyCalendar(): React.ReactElement {
                 {/* 시간 라벨 */}
                 <div className="w-20 flex-shrink-0 text-right pr-3 pt-0.5">
                   {isHourMark && (
-                    <span
-                      className={`text-[11px] ${
-                        isDark ? 'text-gray-500' : 'text-gray-400'
-                      }`}
-                    >
-                      {slot.label}
-                    </span>
+                    <span className={`text-[11px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{slot.label}</span>
                   )}
                 </div>
 
@@ -365,15 +330,9 @@ export function DailyCalendar(): React.ReactElement {
                       key={task.id}
                       onClick={() => selectTask(task.id)}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer border-l-2 transition-colors ${
-                        isDark
-                          ? priorityBg[task.priority].dark
-                          : priorityBg[task.priority].light
+                        isDark ? priorityBg[task.priority].dark : priorityBg[task.priority].light
                       } ${
-                        selectedTaskId === task.id
-                          ? isDark
-                            ? 'ring-1 ring-blue-500'
-                            : 'ring-1 ring-blue-400'
-                          : ''
+                        selectedTaskId === task.id ? (isDark ? 'ring-1 ring-blue-500' : 'ring-1 ring-blue-400') : ''
                       }`}
                     >
                       <button
@@ -386,33 +345,20 @@ export function DailyCalendar(): React.ReactElement {
                         {task.completed ? (
                           <CheckCircle2 size={14} className="text-green-500" />
                         ) : (
-                          <Circle
-                            size={14}
-                            className={isDark ? 'text-gray-500' : 'text-gray-400'}
-                          />
+                          <Circle size={14} className={isDark ? 'text-gray-500' : 'text-gray-400'} />
                         )}
                       </button>
 
                       <div className="flex-1 min-w-0">
                         <p
                           className={`text-sm truncate ${
-                            task.completed
-                              ? 'line-through text-gray-500'
-                              : isDark
-                                ? 'text-gray-200'
-                                : 'text-gray-800'
+                            task.completed ? 'line-through text-gray-500' : isDark ? 'text-gray-200' : 'text-gray-800'
                           }`}
                         >
                           {task.title}
                         </p>
                         {task.dueTime && (
-                          <p
-                            className={`text-[10px] ${
-                              isDark ? 'text-gray-500' : 'text-gray-400'
-                            }`}
-                          >
-                            {task.dueTime}
-                          </p>
+                          <p className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{task.dueTime}</p>
                         )}
                       </div>
 

@@ -28,24 +28,24 @@ export function PomodoroTimer() {
     if (intervalRef.current) clearInterval(intervalRef.current)
   }, [currentMode])
 
-  const switchMode = useCallback(
-    (newMode: TimerMode) => {
-      if (intervalRef.current) clearInterval(intervalRef.current)
-      setIsRunning(false)
-      const m = MODES.find((m) => m.key === newMode)!
-      setMode(newMode)
-      setTimeLeft(m.duration)
-    },
-    []
-  )
+  const switchMode = useCallback((newMode: TimerMode) => {
+    if (intervalRef.current) clearInterval(intervalRef.current)
+    setIsRunning(false)
+    const m = MODES.find((m) => m.key === newMode)!
+    setMode(newMode)
+    setTimeLeft(m.duration)
+  }, [])
 
   const skipToNext = useCallback(() => {
     // 세션 완료 시 저장
     if (sessionStartRef.current) {
       const m = MODES.find((m) => m.key === mode)!
       savePomodoroSession({
-        taskId: null, duration: m.duration, type: mode === 'work' ? 'work' : 'break',
-        startedAt: sessionStartRef.current, completedAt: new Date().toISOString()
+        taskId: null,
+        duration: m.duration,
+        type: mode === 'work' ? 'work' : 'break',
+        startedAt: sessionStartRef.current,
+        completedAt: new Date().toISOString()
       })
       sessionStartRef.current = null
     }
@@ -103,7 +103,9 @@ export function PomodoroTimer() {
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               mode === m.key
                 ? 'text-white'
-                : isDark ? 'text-gray-500 hover:text-gray-300 hover:bg-gray-800' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                : isDark
+                  ? 'text-gray-500 hover:text-gray-300 hover:bg-gray-800'
+                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
             }`}
             style={mode === m.key ? { backgroundColor: m.color + '33', color: m.color } : {}}
           >
@@ -116,14 +118,7 @@ export function PomodoroTimer() {
       <div className="relative w-80 h-80 mb-10">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 300 300">
           {/* 배경 원 */}
-          <circle
-            cx="150"
-            cy="150"
-            r="140"
-            fill="none"
-            stroke={isDark ? '#333' : '#E5E5E5'}
-            strokeWidth="6"
-          />
+          <circle cx="150" cy="150" r="140" fill="none" stroke={isDark ? '#333' : '#E5E5E5'} strokeWidth="6" />
           {/* 진행 원 */}
           <circle
             cx="150"

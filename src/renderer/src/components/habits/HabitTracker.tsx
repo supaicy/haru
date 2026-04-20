@@ -59,7 +59,9 @@ export function HabitTracker() {
   return (
     <div className={`flex-1 flex flex-col h-full ${isDark ? 'bg-[#1C1C1E]' : 'bg-white'}`}>
       {/* 헤더 */}
-      <div className={`flex items-center justify-between px-6 py-4 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
+      <div
+        className={`flex items-center justify-between px-6 py-4 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}
+      >
         <div className="flex items-center gap-4">
           <h1 className={`text-xl font-bold ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>습관 트래커</h1>
           <div className="flex items-center gap-1">
@@ -114,9 +116,7 @@ export function HabitTracker() {
             <div className="w-48 flex items-center gap-3 pr-4">
               <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: habit.color }} />
               <span className={`text-sm truncate ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>{habit.name}</span>
-              <span className="text-xs text-gray-500 flex-shrink-0">
-                {streaks[habit.id] || 0}일 연속
-              </span>
+              <span className="text-xs text-gray-500 flex-shrink-0">{streaks[habit.id] || 0}일 연속</span>
               <button
                 onClick={() => removeHabit(habit.id)}
                 className="opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 transition-all ml-auto flex-shrink-0"
@@ -134,7 +134,9 @@ export function HabitTracker() {
                     className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center transition-all ${
                       logged
                         ? 'border-transparent'
-                        : isDark ? 'border-gray-700 hover:border-gray-500' : 'border-gray-300 hover:border-gray-400'
+                        : isDark
+                          ? 'border-gray-700 hover:border-gray-500'
+                          : 'border-gray-300 hover:border-gray-400'
                     }`}
                     style={logged ? { backgroundColor: habit.color + '33', borderColor: habit.color } : {}}
                   >
@@ -148,12 +150,11 @@ export function HabitTracker() {
 
         {/* 빈 상태 */}
         {habits.length === 0 && !showAdd && (
-          <div className={`flex flex-col items-center justify-center py-20 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+          <div
+            className={`flex flex-col items-center justify-center py-20 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}
+          >
             <p className="text-sm">추적 중인 습관이 없습니다</p>
-            <button
-              onClick={() => setShowAdd(true)}
-              className="mt-2 text-sm text-primary-400 hover:text-primary-300"
-            >
+            <button onClick={() => setShowAdd(true)} className="mt-2 text-sm text-primary-400 hover:text-primary-300">
               첫 습관 추가하기
             </button>
           </div>
@@ -161,7 +162,9 @@ export function HabitTracker() {
 
         {/* 추가 폼 */}
         {showAdd && (
-          <div className={`mt-4 flex items-center gap-3 p-3 border rounded-lg ${isDark ? 'border-gray-700 bg-gray-800/50' : 'border-gray-300 bg-gray-50'}`}>
+          <div
+            className={`mt-4 flex items-center gap-3 p-3 border rounded-lg ${isDark ? 'border-gray-700 bg-gray-800/50' : 'border-gray-300 bg-gray-50'}`}
+          >
             <div
               className="w-6 h-6 rounded-full cursor-pointer flex-shrink-0"
               style={{ backgroundColor: color }}

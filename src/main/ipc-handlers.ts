@@ -49,7 +49,9 @@ export function setupIpcHandlers(): void {
 
   // Habits
   ipcMain.handle('get-habits', () => db.getHabits())
-  ipcMain.handle('create-habit', (_, id, name, color, frequency, targetDays) => db.createHabit(id, name, color, frequency, targetDays))
+  ipcMain.handle('create-habit', (_, id, name, color, frequency, targetDays) =>
+    db.createHabit(id, name, color, frequency, targetDays)
+  )
   ipcMain.handle('delete-habit', (_, id) => db.deleteHabit(id))
   ipcMain.handle('get-habit-logs', () => db.getHabitLogs())
   ipcMain.handle('toggle-habit-log', (_, id, habitId, date) => db.toggleHabitLog(id, habitId, date))
@@ -87,7 +89,10 @@ export function setupIpcHandlers(): void {
   ipcMain.handle('export-data', async () => {
     const result = await dialog.showSaveDialog({
       defaultPath: `ticktick-backup-${new Date().toISOString().split('T')[0]}.json`,
-      filters: [{ name: 'JSON', extensions: ['json'] }, { name: 'CSV', extensions: ['csv'] }]
+      filters: [
+        { name: 'JSON', extensions: ['json'] },
+        { name: 'CSV', extensions: ['csv'] }
+      ]
     })
     if (result.canceled || !result.filePath) return false
     const ext = result.filePath.endsWith('.csv') ? 'csv' : 'json'
@@ -96,10 +101,13 @@ export function setupIpcHandlers(): void {
       const parsed = JSON.parse(exportedData)
       const tasks = parsed.tasks || []
       const header = 'Title,Description,Priority,DueDate,List,Completed,CreatedAt\n'
-      const rows = tasks.map((t: Record<string, unknown>) =>
-        [t.title, t.description, t.priority, t.due_date || '', t.list_id, t.completed ? 'Yes' : 'No', t.created_at]
-          .map(csvCell).join(',')
-      ).join('\n')
+      const rows = tasks
+        .map((t: Record<string, unknown>) =>
+          [t.title, t.description, t.priority, t.due_date || '', t.list_id, t.completed ? 'Yes' : 'No', t.created_at]
+            .map(csvCell)
+            .join(',')
+        )
+        .join('\n')
       const { writeFileSync } = require('fs')
       writeFileSync(result.filePath, header + rows, 'utf-8')
     } else {
@@ -130,9 +138,15 @@ export function setupIpcHandlers(): void {
     ai.streamChat(
       message,
       tasks,
-      (token) => { if (!sender.isDestroyed()) sender.send('ai:stream-token', token) },
-      () => { if (!sender.isDestroyed()) sender.send('ai:stream-done') },
-      (error) => { if (!sender.isDestroyed()) sender.send('ai:stream-error', error) }
+      (token) => {
+        if (!sender.isDestroyed()) sender.send('ai:stream-token', token)
+      },
+      () => {
+        if (!sender.isDestroyed()) sender.send('ai:stream-done')
+      },
+      (error) => {
+        if (!sender.isDestroyed()) sender.send('ai:stream-error', error)
+      }
     )
   })
 
