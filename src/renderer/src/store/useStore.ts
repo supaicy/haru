@@ -148,6 +148,7 @@ interface Store {
   setShowAiChat: (show: boolean) => void
   aiCheckConnection: () => Promise<void>
   aiLoadConfig: () => Promise<void>
+  aiLoadHistory: () => Promise<void>
   aiSaveConfig: (updates: Partial<AiConfig>) => Promise<void>
   aiSendMessage: (message: string) => Promise<void>
   aiClearMessages: () => void
@@ -704,6 +705,10 @@ export const useStore = create<Store>((set, get) => ({
     } catch {
       /* ignore */
     }
+  },
+  aiLoadHistory: async () => {
+    const messages = (await window.api.aiGetHistory()) as AiMessage[]
+    set({ aiMessages: messages })
   },
   aiSaveConfig: async (updates) => {
     await window.api.aiSetConfig(updates)
