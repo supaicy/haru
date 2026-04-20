@@ -16,10 +16,19 @@ const SORT_OPTIONS: SortOption[] = [
   { value: 'createdAt', label: '생성일' }
 ]
 
-export function SortMenu() {
+interface SortMenuProps {
+  onClose?: () => void
+}
+
+export function SortMenu({ onClose }: SortMenuProps = {}) {
   const { sortBy, sortDir, setSortBy, setSortDir, theme } = useStore()
   const isDark = theme === 'dark'
   const [open, setOpen] = useState(false)
+
+  const close = (): void => {
+    setOpen(false)
+    onClose?.()
+  }
 
   const handleSelect = (value: SortBy) => {
     if (sortBy === value) {
@@ -57,7 +66,7 @@ export function SortMenu() {
       {open && (
         <>
           {/* 배경 클릭으로 닫기 */}
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="fixed inset-0 z-40" onClick={close} />
 
           <div
             className={`absolute right-0 top-full mt-1 z-50 rounded-lg shadow-2xl border py-1 min-w-[160px] ${

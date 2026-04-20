@@ -76,7 +76,7 @@ export function setAiConfig(updates: Partial<AiConfig>): void {
     delete updates.apiKey
   }
   config = { ...config, ...updates }
-  db.saveAiConfig(config)
+  db.saveAiConfig({ ...config } as unknown as Record<string, unknown>)
 }
 
 export async function checkConnection(): Promise<{ connected: boolean; models?: string[] }> {
