@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.1] - 2026-04-20
+
+### Changed
+- 앱 아이콘을 새 task-list 디자인으로 교체. README 미리보기도 동일하게 갱신.
+
+### Added
+- MIT 라이선스 추가 (`LICENSE`, `package.json`).
+
 ## [1.4.0] - 2026-04-20
 
 ### Added
