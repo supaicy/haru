@@ -5,3 +5,4 @@ dist
 *.log
 docs/superpowers/
 .gstack/
+homebrew-haru/

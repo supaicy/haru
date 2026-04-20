@@ -27,9 +27,58 @@ jobs:
       - name: Package and publish
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx electron-builder --mac --publish always
+        run: npx electron-builder --mac --arm64 --x64 --publish always
 
       - name: Publish release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release edit ${{ github.ref_name }} --draft=false --latest
+
+  bump-cask:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compute SHAs and update tap
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          VERSION="${TAG#v}"
+          ARM_URL="https://github.com/supaicy/haru/releases/download/${TAG}/haru-${VERSION}-arm64.dmg"
+          X64_URL="https://github.com/supaicy/haru/releases/download/${TAG}/haru-${VERSION}-x64.dmg"
+          ARM_SHA=$(curl -sL "$ARM_URL" | shasum -a 256 | cut -d' ' -f1)
+          X64_SHA=$(curl -sL "$X64_URL" | shasum -a 256 | cut -d' ' -f1)
+
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/supaicy/homebrew-haru.git" tap
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          cat > Casks/haru.rb <<EOF
+          cask "haru" do
+            arch arm: "arm64", intel: "x64"
+
+            version "${VERSION}"
+            sha256 arm:   "${ARM_SHA}",
+                   intel: "${X64_SHA}"
+
+            url "https://github.com/supaicy/haru/releases/download/v#{version}/haru-#{version}-#{arch}.dmg"
+            name "haru"
+            desc "TickTick 스타일 일정관리 앱"
+            homepage "https://github.com/supaicy/haru"
+
+            depends_on macos: ">= :big_sur"
+
+            app "haru.app"
+
+            zap trash: [
+              "~/Library/Application Support/haru",
+              "~/Library/Preferences/com.haru.app.plist",
+              "~/Library/Saved Application State/com.haru.app.savedState",
+            ]
+          end
+          EOF
+
+          git add Casks/haru.rb
+          git commit -m "chore: bump haru to ${VERSION}"
+          git push
