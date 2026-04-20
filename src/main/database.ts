@@ -26,6 +26,16 @@ export function writeHistoryFile(filePath: string, messages: Record<string, unkn
   writeFileSync(filePath, JSON.stringify({ version: 1, messages }, null, 2), 'utf-8')
 }
 
+export function getChatHistory(): Record<string, unknown>[] {
+  if (!chatHistoryPath) return []
+  return readHistoryFile(chatHistoryPath)
+}
+
+export function saveChatHistory(messages: Record<string, unknown>[]): void {
+  if (!chatHistoryPath) return
+  writeHistoryFile(chatHistoryPath, messages)
+}
+
 let data: DbData = {
   lists: [],
   tasks: [],
@@ -97,6 +107,7 @@ export function initDatabase(): void {
   if (!existsSync(userDataPath)) mkdirSync(userDataPath, { recursive: true })
   dbPath = path.join(userDataPath, 'ticktick-data.json')
   aiConfigPath = path.join(userDataPath, 'ai-config.json')
+  chatHistoryPath = path.join(userDataPath, 'ai-chat.json')
   attachmentsDir = path.join(userDataPath, 'attachments')
   if (!existsSync(attachmentsDir)) mkdirSync(attachmentsDir, { recursive: true })
   data = load()
@@ -378,6 +389,7 @@ export function listAttachmentFiles(): string[] {
 
 // === AI Config ===
 let aiConfigPath: string
+let chatHistoryPath: string
 export function getAiConfig(): Record<string, unknown> | null {
   if (!aiConfigPath) return null
   if (!existsSync(aiConfigPath)) return null
