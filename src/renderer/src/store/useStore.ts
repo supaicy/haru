@@ -17,6 +17,7 @@ import type {
   AiConfig
 } from '../types'
 import { isValidSchedulePair } from '../utils/scheduledTime'
+import { trimHistory } from './trim'
 
 export type Theme = 'dark' | 'light'
 
@@ -760,14 +761,21 @@ export const useStore = create<Store>((set, get) => ({
       }))
     })
     const cleanupDone = window.api.onAiStreamDone?.(() => {
-      set({ aiLoading: false })
+      const { aiMessages, aiConfig } = get()
+      const cap = aiConfig?.maxHistoryMessages ?? 200
+      const trimmed = trimHistory(aiMessages, cap)
+      set({ aiLoading: false, aiMessages: trimmed })
+      void window.api.aiSaveHistory(trimmed)
       cleanup()
     })
     const cleanupError = window.api.onAiStreamError?.((error: string) => {
-      set((s) => ({
-        aiLoading: false,
-        aiMessages: s.aiMessages.map((m) => (m.id === assistantMsg.id ? { ...m, content: `오류: ${error}` } : m))
-      }))
+      const withError = get().aiMessages.map((m) =>
+        m.id === assistantMsg.id ? { ...m, content: `오류: ${error}` } : m
+      )
+      const cap = get().aiConfig?.maxHistoryMessages ?? 200
+      const trimmed = trimHistory(withError, cap)
+      set({ aiLoading: false, aiMessages: trimmed })
+      void window.api.aiSaveHistory(trimmed)
       cleanup()
     })
 
@@ -785,7 +793,10 @@ export const useStore = create<Store>((set, get) => ({
       cleanup()
     }
   },
-  aiClearMessages: () => set({ aiMessages: [] }),
+  aiClearMessages: () => {
+    set({ aiMessages: [] })
+    void window.api.aiSaveHistory([])
+  },
   aiCreateTaskFromNL: async (input) => {
     const tasks = get()
       .tasks.slice(0, 50)
