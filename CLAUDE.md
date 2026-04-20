@@ -19,3 +19,9 @@ Key routing rules:
 - Design system, brand → invoke design-consultation
 - Visual audit, design polish → invoke design-review
 - Architecture review → invoke plan-eng-review
+
+## Health Stack
+
+- typecheck: tsc --build
+- lint: biome lint src electron.vite.config.ts
+- test: vitest run
