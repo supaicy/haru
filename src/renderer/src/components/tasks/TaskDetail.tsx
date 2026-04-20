@@ -112,19 +112,10 @@ export function TaskDetail() {
     }
   }, [task?.id])
 
-  if (!task) return null
-
-  const save = (updates: Record<string, unknown>) => updateTask({ id: task.id, ...updates })
-  const addTag = () => {
-    if (!tagInput.trim()) return
-    save({ tags: [...new Set([...task.tags, tagInput.trim()])] })
-    setTagInput('')
-  }
-  const removeTag = (tag: string) => save({ tags: task.tags.filter((t) => t !== tag) })
-
   // 체크박스 토글: description 내 n번째 체크박스의 상태를 변경
   const toggleCheckbox = useCallback(
     (index: number) => {
+      if (!task) return
       let count = 0
       const newDesc = description.replace(/^(\s*[-*]\s*)\[([ xX])\]/gm, (match, prefix, check) => {
         if (count++ === index) {
@@ -136,10 +127,20 @@ export function TaskDetail() {
       setDescription(newDesc)
       updateTask({ id: task.id, description: newDesc })
     },
-    [description, task.id, updateTask]
+    [description, task, updateTask]
   )
 
   const checkboxIndex = useRef(0)
+
+  if (!task) return null
+
+  const save = (updates: Record<string, unknown>) => updateTask({ id: task.id, ...updates })
+  const addTag = () => {
+    if (!tagInput.trim()) return
+    save({ tags: [...new Set([...task.tags, tagInput.trim()])] })
+    setTagInput('')
+  }
+  const removeTag = (tag: string) => save({ tags: task.tags.filter((t) => t !== tag) })
 
   const inputCls = isDark ? 'bg-gray-800 text-gray-300 border-gray-700' : 'bg-gray-100 text-gray-700 border-gray-300'
   const labelCls = isDark ? 'text-gray-500' : 'text-gray-400'
