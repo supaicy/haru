@@ -107,7 +107,7 @@ export function PomodoroTimer() {
                   ? 'text-gray-500 hover:text-gray-300 hover:bg-gray-800'
                   : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
             }`}
-            style={mode === m.key ? { backgroundColor: m.color + '33', color: m.color } : {}}
+            style={mode === m.key ? { backgroundColor: `${m.color}33`, color: m.color } : {}}
           >
             {m.label}
           </button>

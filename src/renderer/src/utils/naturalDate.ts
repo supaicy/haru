@@ -52,8 +52,8 @@ function parseNaturalTime(tokens: string[]): { time: string; consumed: number } 
   // "오전/오후 N시 M분" or "오전/오후 N시M분" or "오전N시M분"
   const ampmFull = joined.match(/^(오전|오후)\s*(\d{1,2})시\s*(\d{1,2})분?/)
   if (ampmFull) {
-    let h = parseInt(ampmFull[2])
-    const m = parseInt(ampmFull[3])
+    let h = parseInt(ampmFull[2], 10)
+    const m = parseInt(ampmFull[3], 10)
     if (h > 12 || m > 59) return null
     if (ampmFull[1] === '오후' && h < 12) h += 12
     if (ampmFull[1] === '오전' && h === 12) h = 0
@@ -64,7 +64,7 @@ function parseNaturalTime(tokens: string[]): { time: string; consumed: number } 
   // "오전/오후 N시"
   const ampmHour = joined.match(/^(오전|오후)\s*(\d{1,2})시/)
   if (ampmHour) {
-    let h = parseInt(ampmHour[2])
+    let h = parseInt(ampmHour[2], 10)
     if (h > 12) return null
     if (ampmHour[1] === '오후' && h < 12) h += 12
     if (ampmHour[1] === '오전' && h === 12) h = 0
@@ -75,8 +75,8 @@ function parseNaturalTime(tokens: string[]): { time: string; consumed: number } 
   // "N시M분" or "N시 M분"
   const hourMin = joined.match(/^(\d{1,2})시\s*(\d{1,2})분?/)
   if (hourMin) {
-    const h = parseInt(hourMin[1])
-    const m = parseInt(hourMin[2])
+    const h = parseInt(hourMin[1], 10)
+    const m = parseInt(hourMin[2], 10)
     if (h > 23 || m > 59) return null
     const consumed = countConsumed(tokens, hourMin[0])
     return { time: fmtTime(h, m), consumed }
@@ -85,7 +85,7 @@ function parseNaturalTime(tokens: string[]): { time: string; consumed: number } 
   // "N시"
   const hourOnly = joined.match(/^(\d{1,2})시/)
   if (hourOnly) {
-    const h = parseInt(hourOnly[1])
+    const h = parseInt(hourOnly[1], 10)
     if (h > 23) return null
     const consumed = countConsumed(tokens, hourOnly[0])
     return { time: fmtTime(h, 0), consumed }
@@ -94,8 +94,8 @@ function parseNaturalTime(tokens: string[]): { time: string; consumed: number } 
   // "14:50", "9:30"
   const colonTime = tokens[0].match(/^(\d{1,2}):(\d{2})$/)
   if (colonTime) {
-    const h = parseInt(colonTime[1])
-    const m = parseInt(colonTime[2])
+    const h = parseInt(colonTime[1], 10)
+    const m = parseInt(colonTime[2], 10)
     if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
       return { time: fmtTime(h, m), consumed: 1 }
     }
@@ -167,12 +167,12 @@ export function parseNaturalDateTime(input: string): ParsedDateTime | null {
           const timeParsed = parseNaturalTime([rest, ...tokens.slice(1)])
           if (timeParsed) {
             // 시간 부분이 첫 토큰 안에 있으므로 consumed 계산
-            const restLen = rest.replace(/\s+/g, '').length
+            const _restLen = rest.replace(/\s+/g, '').length
             let timeTokens = 0
             let consumed = 0
             // rest가 첫 토큰의 나머지이므로 첫 토큰 = 1개 소비
             const restTokens = [rest, ...tokens.slice(1)]
-            for (const tok of restTokens) {
+            for (const _tok of restTokens) {
               if (consumed >= timeParsed.consumed) break
               consumed++
               timeTokens++
@@ -210,15 +210,15 @@ function parseDateExpression(text: string, today: Date): string | null {
 
   // "N일 후", "N일후", "N일 뒤"
   const daysLater = text.match(/^(\d+)\s*일\s*(후|뒤)$/)
-  if (daysLater) return fmt(addDays(today, parseInt(daysLater[1])))
+  if (daysLater) return fmt(addDays(today, parseInt(daysLater[1], 10)))
 
   // "N주 후"
   const weeksLater = text.match(/^(\d+)\s*주\s*(후|뒤)$/)
-  if (weeksLater) return fmt(addWeeks(today, parseInt(weeksLater[1])))
+  if (weeksLater) return fmt(addWeeks(today, parseInt(weeksLater[1], 10)))
 
   // "N개월 후"
   const monthsLater = text.match(/^(\d+)\s*개?월\s*(후|뒤)$/)
-  if (monthsLater) return fmt(addMonths(today, parseInt(monthsLater[1])))
+  if (monthsLater) return fmt(addMonths(today, parseInt(monthsLater[1], 10)))
 
   // "다음주", "다음 주"
   if (/^다음\s*주$/.test(text)) return fmt(nextMonday(today))
@@ -249,8 +249,8 @@ function parseDateExpression(text: string, today: Date): string | null {
   // "1월 15일", "3월 5일"
   const monthDay = text.match(/^(\d{1,2})월\s*(\d{1,2})일$/)
   if (monthDay) {
-    const m = parseInt(monthDay[1]) - 1
-    const d = parseInt(monthDay[2])
+    const m = parseInt(monthDay[1], 10) - 1
+    const d = parseInt(monthDay[2], 10)
     const year = today.getFullYear()
     let date = new Date(year, m, d)
     if (date < today) date = new Date(year + 1, m, d)
@@ -260,7 +260,7 @@ function parseDateExpression(text: string, today: Date): string | null {
   // "2026-03-15" 또는 "2026/03/15" 형식
   const isoDate = text.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/)
   if (isoDate) {
-    return fmt(new Date(parseInt(isoDate[1]), parseInt(isoDate[2]) - 1, parseInt(isoDate[3])))
+    return fmt(new Date(parseInt(isoDate[1], 10), parseInt(isoDate[2], 10) - 1, parseInt(isoDate[3], 10)))
   }
 
   return null

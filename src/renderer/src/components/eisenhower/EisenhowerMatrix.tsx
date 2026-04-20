@@ -29,7 +29,7 @@ export function EisenhowerMatrix(): React.ReactElement {
 
   const quadrants = useMemo(() => {
     const now = new Date()
-    const todayStr = toDateString(now)
+    const _todayStr = toDateString(now)
 
     // "곧" = 3일 이내
     const soonDate = new Date(now)

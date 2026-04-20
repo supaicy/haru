@@ -26,7 +26,7 @@ export function StatsView(): React.ReactElement {
     const completedTasks = tasks.filter((t) => t.completed && t.completedAt)
     const totalCompleted = completedTasks.length
 
-    const completedToday = completedTasks.filter((t) => t.completedAt && t.completedAt.startsWith(todayStr)).length
+    const completedToday = completedTasks.filter((t) => t.completedAt?.startsWith(todayStr)).length
 
     const completedThisWeek = completedTasks.filter((t) => t.completedAt && t.completedAt >= weekStartStr).length
 
@@ -41,7 +41,7 @@ export function StatsView(): React.ReactElement {
       const d = new Date(now)
       d.setDate(d.getDate() - i)
       const dateStr = d.toISOString().split('T')[0]
-      const count = completedTasks.filter((t) => t.completedAt && t.completedAt.startsWith(dateStr)).length
+      const count = completedTasks.filter((t) => t.completedAt?.startsWith(dateStr)).length
       last14Days.push({
         date: dateStr,
         label: `${d.getMonth() + 1}/${d.getDate()}`,

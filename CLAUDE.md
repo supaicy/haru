@@ -22,5 +22,6 @@ Key routing rules:
 
 ## Health Stack
 
-- typecheck: tsc --noEmit -p tsconfig.json
+- typecheck: tsc --build
+- lint: biome lint src electron.vite.config.ts
 - test: vitest run
