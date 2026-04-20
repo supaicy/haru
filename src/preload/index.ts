@@ -89,6 +89,8 @@ const api = {
   aiCreateTask: (input: string, tasks: unknown[]) => ipcRenderer.invoke('ai:create-task', input, tasks),
   aiChat: (message: string, tasks: unknown[]) => ipcRenderer.invoke('ai:chat', message, tasks),
   aiStreamChat: (message: string, tasks: unknown[]) => ipcRenderer.invoke('ai:stream-chat', message, tasks),
+  aiGetHistory: () => ipcRenderer.invoke('ai:get-history'),
+  aiSaveHistory: (messages: unknown[]) => ipcRenderer.invoke('ai:save-history', messages),
   onAiStreamToken: (callback: (token: string) => void) => {
     const handler = (_: Electron.IpcRendererEvent, token: string): void => callback(token)
     ipcRenderer.on('ai:stream-token', handler)
