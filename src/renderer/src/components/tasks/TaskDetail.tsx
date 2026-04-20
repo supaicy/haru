@@ -1,19 +1,5 @@
 import { useState, useEffect, useRef, useCallback, memo } from 'react'
-import {
-  X,
-  Trash2,
-  Flag,
-  Calendar,
-  AlignLeft,
-  Tag,
-  List,
-  Eye,
-  Edit3,
-  Clock,
-  Bell,
-  Repeat,
-  Paperclip
-} from 'lucide-react'
+import { X, Trash2, Flag, Calendar, AlignLeft, Tag, List, Eye, Edit3, Clock, Bell, Repeat } from 'lucide-react'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import hljs from 'highlight.js/lib/core'
@@ -65,7 +51,7 @@ const CodeBlock = memo(function CodeBlock({
       codeRef.current.removeAttribute('data-highlighted')
       hljs.highlightElement(codeRef.current)
     }
-  }, [children, lang])
+  }, [lang])
 
   if (isInline) {
     return (
@@ -114,6 +100,7 @@ export function TaskDetail() {
   const [showRecurring, setShowRecurring] = useState(false)
   const [showReminder, setShowReminder] = useState(false)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: form state resets only when a different task is selected; watching other fields would overwrite in-progress edits
   useEffect(() => {
     if (task) {
       setTitle(task.title)
@@ -431,7 +418,6 @@ export function TaskDetail() {
                   save({ description })
                   if (description.trim()) setMdPreview(true)
                 }}
-                autoFocus
                 placeholder="마크다운으로 메모를 작성하세요..."
                 className={`w-full flex-1 min-h-[200px] text-sm rounded-lg px-3 py-2.5 outline-none border resize-none font-mono leading-relaxed ${inputCls} ${isDark ? 'placeholder-gray-600' : 'placeholder-gray-400'}`}
               />

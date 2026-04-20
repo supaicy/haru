@@ -28,7 +28,7 @@ export function AiChatPanel() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [aiMessages])
+  }, [])
 
   useEffect(() => {
     if (showAiChat) inputRef.current?.focus()

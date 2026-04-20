@@ -1,5 +1,5 @@
 import { ipcMain, dialog, Notification, globalShortcut, BrowserWindow, shell } from 'electron'
-import { basename } from 'path'
+import { basename } from 'node:path'
 import { v4 as uuid } from 'uuid'
 import * as db from './database'
 import * as ai from './ai-service'
@@ -108,10 +108,10 @@ export function setupIpcHandlers(): void {
             .join(',')
         )
         .join('\n')
-      const { writeFileSync } = require('fs')
+      const { writeFileSync } = require('node:fs')
       writeFileSync(result.filePath, header + rows, 'utf-8')
     } else {
-      const { writeFileSync } = require('fs')
+      const { writeFileSync } = require('node:fs')
       writeFileSync(result.filePath, exportedData, 'utf-8')
     }
     return true

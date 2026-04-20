@@ -171,7 +171,6 @@ export function Sidebar() {
             onChange={(e) => setEditName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
             className="flex-1 bg-sidebar-hover text-white text-sm px-2 py-1 rounded outline-none"
-            autoFocus
           />
           <button onClick={saveEdit} className="text-green-400">
             <Check size={14} />
@@ -294,7 +293,6 @@ export function Sidebar() {
                 }}
                 placeholder="폴더 이름"
                 className={`flex-1 text-sm px-2 py-1 rounded outline-none ${isDark ? 'bg-sidebar-hover text-white placeholder-sidebar-muted' : 'bg-gray-200 text-gray-800 placeholder-gray-400'}`}
-                autoFocus
               />
               <button onClick={handleAddFolder} className="text-green-400">
                 <Check size={14} />
@@ -364,7 +362,6 @@ export function Sidebar() {
                 }}
                 placeholder="리스트 이름"
                 className={`flex-1 text-sm px-2 py-1 rounded outline-none ${isDark ? 'bg-sidebar-hover text-white placeholder-sidebar-muted' : 'bg-gray-200 text-gray-800 placeholder-gray-400'}`}
-                autoFocus
               />
               <button onClick={handleAddList} className="text-green-400">
                 <Check size={14} />

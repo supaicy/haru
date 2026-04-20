@@ -1,6 +1,6 @@
 import { app } from 'electron'
-import { readFileSync, writeFileSync, writeFile, existsSync, mkdirSync, copyFileSync, readdirSync } from 'fs'
-import path from 'path'
+import { readFileSync, writeFileSync, writeFile, existsSync, mkdirSync, copyFileSync, readdirSync } from 'node:fs'
+import path from 'node:path'
 
 interface DbData {
   lists: Record<string, unknown>[]

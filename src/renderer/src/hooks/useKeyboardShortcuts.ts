@@ -126,15 +126,5 @@ export function useKeyboardShortcuts() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [
-    setShowAddTask,
-    setSearchQuery,
-    popUndo,
-    updateTask,
-    removeTask,
-    selectTask,
-    setShowQuickAdd,
-    setShowExport,
-    exportData
-  ])
+  }, [setSearchQuery, popUndo, updateTask, removeTask, selectTask, exportData])
 }

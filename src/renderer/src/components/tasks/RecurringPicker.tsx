@@ -200,7 +200,7 @@ export function RecurringPicker({
                 min={1}
                 max={31}
                 value={monthDay}
-                onChange={(e) => setMonthDay(Math.max(1, Math.min(31, parseInt(e.target.value) || 1)))}
+                onChange={(e) => setMonthDay(Math.max(1, Math.min(31, parseInt(e.target.value, 10) || 1)))}
                 className={`w-20 text-sm px-2 py-1 rounded border outline-none ${
                   isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-white border-gray-300 text-gray-700'
                 }`}
@@ -216,7 +216,7 @@ export function RecurringPicker({
               <div className="flex items-center gap-2">
                 <select
                   value={yearMonth}
-                  onChange={(e) => setYearMonth(parseInt(e.target.value))}
+                  onChange={(e) => setYearMonth(parseInt(e.target.value, 10))}
                   className={`text-sm px-2 py-1 rounded border outline-none ${
                     isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-white border-gray-300 text-gray-700'
                   }`}
@@ -232,7 +232,7 @@ export function RecurringPicker({
                   min={1}
                   max={31}
                   value={yearDay}
-                  onChange={(e) => setYearDay(Math.max(1, Math.min(31, parseInt(e.target.value) || 1)))}
+                  onChange={(e) => setYearDay(Math.max(1, Math.min(31, parseInt(e.target.value, 10) || 1)))}
                   className={`w-16 text-sm px-2 py-1 rounded border outline-none ${
                     isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-white border-gray-300 text-gray-700'
                   }`}

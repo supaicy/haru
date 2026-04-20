@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Plus, Trash2, X, Check, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useStore } from '../../store/useStore'
-import { toDateString, formatDate } from '../../utils/date'
+import { toDateString } from '../../utils/date'
 import { addDays, startOfWeek, isToday } from 'date-fns'
 
 const COLORS = ['#4A90D9', '#E74C3C', '#F39C12', '#2ECC71', '#9B59B6', '#1ABC9C', '#E91E63', '#FF5722']
@@ -138,7 +138,7 @@ export function HabitTracker() {
                           ? 'border-gray-700 hover:border-gray-500'
                           : 'border-gray-300 hover:border-gray-400'
                     }`}
-                    style={logged ? { backgroundColor: habit.color + '33', borderColor: habit.color } : {}}
+                    style={logged ? { backgroundColor: `${habit.color}33`, borderColor: habit.color } : {}}
                   >
                     {logged && <Check size={16} style={{ color: habit.color }} />}
                   </button>
@@ -183,7 +183,6 @@ export function HabitTracker() {
               }}
               placeholder="습관 이름..."
               className={`flex-1 bg-transparent text-sm outline-none ${isDark ? 'text-gray-200 placeholder-gray-600' : 'text-gray-700 placeholder-gray-400'}`}
-              autoFocus
             />
             <button onClick={handleAdd} className="text-green-400 hover:text-green-300">
               <Check size={18} />

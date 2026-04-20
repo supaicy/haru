@@ -47,13 +47,13 @@ describe('layoutOverlappingBlocks', () => {
       b('d', 70, 100),
       b('e', 80, 95) // cluster 2: 3-wide
     ])
-    expect(out.find((e) => e.id === 'a')!.columns).toBe(2)
-    expect(out.find((e) => e.id === 'c')!.columns).toBe(3)
+    expect(out.find((e) => e.id === 'a')?.columns).toBe(2)
+    expect(out.find((e) => e.id === 'c')?.columns).toBe(3)
   })
 
   it('tie-break: equal start, longer block first in column 0', () => {
     const out = layoutOverlappingBlocks([b('short', 0, 30), b('long', 0, 60)])
-    expect(out.find((e) => e.id === 'long')!.column).toBe(0)
-    expect(out.find((e) => e.id === 'short')!.column).toBe(1)
+    expect(out.find((e) => e.id === 'long')?.column).toBe(0)
+    expect(out.find((e) => e.id === 'short')?.column).toBe(1)
   })
 })

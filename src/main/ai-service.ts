@@ -34,7 +34,7 @@ export function getAiConfig(): AiConfig {
     config = { ...DEFAULT_CONFIG, ...saved } as AiConfig
   }
   // API 키는 렌더러에 마스킹하여 반환
-  return { ...config, apiKey: config.apiKey ? '••••••' + config.apiKey.slice(-4) : null }
+  return { ...config, apiKey: config.apiKey ? `••••••${config.apiKey.slice(-4)}` : null }
 }
 
 export function getAiConfigInternal(): AiConfig {
@@ -72,7 +72,7 @@ export function setAiConfig(updates: Partial<AiConfig>): void {
     }
   }
   // 마스킹된 API 키('••••••...')가 돌아오면 기존 키 유지
-  if (updates.apiKey && updates.apiKey.startsWith('••••••')) {
+  if (updates.apiKey?.startsWith('••••••')) {
     delete updates.apiKey
   }
   config = { ...config, ...updates }
@@ -90,7 +90,7 @@ export async function checkConnection(): Promise<{ connected: boolean; models?: 
     }
     // OpenAI/Custom: 연결 확인은 간단히 models 엔드포인트
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-    if (config.apiKey) headers['Authorization'] = `Bearer ${config.apiKey}`
+    if (config.apiKey) headers.Authorization = `Bearer ${config.apiKey}`
     const res = await fetch(`${config.baseUrl}/v1/models`, { headers, signal: AbortSignal.timeout(5000) })
     return { connected: res.ok }
   } catch {
@@ -150,7 +150,7 @@ function getToday(): string {
 
 async function callLlm(systemPrompt: string, userMessage: string, useJsonMode: boolean): Promise<AiResult> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  if (config.apiKey) headers['Authorization'] = `Bearer ${config.apiKey}`
+  if (config.apiKey) headers.Authorization = `Bearer ${config.apiKey}`
 
   const body: Record<string, unknown> = {
     model: config.model,
@@ -238,7 +238,9 @@ function sanitizeTaskResult(raw: AiResult): TaskResult {
     task: {
       title: typeof t.title === 'string' ? t.title.slice(0, 500) : 'Untitled',
       dueDate:
-        typeof t.dueDate === 'string' && DATE_RE.test(t.dueDate) && !isNaN(Date.parse(t.dueDate)) ? t.dueDate : null,
+        typeof t.dueDate === 'string' && DATE_RE.test(t.dueDate) && !Number.isNaN(Date.parse(t.dueDate))
+          ? t.dueDate
+          : null,
       dueTime: typeof t.dueTime === 'string' && TIME_RE.test(t.dueTime) ? t.dueTime : null,
       priority: VALID_PRIORITIES.includes(t.priority as (typeof VALID_PRIORITIES)[number]) ? t.priority : 'none',
       tags: Array.isArray(t.tags) ? t.tags.filter((tag): tag is string => typeof tag === 'string').slice(0, 20) : [],
@@ -248,7 +250,7 @@ function sanitizeTaskResult(raw: AiResult): TaskResult {
             .map((s) => ({
               title: s.title.slice(0, 500),
               dueDate:
-                typeof s.dueDate === 'string' && DATE_RE.test(s.dueDate) && !isNaN(Date.parse(s.dueDate))
+                typeof s.dueDate === 'string' && DATE_RE.test(s.dueDate) && !Number.isNaN(Date.parse(s.dueDate))
                   ? s.dueDate
                   : null
             }))
@@ -258,7 +260,7 @@ function sanitizeTaskResult(raw: AiResult): TaskResult {
   }
 }
 
-export async function createTaskFromNL(input: string, existingTasks: TaskContext[]): Promise<TaskResult> {
+export async function createTaskFromNL(input: string, _existingTasks: TaskContext[]): Promise<TaskResult> {
   const prompt = TASK_SYSTEM_PROMPT
   const result = await callLlm(prompt, input, true)
   return sanitizeTaskResult(result)
@@ -284,7 +286,7 @@ export async function streamChat(
   onError: (error: string) => void
 ): Promise<void> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  if (config.apiKey) headers['Authorization'] = `Bearer ${config.apiKey}`
+  if (config.apiKey) headers.Authorization = `Bearer ${config.apiKey}`
 
   const summary = summarizeTasks(existingTasks)
   const systemPrompt = `You are a productivity assistant for the app "haru". The user can ask about their tasks, schedule, and productivity.

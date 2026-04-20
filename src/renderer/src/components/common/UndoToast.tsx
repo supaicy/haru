@@ -10,6 +10,7 @@ export function UndoToast() {
 
   const lastAction = undoStack.length > 0 ? undoStack[undoStack.length - 1] : null
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only re-run on new action timestamp, not on every lastAction reference change
   useEffect(() => {
     if (lastAction) {
       setLeaving(false)
