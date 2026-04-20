@@ -46,6 +46,7 @@ export function SortMenu({ onClose }: SortMenuProps = {}) {
     <div className="relative">
       {/* 트리거 버튼 */}
       <button
+        type="button"
         onClick={() => setOpen(!open)}
         className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
           sortBy !== 'default'
@@ -75,6 +76,7 @@ export function SortMenu({ onClose }: SortMenuProps = {}) {
               const isSelected = sortBy === option.value
               return (
                 <button
+                  type="button"
                   key={option.value}
                   onClick={() => handleSelect(option.value)}
                   className={`w-full flex items-center justify-between px-4 py-2 text-sm transition-colors ${

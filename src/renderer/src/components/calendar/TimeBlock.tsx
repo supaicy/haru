@@ -140,10 +140,15 @@ export function TimeBlock({ task, start, end, pxPerMin, column, columns, isDark 
             isDark ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-800'
           }`}
         >
-          <button className="px-3 py-1 text-xs hover:bg-gray-500/20 block w-full text-left" onClick={unschedule}>
+          <button
+            type="button"
+            className="px-3 py-1 text-xs hover:bg-gray-500/20 block w-full text-left"
+            onClick={unschedule}
+          >
             일정 해제
           </button>
           <button
+            type="button"
             className="px-3 py-1 text-xs hover:bg-gray-500/20 block w-full text-left"
             onClick={() => setMenuOpen(false)}
           >

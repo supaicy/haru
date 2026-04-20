@@ -131,6 +131,7 @@ export function EisenhowerMatrix(): React.ReactElement {
       }`}
     >
       <button
+        type="button"
         onClick={(e) => {
           e.stopPropagation()
           toggleTask(task.id)

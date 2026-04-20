@@ -164,6 +164,7 @@ export function DailyCalendar(): React.ReactElement {
         </div>
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={goToday}
             className={`px-3 py-1 text-xs rounded-md border ${
               isDark
@@ -174,6 +175,7 @@ export function DailyCalendar(): React.ReactElement {
             오늘
           </button>
           <button
+            type="button"
             onClick={goPrev}
             className={`p-1 rounded-md ${
               isDark ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'
@@ -182,6 +184,7 @@ export function DailyCalendar(): React.ReactElement {
             <ChevronLeft size={18} />
           </button>
           <button
+            type="button"
             onClick={goNext}
             className={`p-1 rounded-md ${
               isDark ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'
@@ -208,6 +211,7 @@ export function DailyCalendar(): React.ReactElement {
                   } ${selectedTaskId === task.id ? (isDark ? 'ring-1 ring-blue-500' : 'ring-1 ring-blue-400') : ''}`}
                 >
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation()
                       toggleTask(task.id)
@@ -336,6 +340,7 @@ export function DailyCalendar(): React.ReactElement {
                       }`}
                     >
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation()
                           toggleTask(task.id)

@@ -128,6 +128,7 @@ export function RecurringPicker({
     <div className="relative">
       {/* 트리거 버튼 */}
       <button
+        type="button"
         onClick={() => setOpen(!open)}
         className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
           value
@@ -152,6 +153,7 @@ export function RecurringPicker({
           <div className="flex gap-1 mb-3">
             {(Object.keys(typeLabels) as RecurringType[]).map((t) => (
               <button
+                type="button"
                 key={t}
                 onClick={() => setType(t)}
                 className={`text-xs px-2.5 py-1 rounded-full transition-colors ${
@@ -174,6 +176,7 @@ export function RecurringPicker({
               <div className="flex gap-1">
                 {WEEKDAYS.map((label, idx) => (
                   <button
+                    type="button"
                     key={label}
                     onClick={() => toggleWeekDay(idx)}
                     className={`w-8 h-8 text-xs rounded-full transition-colors ${
@@ -245,6 +248,7 @@ export function RecurringPicker({
           {/* 하단 버튼 */}
           <div className={`flex justify-between pt-2 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
             <button
+              type="button"
               onClick={handleClear}
               className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
                 isDark ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-500 hover:bg-gray-100'
@@ -254,6 +258,7 @@ export function RecurringPicker({
               해제
             </button>
             <button
+              type="button"
               onClick={handleApply}
               className="text-xs px-3 py-1 rounded bg-primary-500 text-white hover:bg-primary-600 transition-colors"
             >

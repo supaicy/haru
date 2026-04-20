@@ -29,6 +29,7 @@ export function TrashView() {
 
         {trashTasks.length > 0 && (
           <button
+            type="button"
             onClick={emptyTrash}
             className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
           >
@@ -69,6 +70,7 @@ export function TrashView() {
                 {/* 액션 버튼 */}
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
+                    type="button"
                     onClick={() => restoreTask(task.id)}
                     className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg transition-colors ${
                       isDark ? 'text-primary-400 hover:bg-primary-900/30' : 'text-primary-500 hover:bg-primary-50'
@@ -78,6 +80,7 @@ export function TrashView() {
                     복구
                   </button>
                   <button
+                    type="button"
                     onClick={() => permanentDeleteTask(task.id)}
                     className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
                   >

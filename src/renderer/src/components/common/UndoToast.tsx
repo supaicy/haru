@@ -52,6 +52,7 @@ export function UndoToast() {
         <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{lastAction.description}</span>
 
         <button
+          type="button"
           onClick={handleUndo}
           className={`flex items-center gap-1.5 text-sm font-medium px-3 py-1 rounded-lg transition-colors ${
             isDark ? 'text-primary-400 hover:bg-primary-500/20' : 'text-primary-600 hover:bg-primary-50'

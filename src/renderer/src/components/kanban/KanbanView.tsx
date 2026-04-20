@@ -235,6 +235,7 @@ export function KanbanView(): React.ReactElement {
 
                         {/* 체크박스 */}
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation()
                             toggleTask(task.id)

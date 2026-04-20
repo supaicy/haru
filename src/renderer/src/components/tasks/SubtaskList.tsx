@@ -53,6 +53,7 @@ export function SubtaskList({ taskId }: { taskId: string }) {
           >
             {/* 체크박스 */}
             <button
+              type="button"
               onClick={() => toggleTask(subtask.id)}
               className={`flex-shrink-0 transition-colors ${
                 subtask.completed
@@ -82,6 +83,7 @@ export function SubtaskList({ taskId }: { taskId: string }) {
 
             {/* 삭제 버튼 */}
             <button
+              type="button"
               onClick={() => removeTask(subtask.id)}
               className={`opacity-0 group-hover:opacity-100 flex-shrink-0 transition-opacity ${
                 isDark ? 'text-gray-500 hover:text-red-400' : 'text-gray-400 hover:text-red-500'
@@ -120,6 +122,7 @@ export function SubtaskList({ taskId }: { taskId: string }) {
             }`}
           />
           <button
+            type="button"
             onClick={() => {
               setShowInput(false)
               setNewTitle('')
@@ -131,6 +134,7 @@ export function SubtaskList({ taskId }: { taskId: string }) {
         </div>
       ) : (
         <button
+          type="button"
           onClick={() => setShowInput(true)}
           className={`flex items-center gap-2 px-2 py-1.5 mt-1 text-sm rounded transition-colors w-full ${
             isDark

@@ -154,10 +154,14 @@ export function TaskDetail() {
       >
         <span className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>상세</span>
         <div className="flex items-center gap-2">
-          <button onClick={() => removeTask(task.id)} className="text-gray-500 hover:text-red-400 transition-colors">
+          <button
+            type="button"
+            onClick={() => removeTask(task.id)}
+            className="text-gray-500 hover:text-red-400 transition-colors"
+          >
             <Trash2 size={16} />
           </button>
-          <button onClick={() => selectTask(null)} className={`transition-colors ${labelCls}`}>
+          <button type="button" onClick={() => selectTask(null)} className={`transition-colors ${labelCls}`}>
             <X size={16} />
           </button>
         </div>
@@ -217,6 +221,7 @@ export function TaskDetail() {
           />
           {(dueDate || dueTime) && (
             <button
+              type="button"
               onClick={() => {
                 setDueDate('')
                 setDueTime('')
@@ -243,6 +248,7 @@ export function TaskDetail() {
           <div className="flex gap-1">
             {PRIORITY_OPTIONS.map((opt) => (
               <button
+                type="button"
                 key={opt.value}
                 onClick={() => {
                   setPriority(opt.value)
@@ -267,6 +273,7 @@ export function TaskDetail() {
           <Bell size={16} className={labelCls} />
           <div className="relative flex-1">
             <button
+              type="button"
               onClick={() => setShowReminder(!showReminder)}
               className={`text-sm px-2 py-1 rounded border w-full text-left ${
                 task.reminderAt
@@ -294,6 +301,7 @@ export function TaskDetail() {
           <Repeat size={16} className={labelCls} />
           <div className="relative flex-1">
             <button
+              type="button"
               onClick={() => setShowRecurring(!showRecurring)}
               className={`text-sm px-2 py-1 rounded border w-full text-left ${
                 task.isRecurring
@@ -326,7 +334,7 @@ export function TaskDetail() {
                   className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-600'}`}
                 >
                   {tag}
-                  <button onClick={() => removeTag(tag)} className="hover:text-red-400">
+                  <button type="button" onClick={() => removeTag(tag)} className="hover:text-red-400">
                     <X size={10} />
                   </button>
                 </span>
@@ -362,12 +370,14 @@ export function TaskDetail() {
           <div className="flex-1 flex flex-col min-h-0 h-full">
             <div className="flex items-center gap-1 mb-2 shrink-0">
               <button
+                type="button"
                 onClick={() => setMdPreview(false)}
                 className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${!mdPreview ? 'text-primary-400 bg-primary-900/30' : isDark ? 'text-gray-500 hover:bg-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}
               >
                 <Edit3 size={12} /> 편집
               </button>
               <button
+                type="button"
                 onClick={() => setMdPreview(true)}
                 className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${mdPreview ? 'text-primary-400 bg-primary-900/30' : isDark ? 'text-gray-500 hover:bg-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}
               >

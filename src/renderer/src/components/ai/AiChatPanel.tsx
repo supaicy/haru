@@ -67,6 +67,7 @@ export function AiChatPanel() {
         <div className="flex items-center gap-1">
           {aiMessages.length > 0 && (
             <button
+              type="button"
               onClick={aiClearMessages}
               className={`p-1 rounded hover:${isDark ? 'bg-gray-600' : 'bg-gray-200'}`}
               title="대화 지우기"
@@ -75,6 +76,7 @@ export function AiChatPanel() {
             </button>
           )}
           <button
+            type="button"
             onClick={() => setShowAiChat(false)}
             className={`p-1 rounded hover:${isDark ? 'bg-gray-600' : 'bg-gray-200'}`}
           >
@@ -102,7 +104,7 @@ export function AiChatPanel() {
                 '설정에서 API URL과 키를 확인하세요.'
               )}
             </p>
-            <button onClick={aiCheckConnection} className="mt-2 text-xs text-blue-500 hover:underline">
+            <button type="button" onClick={aiCheckConnection} className="mt-2 text-xs text-blue-500 hover:underline">
               다시 연결 시도
             </button>
           </div>
@@ -117,6 +119,7 @@ export function AiChatPanel() {
             <div className="space-y-1">
               {['이번 주에 뭐 해야 하지?', '가장 급한 거 3개 알려줘', '오늘 뭘 완료했지?'].map((q) => (
                 <button
+                  type="button"
                   key={q}
                   onClick={() => {
                     setInput(q)
@@ -164,6 +167,7 @@ export function AiChatPanel() {
             className={`flex-1 bg-transparent text-sm outline-none placeholder-gray-500 ${isDark ? 'text-white' : 'text-gray-800'}`}
           />
           <button
+            type="button"
             onClick={handleSend}
             disabled={!input.trim() || aiLoading || aiConnected === false}
             className={`p-1 rounded ${input.trim() && !aiLoading ? 'text-blue-500 hover:bg-blue-500/20' : 'text-gray-500 opacity-50'}`}

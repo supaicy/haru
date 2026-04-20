@@ -43,18 +43,21 @@ export function CalendarView() {
           </h1>
           <div className="flex items-center gap-1">
             <button
+              type="button"
               onClick={prevMonth}
               className={`p-1 rounded transition-colors ${isDark ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
             >
               <ChevronLeft size={18} />
             </button>
             <button
+              type="button"
               onClick={goToday}
               className={`px-2 py-0.5 rounded text-xs transition-colors ${isDark ? 'text-gray-400 hover:bg-gray-800' : 'text-gray-500 hover:bg-gray-200'}`}
             >
               오늘
             </button>
             <button
+              type="button"
               onClick={nextMonth}
               className={`p-1 rounded transition-colors ${isDark ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
             >
@@ -102,6 +105,7 @@ export function CalendarView() {
                 <div className="space-y-0.5">
                   {dayTasks.slice(0, 3).map((task) => (
                     <button
+                      type="button"
                       key={task.id}
                       onClick={() => {
                         setViewType('tasks')

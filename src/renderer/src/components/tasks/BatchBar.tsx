@@ -42,6 +42,7 @@ export function BatchBar() {
 
       {/* 전체 선택 */}
       <button
+        type="button"
         onClick={selectAllBatch}
         className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-colors ${
           isDark ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'
@@ -57,6 +58,7 @@ export function BatchBar() {
 
       {/* 완료 */}
       <button
+        type="button"
         onClick={batchComplete}
         disabled={count === 0}
         className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-colors disabled:opacity-30 ${
@@ -71,6 +73,7 @@ export function BatchBar() {
       {/* 이동 */}
       <div className="relative">
         <button
+          type="button"
           onClick={() => {
             setShowMoveMenu(!showMoveMenu)
             setShowPriorityMenu(false)
@@ -92,6 +95,7 @@ export function BatchBar() {
           >
             {lists.map((list) => (
               <button
+                type="button"
                 key={list.id}
                 onClick={() => {
                   batchMove(list.id)
@@ -112,6 +116,7 @@ export function BatchBar() {
       {/* 우선순위 */}
       <div className="relative">
         <button
+          type="button"
           onClick={() => {
             setShowPriorityMenu(!showPriorityMenu)
             setShowMoveMenu(false)
@@ -133,6 +138,7 @@ export function BatchBar() {
           >
             {PRIORITY_OPTIONS.map((opt) => (
               <button
+                type="button"
                 key={opt.value}
                 onClick={() => {
                   batchSetPriority(opt.value)
@@ -154,6 +160,7 @@ export function BatchBar() {
 
       {/* 삭제 */}
       <button
+        type="button"
         onClick={batchDelete}
         disabled={count === 0}
         className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-30"
@@ -165,6 +172,7 @@ export function BatchBar() {
 
       {/* 취소 */}
       <button
+        type="button"
         onClick={toggleBatchMode}
         className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-colors ${
           isDark ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-500 hover:bg-gray-100'
