@@ -8,18 +8,20 @@ export function TrashView() {
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* 헤더 */}
-      <div className={`flex items-center justify-between px-6 py-4 border-b ${
-        isDark ? 'border-gray-800' : 'border-gray-200'
-      }`}>
+      <div
+        className={`flex items-center justify-between px-6 py-4 border-b ${
+          isDark ? 'border-gray-800' : 'border-gray-200'
+        }`}
+      >
         <div className="flex items-center gap-2">
           <Trash2 size={20} className={isDark ? 'text-gray-400' : 'text-gray-500'} />
-          <h2 className={`text-lg font-semibold ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>
-            휴지통
-          </h2>
+          <h2 className={`text-lg font-semibold ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>휴지통</h2>
           {trashTasks.length > 0 && (
-            <span className={`text-xs px-2 py-0.5 rounded-full ${
-              isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'
-            }`}>
+            <span
+              className={`text-xs px-2 py-0.5 rounded-full ${
+                isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'
+              }`}
+            >
               {trashTasks.length}
             </span>
           )}
@@ -40,13 +42,8 @@ export function TrashView() {
       <div className="flex-1 overflow-y-auto">
         {trashTasks.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full">
-            <Trash2
-              size={48}
-              className={isDark ? 'text-gray-700' : 'text-gray-300'}
-            />
-            <p className={`mt-3 text-sm ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-              휴지통이 비어있습니다
-            </p>
+            <Trash2 size={48} className={isDark ? 'text-gray-700' : 'text-gray-300'} />
+            <p className={`mt-3 text-sm ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>휴지통이 비어있습니다</p>
           </div>
         ) : (
           <div className="py-2">
@@ -61,9 +58,7 @@ export function TrashView() {
               >
                 {/* 태스크 정보 */}
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    {task.title}
-                  </p>
+                  <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{task.title}</p>
                   {task.deletedAt && (
                     <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
                       삭제: {new Date(task.deletedAt).toLocaleDateString('ko-KR')}
@@ -76,9 +71,7 @@ export function TrashView() {
                   <button
                     onClick={() => restoreTask(task.id)}
                     className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg transition-colors ${
-                      isDark
-                        ? 'text-primary-400 hover:bg-primary-900/30'
-                        : 'text-primary-500 hover:bg-primary-50'
+                      isDark ? 'text-primary-400 hover:bg-primary-900/30' : 'text-primary-500 hover:bg-primary-50'
                     }`}
                   >
                     <RotateCcw size={13} />

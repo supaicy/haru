@@ -21,16 +21,26 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 function MainContent() {
   const viewType = useStore((s) => s.viewType)
   switch (viewType) {
-    case 'calendar': return <CalendarView />
-    case 'calendarWeekly': return <WeeklyCalendar />
-    case 'calendarDaily': return <DailyCalendar />
-    case 'pomodoro': return <PomodoroTimer />
-    case 'habits': return <HabitTracker />
-    case 'kanban': return <KanbanView />
-    case 'timeline': return <TimelineView />
-    case 'eisenhower': return <EisenhowerMatrix />
-    case 'stats': return <StatsView />
-    default: return <TaskListView />
+    case 'calendar':
+      return <CalendarView />
+    case 'calendarWeekly':
+      return <WeeklyCalendar />
+    case 'calendarDaily':
+      return <DailyCalendar />
+    case 'pomodoro':
+      return <PomodoroTimer />
+    case 'habits':
+      return <HabitTracker />
+    case 'kanban':
+      return <KanbanView />
+    case 'timeline':
+      return <TimelineView />
+    case 'eisenhower':
+      return <EisenhowerMatrix />
+    case 'stats':
+      return <StatsView />
+    default:
+      return <TaskListView />
   }
 }
 
@@ -66,7 +76,10 @@ export default function App() {
     })
     return () => {
       cleanup?.()
-      cleanupUpdate?.(); cleanupNotAvailable?.(); cleanupProgress?.(); cleanupDownloaded?.()
+      cleanupUpdate?.()
+      cleanupNotAvailable?.()
+      cleanupProgress?.()
+      cleanupDownloaded?.()
     }
   }, [loadData])
 
@@ -79,7 +92,9 @@ export default function App() {
   const isDark = theme === 'dark'
 
   return (
-    <div className={`flex h-screen overflow-hidden ${isDark ? 'bg-[#1C1C1E] text-gray-100' : 'bg-white text-gray-800'}`}>
+    <div
+      className={`flex h-screen overflow-hidden ${isDark ? 'bg-[#1C1C1E] text-gray-100' : 'bg-white text-gray-800'}`}
+    >
       <Sidebar />
       <div className="flex flex-1 min-w-0">
         <MainContent />

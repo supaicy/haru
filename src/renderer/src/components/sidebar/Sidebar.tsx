@@ -1,8 +1,31 @@
 import { useState, useMemo } from 'react'
 import {
-  Inbox, CalendarDays, CalendarRange, ListTodo, CheckCircle2, Plus, Timer, Target,
-  Calendar, MoreHorizontal, Trash2, Edit3, X, Check, Settings, FolderOpen, FolderPlus,
-  ChevronDown, ChevronRight, BarChart3, Columns3, Clock, Grid2X2, CalendarClock, Trophy, Bot
+  Inbox,
+  CalendarDays,
+  CalendarRange,
+  ListTodo,
+  CheckCircle2,
+  Plus,
+  Timer,
+  Target,
+  Calendar,
+  MoreHorizontal,
+  Trash2,
+  Edit3,
+  X,
+  Check,
+  Settings,
+  FolderOpen,
+  FolderPlus,
+  ChevronDown,
+  ChevronRight,
+  BarChart3,
+  Columns3,
+  Clock,
+  Grid2X2,
+  CalendarClock,
+  Trophy,
+  Bot
 } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import { toDateString } from '../../utils/date'
@@ -41,8 +64,16 @@ export function Sidebar() {
   const updateAvailable = useStore((s) => s.updateAvailable)
   const editingListId = useStore((s) => s.editingListId)
   const {
-    setSelectedList, setViewType, addList, removeList, updateList,
-    setEditingList, toggleSettings, addFolder, updateFolder, removeFolder
+    setSelectedList,
+    setViewType,
+    addList,
+    removeList,
+    updateList,
+    setEditingList,
+    toggleSettings,
+    addFolder,
+    updateFolder,
+    removeFolder
   } = useStore()
 
   const [showNewList, setShowNewList] = useState(false)
@@ -67,7 +98,7 @@ export function Sidebar() {
       inbox: incomplete.filter((t) => t.listId === 'inbox').length,
       all: incomplete.length,
       completed: tasks.filter((t) => t.completed).length,
-      trash: trashTasks.length,
+      trash: trashTasks.length
     }
     for (const list of lists) {
       if (!(list.id in counts)) counts[list.id] = incomplete.filter((t) => t.listId === list.id).length
@@ -78,17 +109,24 @@ export function Sidebar() {
   const handleAddList = async () => {
     if (!newListName.trim()) return
     await addList(newListName.trim(), newListColor, newListFolderId)
-    setNewListName(''); setNewListColor('#4A90D9'); setShowNewList(false); setNewListFolderId(null)
+    setNewListName('')
+    setNewListColor('#4A90D9')
+    setShowNewList(false)
+    setNewListFolderId(null)
   }
 
   const handleAddFolder = async () => {
     if (!newFolderName.trim()) return
     await addFolder(newFolderName.trim())
-    setNewFolderName(''); setShowNewFolder(false)
+    setNewFolderName('')
+    setShowNewFolder(false)
   }
 
   const startEdit = (id: string, name: string, color: string) => {
-    setEditingList(id); setEditName(name); setEditColor(color); setContextMenu(null)
+    setEditingList(id)
+    setEditName(name)
+    setEditColor(color)
+    setContextMenu(null)
   }
 
   const saveEdit = async () => {
@@ -101,8 +139,12 @@ export function Sidebar() {
   const btnClass = (active: boolean) =>
     `w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
       active
-        ? isDark ? 'bg-sidebar-active text-white' : 'bg-primary-100 text-primary-700'
-        : isDark ? 'text-sidebar-text hover:bg-sidebar-hover' : 'text-gray-600 hover:bg-gray-200'
+        ? isDark
+          ? 'bg-sidebar-active text-white'
+          : 'bg-primary-100 text-primary-700'
+        : isDark
+          ? 'text-sidebar-text hover:bg-sidebar-hover'
+          : 'text-gray-600 hover:bg-gray-200'
     }`
 
   const mutedClass = isDark ? 'text-sidebar-muted' : 'text-gray-400'
@@ -111,37 +153,69 @@ export function Sidebar() {
   const listsWithoutFolder = lists.filter((l) => l.id !== 'inbox' && !l.folderId)
   const listsByFolder = (folderId: string) => lists.filter((l) => l.folderId === folderId)
 
-  const renderList = (list: typeof lists[0]) => (
+  const renderList = (list: (typeof lists)[0]) => (
     <div key={list.id} className="relative group">
       {editingListId === list.id ? (
         <div className="flex items-center gap-2 px-3 py-1">
-          <div className="w-3 h-3 rounded-full flex-shrink-0 cursor-pointer" style={{ backgroundColor: editColor }}
-            onClick={() => { const idx = COLORS.indexOf(editColor); setEditColor(COLORS[(idx + 1) % COLORS.length]) }} />
-          <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)}
+          <div
+            className="w-3 h-3 rounded-full flex-shrink-0 cursor-pointer"
+            style={{ backgroundColor: editColor }}
+            onClick={() => {
+              const idx = COLORS.indexOf(editColor)
+              setEditColor(COLORS[(idx + 1) % COLORS.length])
+            }}
+          />
+          <input
+            type="text"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-            className="flex-1 bg-sidebar-hover text-white text-sm px-2 py-1 rounded outline-none" autoFocus />
-          <button onClick={saveEdit} className="text-green-400"><Check size={14} /></button>
-          <button onClick={() => setEditingList(null)} className={mutedClass}><X size={14} /></button>
+            className="flex-1 bg-sidebar-hover text-white text-sm px-2 py-1 rounded outline-none"
+            autoFocus
+          />
+          <button onClick={saveEdit} className="text-green-400">
+            <Check size={14} />
+          </button>
+          <button onClick={() => setEditingList(null)} className={mutedClass}>
+            <X size={14} />
+          </button>
         </div>
       ) : (
-        <button onClick={() => setSelectedList(list.id)} className={btnClass(selectedListId === list.id && viewType === 'tasks')}>
+        <button
+          onClick={() => setSelectedList(list.id)}
+          className={btnClass(selectedListId === list.id && viewType === 'tasks')}
+        >
           <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: list.color }} />
           <span className="flex-1 text-left truncate">{list.name}</span>
           <span className={`text-xs ${mutedClass}`}>{taskCounts[list.id] || ''}</span>
-          <span className="opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={(e) => { e.stopPropagation(); setContextMenu(contextMenu === list.id ? null : list.id) }}>
+          <span
+            className="opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation()
+              setContextMenu(contextMenu === list.id ? null : list.id)
+            }}
+          >
             <MoreHorizontal size={14} className={`${mutedClass} hover:text-white`} />
           </span>
         </button>
       )}
       {contextMenu === list.id && (
-        <div className={`absolute right-2 top-full z-50 rounded-lg shadow-xl py-1 min-w-[120px] ${isDark ? 'bg-[#3A3A3C]' : 'bg-white border border-gray-200'}`}>
-          <button onClick={() => startEdit(list.id, list.name, list.color)}
-            className={`w-full flex items-center gap-2 px-3 py-2 text-sm ${isDark ? 'text-sidebar-text hover:bg-sidebar-hover' : 'text-gray-700 hover:bg-gray-100'}`}>
+        <div
+          className={`absolute right-2 top-full z-50 rounded-lg shadow-xl py-1 min-w-[120px] ${isDark ? 'bg-[#3A3A3C]' : 'bg-white border border-gray-200'}`}
+        >
+          <button
+            onClick={() => startEdit(list.id, list.name, list.color)}
+            className={`w-full flex items-center gap-2 px-3 py-2 text-sm ${isDark ? 'text-sidebar-text hover:bg-sidebar-hover' : 'text-gray-700 hover:bg-gray-100'}`}
+          >
             <Edit3 size={14} /> 편집
           </button>
-          <button onClick={() => { removeList(list.id); setContextMenu(null) }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10">
+          <button
+            onClick={() => {
+              removeList(list.id)
+              setContextMenu(null)
+            }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10"
+          >
             <Trash2 size={14} /> 삭제
           </button>
         </div>
@@ -150,15 +224,21 @@ export function Sidebar() {
   )
 
   return (
-    <div className={`w-64 h-full flex flex-col select-none ${isDark ? 'bg-sidebar-bg text-sidebar-text' : 'bg-gray-100 text-gray-700'}`}
-      style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}>
+    <div
+      className={`w-64 h-full flex flex-col select-none ${isDark ? 'bg-sidebar-bg text-sidebar-text' : 'bg-gray-100 text-gray-700'}`}
+      style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+    >
       <div className="h-12 flex-shrink-0" />
 
       <div className="flex-1 overflow-y-auto px-2 pb-4" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
         {/* 스마트 리스트 */}
         <div className="mb-3">
           {SMART_LISTS.map((item) => (
-            <button key={item.id} onClick={() => setSelectedList(item.id)} className={btnClass(selectedListId === item.id && viewType === 'tasks')}>
+            <button
+              key={item.id}
+              onClick={() => setSelectedList(item.id)}
+              className={btnClass(selectedListId === item.id && viewType === 'tasks')}
+            >
               <span className={mutedClass}>{item.icon}</span>
               <span className="flex-1 text-left">{item.label}</span>
               <span className={`text-xs ${mutedClass}`}>{taskCounts[item.id] || ''}</span>
@@ -182,10 +262,18 @@ export function Sidebar() {
           <div className="flex items-center justify-between px-3 mb-1">
             <span className={`text-xs font-semibold uppercase tracking-wider ${mutedClass}`}>리스트</span>
             <div className="flex items-center gap-1">
-              <button onClick={() => setShowNewFolder(true)} className={`${mutedClass} hover:text-white transition-colors`} title="폴더 추가">
+              <button
+                onClick={() => setShowNewFolder(true)}
+                className={`${mutedClass} hover:text-white transition-colors`}
+                title="폴더 추가"
+              >
                 <FolderPlus size={14} />
               </button>
-              <button onClick={() => setShowNewList(true)} className={`${mutedClass} hover:text-white transition-colors`} title="리스트 추가">
+              <button
+                onClick={() => setShowNewList(true)}
+                className={`${mutedClass} hover:text-white transition-colors`}
+                title="리스트 추가"
+              >
                 <Plus size={16} />
               </button>
             </div>
@@ -195,11 +283,25 @@ export function Sidebar() {
           {showNewFolder && (
             <div className="flex items-center gap-2 px-3 py-1 mb-1">
               <FolderOpen size={14} className={mutedClass} />
-              <input type="text" value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)}
-                onKeyDown={(e) => { if (e.nativeEvent.isComposing) return; if (e.key === 'Enter') handleAddFolder(); if (e.key === 'Escape') setShowNewFolder(false) }}
-                placeholder="폴더 이름" className={`flex-1 text-sm px-2 py-1 rounded outline-none ${isDark ? 'bg-sidebar-hover text-white placeholder-sidebar-muted' : 'bg-gray-200 text-gray-800 placeholder-gray-400'}`} autoFocus />
-              <button onClick={handleAddFolder} className="text-green-400"><Check size={14} /></button>
-              <button onClick={() => setShowNewFolder(false)} className={mutedClass}><X size={14} /></button>
+              <input
+                type="text"
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.nativeEvent.isComposing) return
+                  if (e.key === 'Enter') handleAddFolder()
+                  if (e.key === 'Escape') setShowNewFolder(false)
+                }}
+                placeholder="폴더 이름"
+                className={`flex-1 text-sm px-2 py-1 rounded outline-none ${isDark ? 'bg-sidebar-hover text-white placeholder-sidebar-muted' : 'bg-gray-200 text-gray-800 placeholder-gray-400'}`}
+                autoFocus
+              />
+              <button onClick={handleAddFolder} className="text-green-400">
+                <Check size={14} />
+              </button>
+              <button onClick={() => setShowNewFolder(false)} className={mutedClass}>
+                <X size={14} />
+              </button>
             </div>
           )}
 
@@ -211,11 +313,24 @@ export function Sidebar() {
                   {folder.collapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
                 </button>
                 <FolderOpen size={14} className={mutedClass} />
-                <span className={`flex-1 text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{folder.name}</span>
-                <button onClick={() => { setNewListFolderId(folder.id); setShowNewList(true) }}
-                  className={`opacity-0 group-hover:opacity-100 ${mutedClass}`}><Plus size={12} /></button>
-                <button onClick={() => removeFolder(folder.id)}
-                  className="opacity-0 group-hover:opacity-100 text-red-400"><Trash2 size={12} /></button>
+                <span className={`flex-1 text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                  {folder.name}
+                </span>
+                <button
+                  onClick={() => {
+                    setNewListFolderId(folder.id)
+                    setShowNewList(true)
+                  }}
+                  className={`opacity-0 group-hover:opacity-100 ${mutedClass}`}
+                >
+                  <Plus size={12} />
+                </button>
+                <button
+                  onClick={() => removeFolder(folder.id)}
+                  className="opacity-0 group-hover:opacity-100 text-red-400"
+                >
+                  <Trash2 size={12} />
+                </button>
               </div>
               {!folder.collapsed && listsByFolder(folder.id).map(renderList)}
             </div>
@@ -227,42 +342,78 @@ export function Sidebar() {
           {/* 리스트 추가 */}
           {showNewList && (
             <div className="flex items-center gap-2 px-3 py-1 mt-1">
-              <div className="w-3 h-3 rounded-full flex-shrink-0 cursor-pointer" style={{ backgroundColor: newListColor }}
-                onClick={() => { const idx = COLORS.indexOf(newListColor); setNewListColor(COLORS[(idx + 1) % COLORS.length]) }} />
-              <input type="text" value={newListName} onChange={(e) => setNewListName(e.target.value)}
-                onKeyDown={(e) => { if (e.nativeEvent.isComposing) return; if (e.key === 'Enter') handleAddList(); if (e.key === 'Escape') { setShowNewList(false); setNewListFolderId(null) } }}
-                placeholder="리스트 이름" className={`flex-1 text-sm px-2 py-1 rounded outline-none ${isDark ? 'bg-sidebar-hover text-white placeholder-sidebar-muted' : 'bg-gray-200 text-gray-800 placeholder-gray-400'}`} autoFocus />
-              <button onClick={handleAddList} className="text-green-400"><Check size={14} /></button>
-              <button onClick={() => { setShowNewList(false); setNewListFolderId(null) }} className={mutedClass}><X size={14} /></button>
+              <div
+                className="w-3 h-3 rounded-full flex-shrink-0 cursor-pointer"
+                style={{ backgroundColor: newListColor }}
+                onClick={() => {
+                  const idx = COLORS.indexOf(newListColor)
+                  setNewListColor(COLORS[(idx + 1) % COLORS.length])
+                }}
+              />
+              <input
+                type="text"
+                value={newListName}
+                onChange={(e) => setNewListName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.nativeEvent.isComposing) return
+                  if (e.key === 'Enter') handleAddList()
+                  if (e.key === 'Escape') {
+                    setShowNewList(false)
+                    setNewListFolderId(null)
+                  }
+                }}
+                placeholder="리스트 이름"
+                className={`flex-1 text-sm px-2 py-1 rounded outline-none ${isDark ? 'bg-sidebar-hover text-white placeholder-sidebar-muted' : 'bg-gray-200 text-gray-800 placeholder-gray-400'}`}
+                autoFocus
+              />
+              <button onClick={handleAddList} className="text-green-400">
+                <Check size={14} />
+              </button>
+              <button
+                onClick={() => {
+                  setShowNewList(false)
+                  setNewListFolderId(null)
+                }}
+                className={mutedClass}
+              >
+                <X size={14} />
+              </button>
             </div>
           )}
         </div>
       </div>
 
       {/* 하단: 점수 + 설정 */}
-      <div className={`flex-shrink-0 px-3 py-2 border-t ${isDark ? 'border-sidebar-hover' : 'border-gray-300'}`}
-        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+      <div
+        className={`flex-shrink-0 px-3 py-2 border-t ${isDark ? 'border-sidebar-hover' : 'border-gray-300'}`}
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+      >
         <div className="flex items-center gap-2 px-3 py-1.5 mb-1">
           <Trophy size={16} className="text-yellow-500" />
           <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
             Lv.{level} · {score.total}점
           </span>
           <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-gray-700' : 'bg-gray-300'}`}>
-            <div className="h-full bg-yellow-500 rounded-full transition-all" style={{ width: `${score.total % 100}%` }} />
+            <div
+              className="h-full bg-yellow-500 rounded-full transition-all"
+              style={{ width: `${score.total % 100}%` }}
+            />
           </div>
         </div>
-        <button onClick={() => useStore.getState().setShowAiChat(!useStore.getState().showAiChat)}
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors ${isDark ? 'text-sidebar-muted hover:text-white hover:bg-sidebar-hover' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'}`}>
+        <button
+          onClick={() => useStore.getState().setShowAiChat(!useStore.getState().showAiChat)}
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors ${isDark ? 'text-sidebar-muted hover:text-white hover:bg-sidebar-hover' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'}`}
+        >
           <Bot size={18} className="text-blue-500" />
           <span>AI 어시스턴트</span>
         </button>
-        <button onClick={toggleSettings}
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors ${isDark ? 'text-sidebar-muted hover:text-white hover:bg-sidebar-hover' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'}`}>
+        <button
+          onClick={toggleSettings}
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors ${isDark ? 'text-sidebar-muted hover:text-white hover:bg-sidebar-hover' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'}`}
+        >
           <div className="relative">
             <Settings size={18} />
-            {updateAvailable && (
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full" />
-            )}
+            {updateAvailable && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full" />}
           </div>
           <span>설정</span>
         </button>

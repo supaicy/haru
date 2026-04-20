@@ -30,10 +30,7 @@ export function AttachmentList({
     try {
       const files = await pickAttachment()
       if (files && files.length > 0) {
-        const newAttachments = [
-          ...attachments,
-          ...files.map((f) => formatAttachment(f.name, f.path))
-        ]
+        const newAttachments = [...attachments, ...files.map((f) => formatAttachment(f.name, f.path))]
         onUpdate(newAttachments)
       }
     } catch {
@@ -64,20 +61,13 @@ export function AttachmentList({
                   size={14}
                   className={isDark ? 'text-gray-500 flex-shrink-0' : 'text-gray-400 flex-shrink-0'}
                 />
-                <span
-                  className={`flex-1 text-sm truncate ${
-                    isDark ? 'text-gray-300' : 'text-gray-600'
-                  }`}
-                  title={name}
-                >
+                <span className={`flex-1 text-sm truncate ${isDark ? 'text-gray-300' : 'text-gray-600'}`} title={name}>
                   {name}
                 </span>
                 <button
                   onClick={() => handleRemove(index)}
                   className={`opacity-0 group-hover:opacity-100 flex-shrink-0 transition-opacity ${
-                    isDark
-                      ? 'text-gray-500 hover:text-red-400'
-                      : 'text-gray-400 hover:text-red-500'
+                    isDark ? 'text-gray-500 hover:text-red-400' : 'text-gray-400 hover:text-red-500'
                   }`}
                 >
                   <X size={14} />

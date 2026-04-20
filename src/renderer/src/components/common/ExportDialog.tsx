@@ -34,10 +34,7 @@ export function ExportDialog() {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      onClick={handleClose}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={handleClose}>
       <div
         className={`w-[400px] rounded-xl shadow-2xl overflow-hidden ${
           isDark ? 'bg-[#2C2C2E] text-gray-100' : 'bg-white text-gray-800'
@@ -45,9 +42,11 @@ export function ExportDialog() {
         onClick={(e) => e.stopPropagation()}
       >
         {/* 헤더 */}
-        <div className={`flex items-center justify-between px-5 py-4 border-b ${
-          isDark ? 'border-gray-700' : 'border-gray-200'
-        }`}>
+        <div
+          className={`flex items-center justify-between px-5 py-4 border-b ${
+            isDark ? 'border-gray-700' : 'border-gray-200'
+          }`}
+        >
           <h2 className="text-base font-semibold">데이터 내보내기</h2>
           <button
             onClick={handleClose}
@@ -75,9 +74,11 @@ export function ExportDialog() {
                 : 'border-gray-200 hover:border-primary-400 hover:bg-primary-50'
             } ${status === 'loading' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
           >
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-              isDark ? 'bg-blue-500/20' : 'bg-blue-50'
-            }`}>
+            <div
+              className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                isDark ? 'bg-blue-500/20' : 'bg-blue-50'
+              }`}
+            >
               <FileJson size={20} className="text-blue-400" />
             </div>
             <div className="text-left flex-1">
@@ -98,9 +99,11 @@ export function ExportDialog() {
                 : 'border-gray-200 hover:border-primary-400 hover:bg-primary-50'
             } ${status === 'loading' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
           >
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-              isDark ? 'bg-green-500/20' : 'bg-green-50'
-            }`}>
+            <div
+              className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                isDark ? 'bg-green-500/20' : 'bg-green-50'
+              }`}
+            >
               <FileSpreadsheet size={20} className="text-green-400" />
             </div>
             <div className="text-left flex-1">

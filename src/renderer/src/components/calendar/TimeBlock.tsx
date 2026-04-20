@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import type React from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Task } from '../../types'
 import { useStore } from '../../store/useStore'
 import { snapTo15Min } from '../../utils/scheduledTime'
@@ -19,9 +20,7 @@ interface Props {
 
 const MIN_BLOCK_MIN = 15
 
-export function TimeBlock({
-  task, start, end, pxPerMin, column, columns, isDark
-}: Props): React.ReactElement {
+export function TimeBlock({ task, start, end, pxPerMin, column, columns, isDark }: Props): React.ReactElement {
   const { updateTask } = useStore()
   const elRef = useRef<HTMLDivElement>(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -72,9 +71,7 @@ export function TimeBlock({
       const minEnd = new Date(start.getTime() + MIN_BLOCK_MIN * 60000)
       const dayEnd = new Date(start)
       dayEnd.setHours(23, 59, 0, 0)
-      const clampedEnd = new Date(
-        Math.max(minEnd.getTime(), Math.min(newEnd.getTime(), dayEnd.getTime()))
-      )
+      const clampedEnd = new Date(Math.max(minEnd.getTime(), Math.min(newEnd.getTime(), dayEnd.getTime())))
       if (elRef.current) {
         elRef.current.style.height = `${((clampedEnd.getTime() - start.getTime()) / 60000) * pxPerMin}px`
       }
@@ -87,9 +84,7 @@ export function TimeBlock({
       const minEnd = new Date(start.getTime() + MIN_BLOCK_MIN * 60000)
       const dayEnd = new Date(start)
       dayEnd.setHours(23, 59, 0, 0)
-      const clampedEnd = new Date(
-        Math.max(minEnd.getTime(), Math.min(newEnd.getTime(), dayEnd.getTime()))
-      )
+      const clampedEnd = new Date(Math.max(minEnd.getTime(), Math.min(newEnd.getTime(), dayEnd.getTime())))
       const snapped = snapTo15Min(toIso(clampedEnd))
       void updateTask({ id: task.id, scheduledEnd: snapped })
     }
@@ -109,9 +104,7 @@ export function TimeBlock({
     setMenuOpen(false)
   }
 
-  const completedStripe = task.completed
-    ? 'bg-stripes opacity-60'
-    : ''
+  const completedStripe = task.completed ? 'bg-stripes opacity-60' : ''
 
   return (
     <div
@@ -132,9 +125,8 @@ export function TimeBlock({
     >
       <div className="font-medium truncate">{task.title}</div>
       <div className="text-[10px] opacity-70">
-        {start.getHours()}:{String(start.getMinutes()).padStart(2, '0')}
-        –
-        {end.getHours()}:{String(end.getMinutes()).padStart(2, '0')}
+        {start.getHours()}:{String(start.getMinutes()).padStart(2, '0')}–{end.getHours()}:
+        {String(end.getMinutes()).padStart(2, '0')}
       </div>
       {/* Resize handle (bottom 6px) */}
       <div
@@ -151,7 +143,10 @@ export function TimeBlock({
           <button className="px-3 py-1 text-xs hover:bg-gray-500/20 block w-full text-left" onClick={unschedule}>
             일정 해제
           </button>
-          <button className="px-3 py-1 text-xs hover:bg-gray-500/20 block w-full text-left" onClick={() => setMenuOpen(false)}>
+          <button
+            className="px-3 py-1 text-xs hover:bg-gray-500/20 block w-full text-left"
+            onClick={() => setMenuOpen(false)}
+          >
             취소
           </button>
         </div>

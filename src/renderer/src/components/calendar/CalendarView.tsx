@@ -33,19 +33,30 @@ export function CalendarView() {
 
   return (
     <div className={`flex-1 flex flex-col h-full ${isDark ? 'bg-[#1C1C1E]' : 'bg-white'}`}>
-      <div className={`flex items-center justify-between px-6 py-4 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
+      <div
+        className={`flex items-center justify-between px-6 py-4 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}
+      >
         <div className="flex items-center gap-4">
           <h1 className={`text-xl font-bold ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>
             {formatDate(currentDate, 'yyyy년 M월')}
           </h1>
           <div className="flex items-center gap-1">
-            <button onClick={prevMonth} className={`p-1 rounded transition-colors ${isDark ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}>
+            <button
+              onClick={prevMonth}
+              className={`p-1 rounded transition-colors ${isDark ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
+            >
               <ChevronLeft size={18} />
             </button>
-            <button onClick={goToday} className={`px-2 py-0.5 rounded text-xs transition-colors ${isDark ? 'text-gray-400 hover:bg-gray-800' : 'text-gray-500 hover:bg-gray-200'}`}>
+            <button
+              onClick={goToday}
+              className={`px-2 py-0.5 rounded text-xs transition-colors ${isDark ? 'text-gray-400 hover:bg-gray-800' : 'text-gray-500 hover:bg-gray-200'}`}
+            >
               오늘
             </button>
-            <button onClick={nextMonth} className={`p-1 rounded transition-colors ${isDark ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}>
+            <button
+              onClick={nextMonth}
+              className={`p-1 rounded transition-colors ${isDark ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
+            >
               <ChevronRight size={18} />
             </button>
           </div>
@@ -66,7 +77,9 @@ export function CalendarView() {
           ))}
         </div>
 
-        <div className={`grid grid-cols-7 gap-px rounded-lg overflow-hidden ${isDark ? 'bg-gray-800/30' : 'bg-gray-200'}`}>
+        <div
+          className={`grid grid-cols-7 gap-px rounded-lg overflow-hidden ${isDark ? 'bg-gray-800/30' : 'bg-gray-200'}`}
+        >
           {days.map((day) => {
             const dateStr = toDateString(day)
             const dayTasks = tasksByDate[dateStr] || []

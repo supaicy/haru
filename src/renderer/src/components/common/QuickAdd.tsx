@@ -80,43 +80,38 @@ export function QuickAdd() {
             }}
             placeholder="할 일을 입력하세요... (예: 내일 장보기)"
             className={`w-full text-lg bg-transparent outline-none ${
-              isDark
-                ? 'text-gray-100 placeholder-gray-500'
-                : 'text-gray-800 placeholder-gray-400'
+              isDark ? 'text-gray-100 placeholder-gray-500' : 'text-gray-800 placeholder-gray-400'
             }`}
           />
 
           {/* 파싱된 날짜 표시 */}
           {parsedDate && (
-            <div className={`flex items-center gap-2 mt-3 text-sm ${
-              isDark ? 'text-primary-400' : 'text-primary-600'
-            }`}>
+            <div className={`flex items-center gap-2 mt-3 text-sm ${isDark ? 'text-primary-400' : 'text-primary-600'}`}>
               <Calendar size={14} />
-              <span>마감일: {parsedDate}{parsedTime ? ` ${parsedTime}` : ''}</span>
-              <span className={`${isDark ? 'text-gray-500' : 'text-gray-400'}`}>|</span>
-              <span className={`${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                제목: {parsedTitle}
+              <span>
+                마감일: {parsedDate}
+                {parsedTime ? ` ${parsedTime}` : ''}
               </span>
+              <span className={`${isDark ? 'text-gray-500' : 'text-gray-400'}`}>|</span>
+              <span className={`${isDark ? 'text-gray-400' : 'text-gray-500'}`}>제목: {parsedTitle}</span>
             </div>
           )}
         </div>
 
         {/* 하단 안내 */}
-        <div className={`flex items-center justify-between px-5 py-3 border-t ${
-          isDark ? 'border-gray-700 bg-[#1C1C1E]' : 'border-gray-200 bg-gray-50'
-        }`}>
-          <div className={`flex items-center gap-3 text-xs ${
-            isDark ? 'text-gray-500' : 'text-gray-400'
-          }`}>
+        <div
+          className={`flex items-center justify-between px-5 py-3 border-t ${
+            isDark ? 'border-gray-700 bg-[#1C1C1E]' : 'border-gray-200 bg-gray-50'
+          }`}
+        >
+          <div className={`flex items-center gap-3 text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
             <span className="flex items-center gap-1">
               <CornerDownLeft size={12} />
               추가
             </span>
             <span>Esc 닫기</span>
           </div>
-          <div className={`flex items-center gap-1 text-xs ${
-            isDark ? 'text-gray-600' : 'text-gray-400'
-          }`}>
+          <div className={`flex items-center gap-1 text-xs ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
             <Command size={11} />
             <span>Shift + A</span>
           </div>

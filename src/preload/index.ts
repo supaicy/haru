@@ -4,7 +4,8 @@ const api = {
   // Folders
   getFolders: () => ipcRenderer.invoke('get-folders'),
   createFolder: (id: string, name: string) => ipcRenderer.invoke('create-folder', id, name),
-  updateFolder: (id: string, name: string, collapsed: boolean) => ipcRenderer.invoke('update-folder', id, name, collapsed),
+  updateFolder: (id: string, name: string, collapsed: boolean) =>
+    ipcRenderer.invoke('update-folder', id, name, collapsed),
   deleteFolder: (id: string) => ipcRenderer.invoke('delete-folder', id),
 
   // Lists
@@ -60,7 +61,8 @@ const api = {
   downloadUpdate: () => ipcRenderer.invoke('download-update'),
   installUpdate: () => ipcRenderer.invoke('install-update'),
   onUpdateAvailable: (callback: (info: { version: string; downloadUrl: string }) => void) => {
-    const handler = (_: Electron.IpcRendererEvent, info: { version: string; downloadUrl: string }): void => callback(info)
+    const handler = (_: Electron.IpcRendererEvent, info: { version: string; downloadUrl: string }): void =>
+      callback(info)
     ipcRenderer.on('update-available', handler)
     return () => ipcRenderer.removeListener('update-available', handler)
   },

@@ -41,7 +41,7 @@ function toLocalIso(d: Date): string {
  */
 export function getScheduledForOccurrence(
   task: Pick<Task, 'scheduledStart' | 'scheduledEnd' | 'isRecurring'>,
-  occurrenceDate: string  // "YYYY-MM-DD"
+  occurrenceDate: string // "YYYY-MM-DD"
 ): { start: string; end: string } | null {
   if (!task.scheduledStart || !task.scheduledEnd) return null
   if (!task.isRecurring) {
@@ -57,10 +57,7 @@ export function getScheduledForOccurrence(
 
 const MIN_BLOCK_MS = 15 * 60 * 1000
 
-export function isValidSchedulePair(
-  start: string | null,
-  end: string | null
-): boolean {
+export function isValidSchedulePair(start: string | null, end: string | null): boolean {
   if (start === null && end === null) return true
   if (start === null || end === null) return false
   const s = new Date(start).getTime()

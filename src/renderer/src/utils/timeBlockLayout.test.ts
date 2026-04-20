@@ -33,11 +33,7 @@ describe('layoutOverlappingBlocks', () => {
   })
 
   it('three-way overlap → columns:3', () => {
-    const out = layoutOverlappingBlocks([
-      b('a', 0, 60),
-      b('b', 10, 50),
-      b('c', 20, 40)
-    ])
+    const out = layoutOverlappingBlocks([b('a', 0, 60), b('b', 10, 50), b('c', 20, 40)])
     expect(out.every((e) => e.columns === 3)).toBe(true)
     const cols = out.map((e) => e.column).sort()
     expect(cols).toEqual([0, 1, 2])
@@ -45,8 +41,11 @@ describe('layoutOverlappingBlocks', () => {
 
   it('two separated clusters → each cluster sized independently', () => {
     const out = layoutOverlappingBlocks([
-      b('a', 0, 30), b('b', 10, 40),      // cluster 1: 2-wide
-      b('c', 60, 90), b('d', 70, 100), b('e', 80, 95)   // cluster 2: 3-wide
+      b('a', 0, 30),
+      b('b', 10, 40), // cluster 1: 2-wide
+      b('c', 60, 90),
+      b('d', 70, 100),
+      b('e', 80, 95) // cluster 2: 3-wide
     ])
     expect(out.find((e) => e.id === 'a')!.columns).toBe(2)
     expect(out.find((e) => e.id === 'c')!.columns).toBe(3)

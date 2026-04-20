@@ -84,9 +84,7 @@ export function SubtaskList({ taskId }: { taskId: string }) {
             <button
               onClick={() => removeTask(subtask.id)}
               className={`opacity-0 group-hover:opacity-100 flex-shrink-0 transition-opacity ${
-                isDark
-                  ? 'text-gray-500 hover:text-red-400'
-                  : 'text-gray-400 hover:text-red-500'
+                isDark ? 'text-gray-500 hover:text-red-400' : 'text-gray-400 hover:text-red-500'
               }`}
             >
               <X size={14} />
@@ -97,9 +95,11 @@ export function SubtaskList({ taskId }: { taskId: string }) {
 
       {/* 하위 작업 추가 */}
       {showInput ? (
-        <div className={`flex items-center gap-2 px-2 py-1.5 mt-1 rounded border ${
-          isDark ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'
-        }`}>
+        <div
+          className={`flex items-center gap-2 px-2 py-1.5 mt-1 rounded border ${
+            isDark ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'
+          }`}
+        >
           <Circle size={16} className={isDark ? 'text-gray-600' : 'text-gray-300'} />
           <input
             ref={inputRef}

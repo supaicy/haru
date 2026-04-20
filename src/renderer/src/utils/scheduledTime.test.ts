@@ -27,10 +27,23 @@ describe('snapTo15Min', () => {
 })
 
 const baseTask: Task = {
-  id: 't1', title: 'weekly sync', description: '', completed: false, priority: 'none',
-  dueDate: null, dueTime: null, reminderAt: null, listId: 'inbox', parentId: null,
-  tags: [], createdAt: '2026-04-21T00:00:00', completedAt: null, deletedAt: null,
-  sortOrder: 0, isRecurring: true, recurringPattern: 'weekly',
+  id: 't1',
+  title: 'weekly sync',
+  description: '',
+  completed: false,
+  priority: 'none',
+  dueDate: null,
+  dueTime: null,
+  reminderAt: null,
+  listId: 'inbox',
+  parentId: null,
+  tags: [],
+  createdAt: '2026-04-21T00:00:00',
+  completedAt: null,
+  deletedAt: null,
+  sortOrder: 0,
+  isRecurring: true,
+  recurringPattern: 'weekly',
   attachments: [],
   scheduledStart: '2026-04-21T14:00:00',
   scheduledEnd: '2026-04-21T15:00:00'
@@ -54,7 +67,7 @@ describe('getScheduledForOccurrence', () => {
     const t = {
       ...baseTask,
       scheduledStart: '2026-04-21T09:30:00',
-      scheduledEnd:   '2026-04-21T11:15:00'  // 1h 45m duration
+      scheduledEnd: '2026-04-21T11:15:00' // 1h 45m duration
     }
     const result = getScheduledForOccurrence(t, '2026-05-05')
     expect(result).toEqual({
@@ -68,7 +81,7 @@ describe('getScheduledForOccurrence', () => {
     const result = getScheduledForOccurrence(t, '2026-05-05')
     expect(result).toEqual({
       start: '2026-04-21T14:00:00',
-      end:   '2026-04-21T15:00:00'
+      end: '2026-04-21T15:00:00'
     })
   })
 })

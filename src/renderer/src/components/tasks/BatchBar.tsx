@@ -34,15 +34,11 @@ export function BatchBar() {
   return (
     <div
       className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 px-4 py-2 rounded-xl shadow-2xl border ${
-        isDark
-          ? 'bg-[#2C2C2E] border-gray-700'
-          : 'bg-white border-gray-200 shadow-lg'
+        isDark ? 'bg-[#2C2C2E] border-gray-700' : 'bg-white border-gray-200 shadow-lg'
       }`}
     >
       {/* 선택 개수 */}
-      <span className={`text-sm mr-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-        {count}개 선택
-      </span>
+      <span className={`text-sm mr-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{count}개 선택</span>
 
       {/* 전체 선택 */}
       <button
@@ -105,10 +101,7 @@ export function BatchBar() {
                   isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                <span
-                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: list.color }}
-                />
+                <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: list.color }} />
                 {list.name}
               </button>
             ))}

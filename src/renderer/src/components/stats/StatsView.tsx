@@ -1,15 +1,7 @@
-import React, { useMemo } from 'react'
+import type React from 'react'
+import { useMemo } from 'react'
 import { useStore } from '../../store/useStore'
-import {
-  Trophy,
-  CheckCircle2,
-  Flame,
-  Timer,
-  Target,
-  TrendingUp,
-  Star,
-  Calendar
-} from 'lucide-react'
+import { Trophy, CheckCircle2, Flame, Timer, Target, TrendingUp, Star, Calendar } from 'lucide-react'
 
 // 요일 이름
 const dayNames = ['일', '월', '화', '수', '목', '금', '토']
@@ -34,13 +26,9 @@ export function StatsView(): React.ReactElement {
     const completedTasks = tasks.filter((t) => t.completed && t.completedAt)
     const totalCompleted = completedTasks.length
 
-    const completedToday = completedTasks.filter(
-      (t) => t.completedAt && t.completedAt.startsWith(todayStr)
-    ).length
+    const completedToday = completedTasks.filter((t) => t.completedAt && t.completedAt.startsWith(todayStr)).length
 
-    const completedThisWeek = completedTasks.filter(
-      (t) => t.completedAt && t.completedAt >= weekStartStr
-    ).length
+    const completedThisWeek = completedTasks.filter((t) => t.completedAt && t.completedAt >= weekStartStr).length
 
     // 점수 & 레벨
     const totalScore = score.total
@@ -53,9 +41,7 @@ export function StatsView(): React.ReactElement {
       const d = new Date(now)
       d.setDate(d.getDate() - i)
       const dateStr = d.toISOString().split('T')[0]
-      const count = completedTasks.filter(
-        (t) => t.completedAt && t.completedAt.startsWith(dateStr)
-      ).length
+      const count = completedTasks.filter((t) => t.completedAt && t.completedAt.startsWith(dateStr)).length
       last14Days.push({
         date: dateStr,
         label: `${d.getMonth() + 1}/${d.getDate()}`,
@@ -65,9 +51,7 @@ export function StatsView(): React.ReactElement {
     const maxDailyCount = Math.max(...last14Days.map((d) => d.count), 1)
 
     // 포모도로 통계
-    const workSessions = pomodoroSessions.filter(
-      (s) => s.type === 'work' && s.completedAt
-    )
+    const workSessions = pomodoroSessions.filter((s) => s.type === 'work' && s.completedAt)
     const pomodoroCount = workSessions.length
     const totalFocusSeconds = workSessions.reduce((sum, s) => sum + s.duration, 0)
     const totalFocusMinutes = Math.floor(totalFocusSeconds / 60)
@@ -79,9 +63,7 @@ export function StatsView(): React.ReactElement {
     if (habits.length > 0 && habitLogs.length > 0) {
       const completedLogs = habitLogs.filter((l) => l.completed).length
       // 간단한 비율: 완료된 로그 / 전체 로그
-      habitCompletionRate = habitLogs.length > 0
-        ? Math.round((completedLogs / habitLogs.length) * 100)
-        : 0
+      habitCompletionRate = habitLogs.length > 0 ? Math.round((completedLogs / habitLogs.length) * 100) : 0
     }
 
     // 가장 생산적인 요일
@@ -93,8 +75,7 @@ export function StatsView(): React.ReactElement {
       }
     }
     const maxDayCount = Math.max(...dayCount)
-    const mostProductiveDay =
-      maxDayCount > 0 ? dayNames[dayCount.indexOf(maxDayCount)] : '-'
+    const mostProductiveDay = maxDayCount > 0 ? dayNames[dayCount.indexOf(maxDayCount)] : '-'
 
     return {
       totalCompleted,
@@ -116,9 +97,7 @@ export function StatsView(): React.ReactElement {
   }, [tasks, pomodoroSessions, habitLogs, habits, score])
 
   // 카드 스타일
-  const cardClass = `rounded-xl border p-4 ${
-    isDark ? 'bg-gray-800/60 border-gray-700' : 'bg-white border-gray-200'
-  }`
+  const cardClass = `rounded-xl border p-4 ${isDark ? 'bg-gray-800/60 border-gray-700' : 'bg-white border-gray-200'}`
 
   const labelClass = `text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`
   const valueClass = `text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`
@@ -128,9 +107,7 @@ export function StatsView(): React.ReactElement {
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       {/* 헤더 */}
       <div className={`px-6 py-4 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-        <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          통계
-        </h2>
+        <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>통계</h2>
       </div>
 
       {/* 통계 콘텐츠 */}
@@ -151,18 +128,14 @@ export function StatsView(): React.ReactElement {
           </div>
           {/* 레벨 프로그레스 바 */}
           <div className="relative">
-            <div
-              className={`h-2 rounded-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}
-            >
+            <div className={`h-2 rounded-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}>
               <div
                 className="h-full rounded-full bg-amber-500 transition-all"
                 style={{ width: `${stats.levelProgress}%` }}
               />
             </div>
             <div className="flex justify-between mt-1">
-              <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                {stats.levelProgress}/100
-              </span>
+              <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{stats.levelProgress}/100</span>
               <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                 다음 레벨까지 {100 - stats.levelProgress}점
               </span>
@@ -205,10 +178,7 @@ export function StatsView(): React.ReactElement {
           </div>
           <div className="flex items-end gap-1.5 h-32">
             {stats.last14Days.map((day) => (
-              <div
-                key={day.date}
-                className="flex-1 flex flex-col items-center justify-end"
-              >
+              <div key={day.date} className="flex-1 flex flex-col items-center justify-end">
                 {/* 바 */}
                 <div
                   className={`w-full rounded-t transition-all ${
@@ -219,31 +189,17 @@ export function StatsView(): React.ReactElement {
                         : 'bg-gray-300'
                   }`}
                   style={{
-                    height: day.count > 0
-                      ? `${Math.max((day.count / stats.maxDailyCount) * 100, 8)}%`
-                      : '2px',
+                    height: day.count > 0 ? `${Math.max((day.count / stats.maxDailyCount) * 100, 8)}%` : '2px',
                     minHeight: day.count > 0 ? '8px' : '2px'
                   }}
                   title={`${day.date}: ${day.count}개 완료`}
                 />
                 {/* 숫자 */}
                 {day.count > 0 && (
-                  <span
-                    className={`text-[9px] mt-0.5 ${
-                      isDark ? 'text-gray-400' : 'text-gray-500'
-                    }`}
-                  >
-                    {day.count}
-                  </span>
+                  <span className={`text-[9px] mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{day.count}</span>
                 )}
                 {/* 라벨 */}
-                <span
-                  className={`text-[9px] mt-0.5 ${
-                    isDark ? 'text-gray-600' : 'text-gray-400'
-                  }`}
-                >
-                  {day.label}
-                </span>
+                <span className={`text-[9px] mt-0.5 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>{day.label}</span>
               </div>
             ))}
           </div>
@@ -255,9 +211,7 @@ export function StatsView(): React.ReactElement {
           <div className={cardClass}>
             <div className="flex items-center gap-2 mb-3">
               <Timer size={16} className="text-red-500" />
-              <span className={`text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                포모도로
-              </span>
+              <span className={`text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>포모도로</span>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between">
@@ -279,9 +233,7 @@ export function StatsView(): React.ReactElement {
           <div className={cardClass}>
             <div className="flex items-center gap-2 mb-3">
               <Flame size={16} className="text-orange-500" />
-              <span className={`text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                습관 & 생산성
-              </span>
+              <span className={`text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>습관 & 생산성</span>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between">
@@ -326,16 +278,10 @@ export function StatsView(): React.ReactElement {
                         : '2px'
                   }}
                 />
-                <span
-                  className={`text-[10px] mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
-                >
+                <span className={`text-[10px] mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                   {stats.dayCount[idx]}
                 </span>
-                <span
-                  className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}
-                >
-                  {name}
-                </span>
+                <span className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{name}</span>
               </div>
             ))}
           </div>

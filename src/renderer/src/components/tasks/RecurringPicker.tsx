@@ -84,9 +84,7 @@ export function RecurringPicker({
   }, [value])
 
   const toggleWeekDay = (day: number) => {
-    setWeekDays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
-    )
+    setWeekDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]))
   }
 
   const handleApply = () => {
@@ -172,9 +170,7 @@ export function RecurringPicker({
           {/* 요일 선택 (매주) */}
           {type === 'weekly' && (
             <div className="mb-3">
-              <div className={`text-xs mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                요일 선택
-              </div>
+              <div className={`text-xs mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>요일 선택</div>
               <div className="flex gap-1">
                 {WEEKDAYS.map((label, idx) => (
                   <button
@@ -198,9 +194,7 @@ export function RecurringPicker({
           {/* 날짜 선택 (매월) */}
           {type === 'monthly' && (
             <div className="mb-3">
-              <div className={`text-xs mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                매월 몇 일
-              </div>
+              <div className={`text-xs mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>매월 몇 일</div>
               <input
                 type="number"
                 min={1}
@@ -208,9 +202,7 @@ export function RecurringPicker({
                 value={monthDay}
                 onChange={(e) => setMonthDay(Math.max(1, Math.min(31, parseInt(e.target.value) || 1)))}
                 className={`w-20 text-sm px-2 py-1 rounded border outline-none ${
-                  isDark
-                    ? 'bg-gray-700 border-gray-600 text-gray-200'
-                    : 'bg-white border-gray-300 text-gray-700'
+                  isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-white border-gray-300 text-gray-700'
                 }`}
               />
               <span className={`ml-1 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>일</span>
@@ -220,17 +212,13 @@ export function RecurringPicker({
           {/* 월+일 선택 (매년) */}
           {type === 'yearly' && (
             <div className="mb-3">
-              <div className={`text-xs mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                매년 날짜
-              </div>
+              <div className={`text-xs mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>매년 날짜</div>
               <div className="flex items-center gap-2">
                 <select
                   value={yearMonth}
                   onChange={(e) => setYearMonth(parseInt(e.target.value))}
                   className={`text-sm px-2 py-1 rounded border outline-none ${
-                    isDark
-                      ? 'bg-gray-700 border-gray-600 text-gray-200'
-                      : 'bg-white border-gray-300 text-gray-700'
+                    isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-white border-gray-300 text-gray-700'
                   }`}
                 >
                   {MONTHS.map((label, idx) => (
@@ -246,9 +234,7 @@ export function RecurringPicker({
                   value={yearDay}
                   onChange={(e) => setYearDay(Math.max(1, Math.min(31, parseInt(e.target.value) || 1)))}
                   className={`w-16 text-sm px-2 py-1 rounded border outline-none ${
-                    isDark
-                      ? 'bg-gray-700 border-gray-600 text-gray-200'
-                      : 'bg-white border-gray-300 text-gray-700'
+                    isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-white border-gray-300 text-gray-700'
                   }`}
                 />
                 <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>일</span>

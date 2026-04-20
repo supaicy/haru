@@ -6,7 +6,7 @@ export interface LayoutInput {
 
 export interface LayoutEntry {
   id: string
-  column: number  // 0-indexed column within the cluster
+  column: number // 0-indexed column within the cluster
   columns: number // total columns in the cluster
 }
 
