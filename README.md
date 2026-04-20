@@ -59,13 +59,13 @@
 brew install --cask supaicy/haru/haru
 ```
 
-첫 실행 시 macOS 경고가 뜨면:
+If macOS shows a "damaged" warning on first launch, clear the quarantine flag:
 
 ```bash
 xattr -cr /Applications/haru.app
 ```
 
-업데이트:
+To upgrade:
 
 ```bash
 brew upgrade --cask haru
@@ -74,23 +74,19 @@ brew upgrade --cask haru
 ### Download DMG
 
 1. Click the **Download** button above (or visit [Releases](https://github.com/supaicy/haru/releases))
-2. Open the downloaded `.dmg` file
-3. Drag `haru` to your `Applications` folder
-4. **첫 실행 전에 터미널에서 아래 명령을 실행하세요:**
+2. Open the downloaded `.dmg` and drag `haru` into your `Applications` folder
+3. Before the first launch, run:
 
 ```bash
 xattr -cr /Applications/haru.app
 ```
 
-> **왜 필요한가요?**
-> haru는 Apple Developer 인증서로 서명되지 않은 오픈소스 앱입니다.
-> macOS가 "손상되었습니다" 경고를 표시할 수 있으며, 위 명령으로 해결됩니다.
-> 이 명령은 최초 설치 시 1회만 실행하면 됩니다.
+> haru is open-source and isn't signed with an Apple Developer certificate, so macOS may show a *"damaged"* warning. The command above clears the quarantine flag and only needs to run once.
 
 ### Update
 
-- **Homebrew 사용자:** `brew upgrade --cask haru`
-- **DMG 사용자:** 앱 내 **설정 > 업데이트 확인**에서 새 버전이 감지되면 GitHub Releases 페이지로 이동합니다. `haru.dmg`를 다시 다운로드하여 기존 앱에 덮어쓰기하세요.
+- **Homebrew:** `brew upgrade --cask haru`
+- **DMG:** Open **Settings → Check for Updates** in-app. When a new version is available, download the latest `haru.dmg` from Releases and replace the existing app.
 
 ### Build from Source
 
@@ -101,6 +97,16 @@ npm install
 npm run dev        # Development mode
 npm run package    # Build macOS app
 ```
+
+## AI Setup (Optional)
+
+haru's AI features work with a local or cloud model. Configure under **Settings → AI**.
+
+| Provider | Default endpoint | Default model | Notes |
+|----------|------------------|---------------|-------|
+| **Ollama** (local, free) | `http://localhost:11434` | `llama3.2:latest` | Install [Ollama](https://ollama.com), then `ollama pull llama3.2` |
+| **OpenAI** | `https://api.openai.com` | `gpt-4o-mini` | Paste an API key from [platform.openai.com](https://platform.openai.com/api-keys) |
+| **Custom** | Your own URL | Your own model | Any OpenAI-compatible endpoint |
 
 ## Keyboard Shortcuts
 
@@ -127,7 +133,7 @@ npm run package    # Build macOS app
 ## System Requirements
 
 - macOS 12 (Monterey) or later
-- Apple Silicon (M1 / M2 / M3 / M4)
+- Apple Silicon only (M1 / M2 / M3 / M4) — *Intel Macs are not supported*
 
 ---
 

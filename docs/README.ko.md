@@ -84,6 +84,16 @@ npm run dev        # 개발 모드 실행
 npm run package    # macOS 앱으로 패키징
 ```
 
+## AI 설정 (선택)
+
+haru의 AI 기능은 로컬 모델이나 클라우드 모델 모두 사용할 수 있습니다. **설정 → AI**에서 구성하세요.
+
+| 제공자 | 기본 엔드포인트 | 기본 모델 | 비고 |
+|--------|----------------|-----------|------|
+| **Ollama** (로컬, 무료) | `http://localhost:11434` | `llama3.2:latest` | [Ollama](https://ollama.com) 설치 후 `ollama pull llama3.2` |
+| **OpenAI** | `https://api.openai.com` | `gpt-4o-mini` | [platform.openai.com](https://platform.openai.com/api-keys)에서 API 키 발급 |
+| **Custom** | 직접 지정 | 직접 지정 | OpenAI 호환 엔드포인트 모두 가능 |
+
 ## 키보드 단축키
 
 | 단축키 | 기능 |
@@ -109,7 +119,7 @@ npm run package    # macOS 앱으로 패키징
 ## 시스템 요구사항
 
 - macOS 12 (Monterey) 이상
-- Apple Silicon (M1 / M2 / M3 / M4)
+- Apple Silicon 전용 (M1 / M2 / M3 / M4) — *Intel Mac은 지원하지 않습니다*
 
 ---
 
