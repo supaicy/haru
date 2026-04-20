@@ -53,7 +53,25 @@
 
 ## Installation
 
-### Download DMG (Recommended)
+### Homebrew (Recommended)
+
+```bash
+brew install --cask supaicy/haru/haru
+```
+
+첫 실행 시 macOS 경고가 뜨면:
+
+```bash
+xattr -cr /Applications/haru.app
+```
+
+업데이트:
+
+```bash
+brew upgrade --cask haru
+```
+
+### Download DMG
 
 1. Click the **Download** button above (or visit [Releases](https://github.com/supaicy/haru/releases))
 2. Open the downloaded `.dmg` file
@@ -71,8 +89,8 @@ xattr -cr /Applications/haru.app
 
 ### Update
 
-앱 내 **설정 > 업데이트 확인**에서 새 버전이 감지되면 GitHub Releases 페이지로 이동합니다.
-`haru.dmg`를 다시 다운로드하여 기존 앱에 덮어쓰기하세요.
+- **Homebrew 사용자:** `brew upgrade --cask haru`
+- **DMG 사용자:** 앱 내 **설정 > 업데이트 확인**에서 새 버전이 감지되면 GitHub Releases 페이지로 이동합니다. `haru.dmg`를 다시 다운로드하여 기존 앱에 덮어쓰기하세요.
 
 ### Build from Source
 
