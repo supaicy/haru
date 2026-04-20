@@ -149,6 +149,8 @@ export function setupIpcHandlers(): void {
       }
     )
   })
+  ipcMain.handle('ai:get-history', () => db.getChatHistory())
+  ipcMain.handle('ai:save-history', (_, messages) => db.saveChatHistory(messages))
 
   // Quick add (global shortcut)
   ipcMain.handle('register-global-shortcut', () => {

@@ -13,13 +13,15 @@ interface AiConfig {
   baseUrl: string
   model: string
   apiKey: string | null
+  maxHistoryMessages: number
 }
 
 const DEFAULT_CONFIG: AiConfig = {
   provider: 'ollama',
   baseUrl: 'http://localhost:11434',
   model: 'llama3.2:latest',
-  apiKey: null
+  apiKey: null,
+  maxHistoryMessages: 200
 }
 
 let config: AiConfig = { ...DEFAULT_CONFIG }

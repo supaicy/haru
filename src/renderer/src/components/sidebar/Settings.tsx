@@ -34,6 +34,7 @@ export function Settings() {
   const [aiModel, setAiModel] = useState('')
   const [aiApiKey, setAiApiKey] = useState('')
   const [aiProvider, setAiProvider] = useState<'ollama' | 'openai' | 'custom'>('ollama')
+  const [aiMaxHistory, setAiMaxHistory] = useState(200)
 
   useEffect(() => {
     if (showSettings && !aiConfig) {
@@ -48,13 +49,20 @@ export function Settings() {
       setAiModel(aiConfig.model)
       setAiApiKey(aiConfig.apiKey || '')
       setAiProvider(aiConfig.provider)
+      setAiMaxHistory(aiConfig.maxHistoryMessages ?? 200)
     }
   }, [aiConfig])
 
   if (!showSettings) return null
 
   const handleAiSave = () => {
-    aiSaveConfig({ provider: aiProvider, baseUrl: aiBaseUrl, model: aiModel, apiKey: aiApiKey || null })
+    aiSaveConfig({
+      provider: aiProvider,
+      baseUrl: aiBaseUrl,
+      model: aiModel,
+      apiKey: aiApiKey || null,
+      maxHistoryMessages: aiMaxHistory
+    })
     aiCheckConnection()
   }
 
@@ -225,6 +233,26 @@ export function Settings() {
                   />
                 </div>
               )}
+              <div>
+                <label
+                  htmlFor="ai-max-history"
+                  className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                >
+                  채팅 기록 보관 개수
+                </label>
+                <input
+                  id="ai-max-history"
+                  type="number"
+                  min={0}
+                  max={10000}
+                  value={aiMaxHistory}
+                  onChange={(e) => setAiMaxHistory(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                  className={`w-full mt-1 px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-700'}`}
+                />
+                <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                  오래된 메시지부터 자동 삭제됩니다. 0이면 보관 안 함.
+                </p>
+              </div>
               <button
                 onClick={handleAiSave}
                 className="w-full px-3 py-2 rounded-lg text-sm bg-blue-600 text-white hover:bg-blue-700 transition-colors"
