@@ -18,7 +18,8 @@ export function CalendarView() {
     tasks
       .filter((t) => t.dueDate && !t.completed && !t.deletedAt)
       .forEach((t) => {
-        const key = t.dueDate!
+        const key = t.dueDate
+        if (!key) return
         if (!map[key]) map[key] = []
         map[key].push(t)
       })

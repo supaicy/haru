@@ -174,7 +174,7 @@ export function RecurringPicker({
               <div className="flex gap-1">
                 {WEEKDAYS.map((label, idx) => (
                   <button
-                    key={idx}
+                    key={label}
                     onClick={() => toggleWeekDay(idx)}
                     className={`w-8 h-8 text-xs rounded-full transition-colors ${
                       weekDays.includes(idx)
@@ -222,7 +222,7 @@ export function RecurringPicker({
                   }`}
                 >
                   {MONTHS.map((label, idx) => (
-                    <option key={idx} value={idx + 1}>
+                    <option key={label} value={idx + 1}>
                       {label}
                     </option>
                   ))}

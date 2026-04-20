@@ -10,17 +10,7 @@ const PRIORITY_MAP: Record<string, Priority> = {
 }
 
 export function useKeyboardShortcuts() {
-  const {
-    setShowAddTask,
-    setSearchQuery,
-    popUndo,
-    updateTask,
-    removeTask,
-    selectTask,
-    setShowQuickAdd,
-    setShowExport,
-    exportData
-  } = useStore()
+  const { setSearchQuery, popUndo, updateTask, removeTask, selectTask, exportData } = useStore()
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

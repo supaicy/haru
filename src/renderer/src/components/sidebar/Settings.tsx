@@ -20,7 +20,6 @@ export function Settings() {
     setTheme,
     showSettings,
     toggleSettings,
-    setShowExport,
     exportData,
     updateAvailable,
     updateChecked,
@@ -151,8 +150,14 @@ export function Settings() {
             </h3>
             <div className="space-y-3">
               <div>
-                <label className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>AI 제공자</label>
+                <label
+                  htmlFor="ai-provider"
+                  className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                >
+                  AI 제공자
+                </label>
                 <select
+                  id="ai-provider"
                   value={aiProvider}
                   onChange={(e) => {
                     const v = e.target.value as 'ollama' | 'openai' | 'custom'
@@ -173,8 +178,14 @@ export function Settings() {
                 </select>
               </div>
               <div>
-                <label className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>API URL</label>
+                <label
+                  htmlFor="ai-base-url"
+                  className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                >
+                  API URL
+                </label>
                 <input
+                  id="ai-base-url"
                   type="text"
                   value={aiBaseUrl}
                   onChange={(e) => setAiBaseUrl(e.target.value)}
@@ -182,8 +193,14 @@ export function Settings() {
                 />
               </div>
               <div>
-                <label className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>모델</label>
+                <label
+                  htmlFor="ai-model"
+                  className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                >
+                  모델
+                </label>
                 <input
+                  id="ai-model"
                   type="text"
                   value={aiModel}
                   onChange={(e) => setAiModel(e.target.value)}
@@ -192,8 +209,14 @@ export function Settings() {
               </div>
               {aiProvider !== 'ollama' && (
                 <div>
-                  <label className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>API 키</label>
+                  <label
+                    htmlFor="ai-api-key"
+                    className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                  >
+                    API 키
+                  </label>
                   <input
+                    id="ai-api-key"
                     type="password"
                     value={aiApiKey}
                     onChange={(e) => setAiApiKey(e.target.value)}

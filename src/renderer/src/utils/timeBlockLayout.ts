@@ -63,6 +63,6 @@ export function layoutOverlappingBlocks(blocks: LayoutInput[]): LayoutEntry[] {
   return assigned.map((a) => ({
     id: a.id,
     column: a.column,
-    columns: clusterCols.get(a.clusterId)!
+    columns: clusterCols.get(a.clusterId) ?? 1
   }))
 }
